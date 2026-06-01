@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.45rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.92rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .section-title-left {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .section-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .section-body {
+        padding: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.9rem;
+        padding: 0.62rem 0.8rem;
+        background: #ffffff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1d7fbf;
+        box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+    }
+
+    .form-control::placeholder {
+        color: #9ca3af;
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .mini-help {
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    .selected-patient-box {
+        background: #f8fbff;
+        border: 1px dashed #b8c7dc;
+        border-radius: 14px;
+        padding: 0.8rem 0.95rem;
+        color: #526179;
+        font-size: 0.88rem;
+    }
+
+    .patient-name {
+        font-weight: 900;
+        color: #111827;
+        font-size: 1rem;
+    }
+
+    .patient-meta {
+        color: #526179;
+        font-size: 0.84rem;
+        margin-top: 0.15rem;
+    }
+
+    .badge-soft-primary {
+        background: #e8f2ff;
+        color: #0d6efd;
+        border: 1px solid #b9d7ff;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 0.42rem 0.7rem;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+        z-index: 10;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .btn-sm-custom {
+        padding: 0.52rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-pen-to-square"></i>
+                    Editar Preingreso #{{ preingreso.id }}
+                </h2>
+                <p>
+                    Modificación de cobertura, datos médicos, contacto responsable y observaciones del preingreso.
+                </p>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap justify-content-end">
+                <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary btn-sm-custom">
+                    <i class="fas fa-arrow-left"></i> Volver al detalle
+                </a>
+
+                <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-outline-primary btn-sm-custom">
+                    <i class="fas fa-list"></i> Listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="formEditarPreingreso">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">1</span>
+                    Datos del paciente
+                </div>
+
+                {% if preingreso.estado %}
+                    <span class="badge-soft-primary">
+                        {{ preingreso.get_estado_display|default:preingreso.estado }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="section-body">
+                <div class="selected-patient-box">
+                    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                        <div>
+                            <div class="patient-name">
+                                <i class="fas fa-user-injured text-primary"></i>
+                                {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                            </div>
+
+                            <div class="patient-meta">
+                                DNI:
+                                <strong>{{ preingreso.paciente.dni|default:"-" }}</strong>
+
+                                {% if preingreso.paciente.fecha_nacimiento %}
+                                    · Fecha nacimiento:
+                                    <strong>{{ preingreso.paciente.fecha_nacimiento|date:"d/m/Y" }}</strong>
+                                {% endif %}
+
+                                {% if preingreso.paciente.telefono %}
+                                    · Tel:
+                                    <strong>{{ preingreso.paciente.telefono }}</strong>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="text-muted small">
+                            El paciente no se modifica desde esta pantalla.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            Obra social <span class="required-mark">*</span>
+                        </label>
+
+                        <select name="obra_social" class="form-select" required>
+                            <option value="">Seleccione una obra social...</option>
+                            {% for os in obras_sociales %}
+                                <option value="{{ os.id }}"
+                                    {% if preingreso.obra_social_id == os.id %}selected{% endif %}>
+                                    {{ os.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Plan</label>
+
+                        <select name="plan" class="form-select">
+                            <option value="">Seleccione un plan...</option>
+                            {% for plan in planes %}
+                                <option value="{{ plan.id }}"
+                                    {% if preingreso.plan_id == plan.id %}selected{% endif %}>
+                                    {{ plan.nombre }}
+                                    {% if plan.obra_social %}
+                                        - {{ plan.obra_social.nombre }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">N° afiliado</label>
+                        <input type="text"
+                               name="numero_afiliado"
+                               class="form-control"
+                               value="{{ preingreso.numero_afiliado|default:'' }}"
+                               placeholder="Ingrese número de afiliado">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">2</span>
+                    Datos del preingreso
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Fecha probable ingreso <span class="required-mark">*</span>
+                        </label>
+
+                        <input type="date"
+                               name="fecha_probable_ingreso"
+                               class="form-control"
+                               value="{{ preingreso.fecha_probable_ingreso|date:'Y-m-d' }}"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Servicio</label>
+
+                        <select name="servicio" class="form-select">
+                            <option value="">Seleccione un servicio...</option>
+                            {% for servicio in servicios %}
+                                <option value="{{ servicio.id }}"
+                                    {% if preingreso.servicio_id == servicio.id %}selected{% endif %}>
+                                    {{ servicio.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Médico</label>
+
+                        <select name="medico" class="form-select">
+                            <option value="">Seleccione un médico...</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}"
+                                    {% if preingreso.medico_id == medico.id %}selected{% endif %}>
+                                    {{ medico.apellido }}, {{ medico.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Origen del paciente</label>
+
+                        <select name="origen_paciente" class="form-select">
+                            <option value="">Seleccione origen...</option>
+
+                            <option value="domicilio"
+                                {% if preingreso.origen_paciente == "domicilio" %}selected{% endif %}>
+                                Domicilio
+                            </option>
+
+                            <option value="guardia"
+                                {% if preingreso.origen_paciente == "guardia" %}selected{% endif %}>
+                                Guardia
+                            </option>
+
+                            <option value="consultorio"
+                                {% if preingreso.origen_paciente == "consultorio" %}selected{% endif %}>
+                                Consultorio
+                            </option>
+
+                            <option value="derivacion"
+                                {% if preingreso.origen_paciente == "derivacion" %}selected{% endif %}>
+                                Derivación
+                            </option>
+
+                            <option value="otro"
+                                {% if preingreso.origen_paciente == "otro" %}selected{% endif %}>
+                                Otro
+                            </option>
+                        </select>
+
+                        <div class="mini-help mt-1">
+                            Si el dato anterior fue cargado distinto, revisar la view/modelo.
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Prioridad</label>
+
+                        <select name="prioridad" class="form-select">
+                            <option value="normal"
+                                {% if preingreso.prioridad == "normal" %}selected{% endif %}>
+                                Normal
+                            </option>
+
+                            <option value="urgente"
+                                {% if preingreso.prioridad == "urgente" %}selected{% endif %}>
+                                Urgente
+                            </option>
+
+                            <option value="programado"
+                                {% if preingreso.prioridad == "programado" %}selected{% endif %}>
+                                Programado
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-9">
+                        <label class="form-label">Diagnóstico</label>
+
+                        <textarea name="diagnostico"
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="Ingrese diagnóstico o motivo del preingreso...">{{ preingreso.diagnostico|default:'' }}</textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">3</span>
+                    Contacto responsable
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Nombre y apellido</label>
+
+                        <input type="text"
+                               name="contacto_nombre"
+                               class="form-control"
+                               value="{{ preingreso.contacto_nombre|default:'' }}"
+                               placeholder="Ingrese nombre y apellido">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+
+                        <input type="text"
+                               name="contacto_dni"
+                               class="form-control"
+                               value="{{ preingreso.contacto_dni|default:'' }}"
+                               placeholder="Ingrese DNI">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Parentesco</label>
+
+                        <input type="text"
+                               name="contacto_parentesco"
+                               class="form-control"
+                               value="{{ preingreso.contacto_parentesco|default:'' }}"
+                               placeholder="Ej: Madre, padre, hijo/a">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Teléfono</label>
+
+                        <input type="text"
+                               name="contacto_telefono"
+                               class="form-control"
+                               value="{{ preingreso.contacto_telefono|default:'' }}"
+                               placeholder="Ej: 3875555555">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">4</span>
+                    Observaciones
+                </div>
+            </div>
+
+            <div class="section-body">
+                <label class="form-label">Observaciones adicionales</label>
+
+                <textarea name="observaciones"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Ingrese aquí cualquier observación relevante...">{{ preingreso.observaciones|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalGuardarCambios">
+                <i class="fas fa-save"></i> Guardar cambios
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="modal fade" id="modalGuardarCambios" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-primary"></i>
+                    Confirmar cambios
+                </h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Desea guardar los cambios realizados en este preingreso?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        onclick="validarYEnviarEdicion();">
+                    <i class="fas fa-save"></i> Sí, guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function validarYEnviarEdicion() {
+        const form = document.getElementById("formEditarPreingreso");
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        form.submit();
+    }
+</script>
+
+{% endblock %}

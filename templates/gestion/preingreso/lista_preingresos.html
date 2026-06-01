@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-top: 0.2rem;
+    }
+
+    .card-filter {
+        background: #fff;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .table-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .table-preingresos {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.85rem;
+    }
+
+    .table-preingresos thead {
+        background: #f3f6fb;
+        color: #374151;
+        font-weight: 700;
+    }
+
+    .table-preingresos th {
+        white-space: nowrap;
+        padding: 0.75rem;
+        border-bottom: 1px solid #dbe3ef;
+    }
+
+    .table-preingresos td {
+        vertical-align: middle;
+        padding: 0.7rem;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .patient-name {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .text-muted-small {
+        color: #6b7280;
+        font-size: 0.78rem;
+    }
+
+    .badge-estado {
+        padding: 0.4rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .badge-pendiente {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .badge-realizado {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .badge-anulado {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .ordenes-box {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+    }
+
+    .badge-orden {
+        background: #eef2ff;
+        color: #3730a3;
+        padding: 0.28rem 0.5rem;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .badge-ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-warn {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .btn-action {
+        border-radius: 8px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: #6b7280;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">
+                <i class="fas fa-procedures"></i> Preingresos
+            </h2>
+            <div class="page-subtitle">
+                Seguimiento operativo de preingresos, órdenes y autorizaciones.
+            </div>
+        </div>
+
+        <a href="{% url 'gestion_app:agregar_preingreso' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuevo preingreso
+        </a>
+    </div>
+
+    <div class="card-filter">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label mb-1">Buscar</label>
+                <input type="text"
+                       name="q"
+                       value="{{ query }}"
+                       class="form-control"
+                       placeholder="Paciente, DNI u obra social">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label mb-1">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for value, label in estados %}
+                        <option value="{{ value }}" {% if estado == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+
+                <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-outline-secondary">
+                    Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-preingresos">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Ingreso probable</th>
+                        <th>Paciente</th>
+                        <th>DNI</th>
+                        <th>Obra Social</th>
+                        <th>Médico</th>
+                        <th>Servicio</th>
+                        <th>Órdenes</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for p in preingresos %}
+                        <tr>
+                            <td>
+                                <strong>{{ p.id }}</strong>
+                            </td>
+
+                            <td>
+                                {{ p.created_at|date:"d/m/Y" }} 
+                            </td>
+
+                            <td>
+                                {% if p.fecha_probable_ingreso %}
+                                    {{ p.fecha_probable_ingreso|date:"d/m/Y" }}
+                                {% else %}
+                                    <span class="text-muted">Sin definir</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="patient-name">
+                                    {{ p.paciente.apellido }}, {{ p.paciente.nombre }}
+                                </div>
+                                <div class="text-muted-small">
+                                    Origen: {{ p.get_origen_paciente_display }}
+                                </div>
+                            </td>
+
+                            <td>{{ p.paciente.dni }}</td>
+
+                            <td>
+                                {{ p.obra_social }}
+                                {% if p.plan %}
+                                    <div class="text-muted-small">
+                                        Plan: {{ p.plan }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if p.medico %}
+                                    {{ p.medico.apellido }}, {{ p.medico.nombre }}
+                                {% else %}
+                                    <span class="text-muted">Sin médico</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if p.servicio %}
+                                    {{ p.servicio.nombre }}
+                                {% else %}
+                                    <span class="text-muted">Sin servicio</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="ordenes-box">
+                                    <span class="badge-orden">
+                                        Total: {{ p.total_ordenes }}
+                                    </span>
+
+                                    <span class="badge-orden badge-ok">
+                                        Aut: {{ p.ordenes_autorizadas }}
+                                    </span>
+
+                                    <span class="badge-orden badge-warn">
+                                        Pend: {{ p.ordenes_pendientes }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge-estado badge-{{ p.estado }}">
+                                    {{ p.get_estado_display }}
+                                </span>
+                            </td>
+
+                            <td class="text-end">
+                                <a href="{% url 'gestion_app:detalle_preingreso' p.id %}" class="btn btn-sm btn-outline-primary btn-action">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <a href="{% url 'gestion_app:editar_preingreso' p.id %}"  class="btn btn-sm btn-outline-secondary btn-action">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <a href="{% url 'gestion_app:lista_ordenes_preingreso' p.id %}" class="btn btn-sm btn-outline-success btn-action">
+                                    <i class="fas fa-file-medical"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="11">
+                                <div class="empty-state">
+                                    <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                    <div>No se encontraron preingresos.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

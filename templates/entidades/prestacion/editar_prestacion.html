@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 950px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        color: black;
+        border-radius: 20px;
+        padding: 1.5rem 1.8rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.16);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.4rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.95rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.9rem 1.2rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .section-title i {
+        color: #0f4c81;
+    }
+
+    .section-body {
+        padding: 1.2rem;
+    }
+
+    .form-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.92rem;
+        padding: 0.68rem 0.85rem;
+        background: #ffffff;
+    }
+
+    textarea.form-control {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .form-control:focus {
+        border-color: #1d7fbf;
+        box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+    }
+
+    .help-text {
+        color: #6b7280;
+        font-size: 0.76rem;
+        margin-top: 0.25rem;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <h2>
+            <i class="fas fa-edit"></i>
+            Editar Prestación
+        </h2>
+        <p>
+            Actualización de código, nombre y descripción de la prestación seleccionada.
+        </p>
+    </div>
+
+    <form method="post" id="formEditarPrestacion">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <div class="section-title">
+                <i class="fas fa-notes-medical"></i>
+                Datos de la prestación
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Código <span class="required-mark">*</span>
+                        </label>
+                        <input type="text"
+                               name="codigo"
+                               class="form-control"
+                               value="{{ prestacion.codigo }}"
+                               required>
+                        <div class="help-text">Código interno o nomenclador de la prestación.</div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label">
+                            Nombre <span class="required-mark">*</span>
+                        </label>
+                        <input type="text"
+                               name="nombre"
+                               class="form-control"
+                               value="{{ prestacion.nombre }}"
+                               required>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="descripcion"
+                                  class="form-control"
+                                  placeholder="Detalle administrativo, aclaraciones de uso o referencia interna de la prestación...">{{ prestacion.descripcion|default_if_none:'' }}</textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="{% url 'entidades_app:listado_prestaciones' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalGuardarCambiosPrestacion">
+                <i class="fas fa-save"></i> Guardar cambios
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<div class="modal fade" id="modalGuardarCambiosPrestacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-primary"></i>
+                    Confirmar cambios
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Desea guardar los cambios realizados sobre la prestación
+                <strong>{{ prestacion.nombre }}</strong>?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        onclick="document.getElementById('formEditarPrestacion').submit();">
+                    <i class="fas fa-save"></i> Sí, guardar cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

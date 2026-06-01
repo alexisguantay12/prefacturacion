@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .entidades-page {
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .main-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 20px;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: #ffffff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 1.25rem 1.6rem 1.4rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .page-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .page-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: #eef6ff;
+        color: #0f4c81;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        border: 1px solid #d7e9fb;
+    }
+
+    .page-title {
+        font-size: 1.65rem;
+        font-weight: 900;
+        color: #111827;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+        color: #526179;
+        font-size: 0.94rem;
+        margin: 0;
+    }
+
+    .records-badge {
+        background: #ffffff;
+        border: 1px solid #d5deea;
+        color: #1f2937;
+        border-radius: 999px;
+        padding: 0.38rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+        box-shadow: 0 2px 7px rgba(15, 23, 42, 0.04);
+    }
+
+    .filter-zone {
+        padding: 1rem 1.6rem;
+        border-bottom: 1px solid #dbe3ef;
+        background: #fbfdff;
+    }
+
+    .filter-zone .form-control::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .form-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.92rem;
+        padding: 0.68rem 0.85rem;
+        background: #ffffff;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .btn-primary {
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+    }
+
+    .btn-filtrar {
+        box-shadow: none !important;
+        opacity: .90 !important;
+    }
+
+    .table-responsive {
+        margin-top: 12px;
+        border-top: 1px solid #3f5f8f;
+        padding: 10px;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .table-entidades {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.88rem;
+    }
+
+    .table-entidades thead th {
+        background-color: #e1e8f3 !important;
+        color: #0f2544;
+        font-weight: 900;
+    }
+
+    .table-entidades th {
+        white-space: nowrap;
+        padding: 0.95rem 1.05rem;
+        border-bottom: 1px solid #d3dce9;
+        vertical-align: middle;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.78rem;
+    }
+
+    .table-entidades td {
+        vertical-align: middle;
+        padding: 0.9rem 1.05rem;
+        border-bottom: 1px solid #abbee4 !important;
+    }
+
+    .table-entidades tbody tr:hover {
+        background: #f3f3fa;
+    }
+
+    .main-name {
+        font-weight: 600;
+        color: #111827;
+        font-size: 0.90rem;
+    }
+
+    .text-muted-small {
+        color: #526179;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .badge-info-soft {
+        background: #eef6ff;
+        color: #0f4c81;
+        border: 1px solid #d7e9fb;
+        border-radius: 999px;
+        padding: 0.32rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 900;
+    }
+
+    .badge-empty {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #dce3ec;
+        border-radius: 999px;
+        padding: 0.32rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .btn-action {
+        border-radius: 10px;
+        font-size: 0.82rem;
+        padding: 0.42rem 0.62rem;
+        width: 40px;
+        height: 40px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.8rem;
+        color: #6b7280;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 1.2rem;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+
+    .pagination .page-link {
+        border-radius: 8px;
+        margin: 0 2px;
+        font-weight: 700;
+        color: #0f4c81;
+    }
+
+    .pagination .active .page-link {
+        background-color: #0f4c81;
+        border-color: #0f4c81;
+        color: #ffffff;
+    }
+</style>
+
+<div class="container-fluid px-2 px-md-3">
+    <div class="entidades-page">
+        <div class="main-card">
+
+            <div class="card-header-custom">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title-row">
+                            <div class="page-icon">
+                                <i class="fas fa-user-injured"></i>
+                            </div>
+
+                            <div>
+                                <h2 class="page-title">Pacientes</h2>
+                                <p class="page-subtitle">
+                                    Administración de pacientes registrados para preingresos, órdenes y gestión asistencial.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="records-badge">
+                            <i class="fas fa-database"></i>
+                            {{ page_obj.paginator.count }} registros
+                        </div>
+                    </div>
+
+                    <a href="{% url 'entidades_app:agregar_paciente' %}" class="btn btn-primary px-4 py-2">
+                        <i class="fas fa-plus"></i> Nuevo paciente
+                    </a>
+                </div>
+            </div>
+
+            <div class="filter-zone">
+                <form method="get" class="row g-2 align-items-end">
+                    <div class="col-md-7">
+                        <label class="form-label mb-1">Buscar paciente</label>
+                        <input type="text"
+                               name="buscar"
+                               value="{{ buscar }}"
+                               class="form-control"
+                               placeholder="Buscar por nombre, apellido, DNI o teléfono...">
+                    </div>
+
+                    <div class="col-md-5 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-filtrar px-3">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+
+                        <a href="{% url 'entidades_app:listado_pacientes' %}" class="btn btn-outline-secondary px-3">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-entidades">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user me-1"></i> Paciente</th>
+                            <th><i class="fas fa-id-card me-1"></i> DNI</th>
+                            <th><i class="fas fa-phone me-1"></i> Teléfono</th>
+                            <th><i class="fas fa-calendar me-1"></i> Nacimiento</th>
+                            <th><i class="fas fa-map-marker-alt me-1"></i> Provincia</th>
+                            <th class="text-end" style="width: 190px;">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for paciente in page_obj %}
+                            <tr>
+                                <td>
+                                    <div class="main-name">{{ paciente.apellido }}, {{ paciente.nombre }}</div>
+                                    <div class="text-muted-small">
+                                        {% if paciente.genero %}
+                                            {{ paciente.genero }}
+                                        {% else %}
+                                            Paciente registrado
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge-info-soft">{{ paciente.dni }}</span>
+                                </td>
+
+                                <td>
+                                    {% if paciente.telefono %}
+                                        {{ paciente.telefono }}
+                                    {% else %}
+                                        <span class="badge-empty">Sin teléfono</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if paciente.fecha_nacimiento %}
+                                        {{ paciente.fecha_nacimiento|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="badge-empty">Sin fecha</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if paciente.provincia %}
+                                        {{ paciente.provincia }}
+                                    {% else %}
+                                        <span class="badge-empty">Sin provincia</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end">
+                                    <a href="{% url 'entidades_app:editar_paciente' paciente.id %}"
+                                       class="btn btn-sm btn-outline-secondary btn-action"
+                                       title="Editar paciente">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger btn-action"
+                                            title="Eliminar paciente"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarPaciente{{ paciente.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+                                    <div class="modal fade" id="modalEliminarPaciente{{ paciente.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content modal-confirmacion">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        <i class="fas fa-exclamation-triangle text-danger me-1"></i>
+                                                        Confirmar eliminación
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+
+                                                <div class="modal-body text-start">
+                                                    ¿Está seguro que desea eliminar al paciente
+                                                    <strong>{{ paciente.apellido }}, {{ paciente.nombre }}</strong>?
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Esta acción no podrá completarse si existen preingresos, órdenes u otros registros asociados.
+                                                    </small>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                                        Cancelar
+                                                    </button>
+
+                                                    <form method="post" action="{% url 'entidades_app:eliminar_paciente' paciente.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">
+                                                            <i class="fas fa-trash"></i> Sí, eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                        <div class="fw-bold">No se encontraron pacientes.</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+
+                    <div class="text-muted-small">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </div>
+
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.previous_page_number }}&buscar={{ buscar }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if num == page_obj.number %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ num }}&buscar={{ buscar }}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.next_page_number }}&buscar={{ buscar }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+
+                        </ul>
+                    </nav>
+
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

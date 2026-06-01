@@ -1,0 +1,439 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Hoja de Preingreso #{{ preingreso.id }}</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 14mm;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111827;
+            font-size: 12px;
+            margin: 0;
+            background: #ffffff;
+        }
+
+        .print-wrap {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .hospital-info {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .hospital-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+        }
+
+        .hospital-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .hospital-subtitle {
+            font-size: 11px;
+            color: #4b5563;
+            margin-top: 2px;
+        }
+
+        .print-meta {
+            text-align: right;
+            font-size: 11px;
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin: 12px 0 14px;
+            text-decoration: underline;
+        }
+
+        .section {
+            border: 1px solid #111827;
+            margin-bottom: 9px;
+        }
+
+        .section-title {
+            background: #e5e7eb;
+            font-weight: bold;
+            padding: 5px 8px;
+            border-bottom: 1px solid #111827;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .section-body {
+            padding: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 6px 10px;
+        }
+
+        .field {
+            min-height: 28px;
+        }
+
+        .col-2 { grid-column: span 2; }
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .col-5 { grid-column: span 5; }
+        .col-6 { grid-column: span 6; }
+        .col-8 { grid-column: span 8; }
+        .col-9 { grid-column: span 9; }
+        .col-12 { grid-column: span 12; }
+
+        .label {
+            font-size: 10px;
+            color: #374151;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .value {
+            border-bottom: 1px solid #9ca3af;
+            min-height: 17px;
+            padding: 2px 0;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .value-normal {
+            font-weight: normal;
+        }
+
+        .observaciones {
+            min-height: 45px;
+            border: 1px solid #9ca3af;
+            padding: 6px;
+            font-size: 12px;
+            white-space: pre-line;
+        }
+
+        .footer {
+            margin-top: 28px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            font-size: 11px;
+        }
+
+        .firma {
+            border-top: 1px solid #111827;
+            text-align: center;
+            padding-top: 5px;
+        }
+
+        .screen-actions {
+            max-width: 900px;
+            margin: 12px auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-print,
+        .btn-back {
+            border: 1px solid #111827;
+            background: #ffffff;
+            color: #111827;
+            padding: 7px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-print {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        @media print {
+            .screen-actions {
+                display: none;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="screen-actions">
+    <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn-back">
+        Volver
+    </a>
+
+    <button type="button" onclick="window.print();" class="btn-print">
+        Imprimir
+    </button>
+</div>
+
+<div class="print-wrap">
+
+    <div class="top-bar">
+        <div class="hospital-info">
+            <img src="{% static 'img/logo.png' %}" class="hospital-logo" alt="Logo">
+
+            <div>
+                <p class="hospital-title">Hospital Privado Santa Clara de Asís</p>
+                <div class="hospital-subtitle">Sistema de Gestión de Preingresos</div>
+            </div>
+        </div>
+
+        <div class="print-meta">
+            <div><strong>Preingreso:</strong> {{ preingreso.id }}</div>
+            <div><strong>Fecha impresión:</strong> {{ fecha_impresion|date:"d/m/Y H:i" }}</div>
+            <div><strong>Pág.:</strong> 1</div>
+        </div>
+    </div>
+
+    <div class="title">
+        HOJA DE PREINGRESO
+    </div>
+
+    <div class="section">
+        <div class="section-title">Datos del paciente</div>
+
+        <div class="section-body">
+            <div class="grid">
+                <div class="field col-6">
+                    <div class="label">Apellido y Nombre</div>
+                    <div class="value">
+                        {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                    </div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Documento</div>
+                    <div class="value">{{ preingreso.paciente.dni|default:"" }}</div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Fecha Nacimiento</div>
+                    <div class="value">
+                        {% if preingreso.paciente.fecha_nacimiento %}
+                            {{ preingreso.paciente.fecha_nacimiento|date:"d/m/Y" }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-6">
+                    <div class="label">Domicilio</div>
+                    <div class="value">{{ preingreso.paciente.direccion|default:"" }}</div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Teléfono</div>
+                    <div class="value">{{ preingreso.paciente.telefono|default:"" }}</div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Género</div>
+                    <div class="value">
+                        {% if preingreso.paciente.genero == "M" %}
+                            Masculino
+                        {% elif preingreso.paciente.genero == "F" %}
+                            Femenino
+                        {% else %}
+                            {{ preingreso.paciente.genero|default:"" }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-4">
+                    <div class="label">Provincia</div>
+                    <div class="value">{{ preingreso.paciente.provincia|default:"" }}</div>
+                </div>
+
+                <div class="field col-4">
+                    <div class="label">Nacionalidad</div>
+                    <div class="value">{{ preingreso.paciente.nacionalidad|default:"" }}</div>
+                </div>
+
+                <div class="field col-4">
+                    <div class="label">Estado</div>
+                    <div class="value">
+                        {{ preingreso.get_estado_display|default:preingreso.estado }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Cobertura</div>
+
+        <div class="section-body">
+            <div class="grid">
+                <div class="field col-6">
+                    <div class="label">Obra Social</div>
+                    <div class="value">
+                        {% if preingreso.obra_social %}
+                            {{ preingreso.obra_social.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Plan</div>
+                    <div class="value">
+                        {% if preingreso.plan %}
+                            {{ preingreso.plan.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">N° Afiliado</div>
+                    <div class="value">{{ preingreso.numero_afiliado|default:"" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Datos del preingreso</div>
+
+        <div class="section-body">
+            <div class="grid">
+                <div class="field col-3">
+                    <div class="label">Fecha Probable</div>
+                    <div class="value">
+                        {% if preingreso.fecha_probable_ingreso %}
+                            {{ preingreso.fecha_probable_ingreso|date:"d/m/Y" }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Servicio</div>
+                    <div class="value">
+                        {% if preingreso.servicio %}
+                            {{ preingreso.servicio.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Médico</div>
+                    <div class="value">
+                        {% if preingreso.medico %}
+                            {{ preingreso.medico.apellido }}, {{ preingreso.medico.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Origen</div>
+                    <div class="value">{{ preingreso.origen_paciente|default:"" }}</div>
+                </div>
+
+                <div class="field col-12">
+                    <div class="label">Diagnóstico</div>
+                    <div class="value value-normal">
+                        {{ preingreso.diagnostico|default:"" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Contacto responsable</div>
+
+        <div class="section-body">
+            <div class="grid">
+                <div class="field col-4">
+                    <div class="label">Nombre y Apellido</div>
+                    <div class="value">{{ preingreso.contacto_nombre|default:"" }}</div>
+                </div>
+
+                <div class="field col-2">
+                    <div class="label">DNI</div>
+                    <div class="value">{{ preingreso.contacto_dni|default:"" }}</div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Parentesco</div>
+                    <div class="value">{{ preingreso.contacto_parentesco|default:"" }}</div>
+                </div>
+
+                <div class="field col-3">
+                    <div class="label">Teléfono</div>
+                    <div class="value">{{ preingreso.contacto_telefono|default:"" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Observaciones</div>
+
+        <div class="section-body">
+            <div class="observaciones">
+                {{ preingreso.observaciones|default:"" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="firma">
+            Firma / aclaración del responsable
+        </div>
+
+        <div class="firma">
+            Firma / aclaración administrativa
+        </div>
+    </div>
+
+</div>
+
+<script> 
+    window.onload = function () {
+        window.print();
+    }
+
+    window.onafterprint = function () {
+        history.back();
+    }
+</script> 
+
+</body>
+</html>

@@ -1,0 +1,631 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .detail-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .detail-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .detail-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.45rem;
+    }
+
+    .detail-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.92rem;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .btn-sm-custom {
+        padding: 0.52rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        padding: 1.1rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+    }
+
+    .patient-main {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .patient-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: #e8f2ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.45rem;
+        border: 1px solid #b9d7ff;
+        flex-shrink: 0;
+    }
+
+    .patient-name {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: #111827;
+        line-height: 1.2;
+    }
+
+    .patient-subtitle {
+        color: #526179;
+        font-size: 0.88rem;
+        margin-top: 0.15rem;
+    }
+
+    .status-pill {
+        border-radius: 999px;
+        padding: 0.48rem 0.78rem;
+        font-size: 0.78rem;
+        font-weight: 900;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+    }
+
+    .status-pendiente {
+        background: #fff8db;
+        color: #7a5b00;
+        border-color: #ffe08a;
+    }
+
+    .status-autorizado {
+        background: #e8f2ff;
+        color: #0d6efd;
+        border-color: #b9d7ff;
+    }
+
+    .status-en_curso {
+        background: #eafaf0;
+        color: #16803c;
+        border-color: #bce7ca;
+    }
+
+    .status-cerrado {
+        background: #f1eaff;
+        color: #6f42c1;
+        border-color: #d7c4ff;
+    }
+
+    .status-anulado,
+    .status-expirado {
+        background: #f3f4f6;
+        color: #6b7280;
+        border-color: #d1d5db;
+    }
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        height: auto;
+    }
+
+    .info-card-header {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .info-card-header i {
+        color: #0f4c81;
+    }
+
+    .info-card-body {
+        padding: 1.05rem 1.15rem;
+    }
+
+    .info-row {
+        display: grid;
+        grid-template-columns: 145px 1fr;
+        gap: 0.75rem;
+        padding: 0.48rem 0;
+        border-bottom: 1px dashed #e5e7eb;
+        font-size: 0.88rem;
+    }
+
+    .info-row:last-child {
+        border-bottom: 0;
+    }
+
+    .info-label {
+        color: #6b7280;
+        font-weight: 800;
+    }
+
+    .info-value {
+        color: #111827;
+        font-weight: 700;
+    }
+
+    .muted-value {
+        color: #9ca3af;
+        font-weight: 600;
+    }
+
+    .text-box {
+        background: #f8fbff;
+        border: 1px dashed #b8c7dc;
+        border-radius: 14px;
+        padding: 0.85rem;
+        color: #374151;
+        font-size: 0.9rem;
+        line-height: 1.45;
+        min-height: 92px;
+        white-space: pre-line;
+    }
+
+    .quick-actions-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .quick-actions-title {
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .quick-actions-title i {
+        color: #0f4c81;
+    }
+
+    .quick-action-btn {
+        width: 100%;
+        justify-content: flex-start;
+        text-align: left;
+        padding: 0.75rem 0.9rem;
+    }
+
+    .mini-help {
+        color: #6b7280;
+        font-size: 0.78rem;
+        margin-top: 0.75rem;
+        line-height: 1.35;
+    }
+
+    .sidebar-column {
+        align-self: flex-start;
+    }
+
+    .sidebar-actions {
+        position: sticky;
+        top: 1rem;
+        height: auto;
+    }
+
+    .main-column {
+        min-width: 0;
+    }
+
+    @media (max-width: 991px) {
+        .sidebar-actions {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .detail-hero .d-flex,
+        .summary-card .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .hero-actions {
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .info-row {
+            grid-template-columns: 1fr;
+            gap: 0.15rem;
+        }
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="detail-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-file-medical-alt"></i>
+                    Detalle del Preingreso #{{ preingreso.id }}
+                </h2>
+                <p>
+                    Consulta general del paciente, cobertura, datos médicos, contacto responsable y acciones disponibles.
+                </p>
+            </div>
+
+            <div class="hero-actions">
+                <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-outline-secondary btn-sm-custom">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+
+                <a href="{% url 'gestion_app:editar_preingreso' preingreso.id %}" class="btn btn-primary btn-sm-custom">
+                    <i class="fas fa-pen-to-square"></i> Editar
+                </a>
+
+                <a href="{% url 'gestion_app:imprimir_preingreso' preingreso.id %}" class="btn btn-outline-dark btn-sm-custom">
+                    <i class="fas fa-print"></i> Imprimir
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+            <div class="patient-main">
+                <div class="patient-avatar">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+
+                <div>
+                    <div class="patient-name">
+                        {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                    </div>
+
+                    <div class="patient-subtitle">
+                        DNI {{ preingreso.paciente.dni|default:"-" }}
+                        {% if preingreso.fecha_probable_ingreso %}
+                            · Ingreso probable {{ preingreso.fecha_probable_ingreso|date:"d/m/Y" }}
+                        {% endif %}
+                        {% if preingreso.servicio %}
+                            · {{ preingreso.servicio.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span class="status-pill status-{{ preingreso.estado|default:'pendiente' }}">
+                    <i class="fas fa-circle"></i>
+                    {{ preingreso.get_estado_display|default:preingreso.estado|default:"Pendiente" }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-start">
+
+        <div class="col-xl-8 col-lg-7 main-column">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fas fa-user"></i>
+                            Datos del paciente
+                        </div>
+
+                        <div class="info-card-body">
+                            <div class="info-row">
+                                <div class="info-label">Paciente</div>
+                                <div class="info-value">
+                                    {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">DNI</div>
+                                <div class="info-value">{{ preingreso.paciente.dni|default:"-" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Nacimiento</div>
+                                <div class="info-value">
+                                    {% if preingreso.paciente.fecha_nacimiento %}
+                                        {{ preingreso.paciente.fecha_nacimiento|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="muted-value">No cargado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Teléfono</div>
+                                <div class="info-value">{{ preingreso.paciente.telefono|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Dirección</div>
+                                <div class="info-value">{{ preingreso.paciente.direccion|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Provincia</div>
+                                <div class="info-value">{{ preingreso.paciente.provincia|default:"No cargado" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fas fa-notes-medical"></i>
+                            Datos del preingreso
+                        </div>
+
+                        <div class="info-card-body">
+                            <div class="info-row">
+                                <div class="info-label">Ingreso probable</div>
+                                <div class="info-value">
+                                    {% if preingreso.fecha_probable_ingreso %}
+                                        {{ preingreso.fecha_probable_ingreso|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="muted-value">No cargado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Servicio</div>
+                                <div class="info-value">{{ preingreso.servicio|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Médico</div>
+                                <div class="info-value">{{ preingreso.medico|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Origen</div>
+                                <div class="info-value">{{ preingreso.origen_paciente|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Prioridad</div>
+                                <div class="info-value">{{ preingreso.prioridad|default:"Normal" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Estado</div>
+                                <div class="info-value">
+                                    {{ preingreso.get_estado_display|default:preingreso.estado|default:"Pendiente" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fas fa-id-card"></i>
+                            Cobertura
+                        </div>
+
+                        <div class="info-card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="info-label mb-1">Obra social</div>
+                                    <div class="info-value">{{ preingreso.obra_social|default:"No cargado" }}</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="info-label mb-1">Plan</div>
+                                    <div class="info-value">{{ preingreso.plan|default:"No cargado" }}</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="info-label mb-1">N° afiliado</div>
+                                    <div class="info-value">{{ preingreso.numero_afiliado|default:"No cargado" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fas fa-stethoscope"></i>
+                            Diagnóstico
+                        </div>
+
+                        <div class="info-card-body">
+                            <div class="text-box">
+                                {{ preingreso.diagnostico|default:"Sin diagnóstico cargado." }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fas fa-phone-volume"></i>
+                            Contacto responsable
+                        </div>
+
+                        <div class="info-card-body">
+                            <div class="info-row">
+                                <div class="info-label">Nombre</div>
+                                <div class="info-value">{{ preingreso.contacto_nombre|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">DNI</div>
+                                <div class="info-value">{{ preingreso.contacto_dni|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Parentesco</div>
+                                <div class="info-value">{{ preingreso.contacto_parentesco|default:"No cargado" }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Teléfono</div>
+                                <div class="info-value">{{ preingreso.contacto_telefono|default:"No cargado" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fas fa-clipboard-list"></i>
+                            Observaciones
+                        </div>
+
+                        <div class="info-card-body">
+                            <div class="text-box">
+                                {{ preingreso.observaciones|default:"Sin observaciones cargadas." }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-4 col-lg-5 sidebar-column">
+
+            <div class="sidebar-actions">
+
+                <div class="quick-actions-card">
+                    <div class="quick-actions-title">
+                        <i class="fas fa-bolt"></i>
+                        Acciones rápidas
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'gestion_app:agregar_orden_preingreso' preingreso.id %}" class="btn btn-success quick-action-btn">
+                            <i class="fas fa-plus-circle"></i>
+                            Agregar orden
+                        </a>
+
+                        <a href="{% url 'gestion_app:lista_ordenes_preingreso' preingreso.id %}" class="btn btn-outline-primary quick-action-btn">
+                            <i class="fas fa-list-ul"></i>
+                            Ver órdenes del preingreso
+                        </a>
+
+                        <a href="{% url 'gestion_app:editar_preingreso' preingreso.id %}" class="btn btn-outline-dark quick-action-btn">
+                            <i class="fas fa-pen-to-square"></i>
+                            Editar preingreso
+                        </a>
+
+                        <a href="{% url 'gestion_app:imprimir_preingreso' preingreso.id %}" class="btn btn-outline-secondary quick-action-btn">
+                            <i class="fas fa-print"></i>
+                            Imprimir hoja de preingreso
+                        </a>
+                    </div>
+
+                    <div class="mini-help">
+                        Desde esta sección podés operar sobre el preingreso sin volver al listado.
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <i class="fas fa-circle-info"></i>
+                        Resumen operativo
+                    </div>
+
+                    <div class="info-card-body">
+                        <div class="info-row">
+                            <div class="info-label">Preingreso</div>
+                            <div class="info-value">#{{ preingreso.id }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Paciente</div>
+                            <div class="info-value">
+                                {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Cobertura</div>
+                            <div class="info-value">{{ preingreso.obra_social|default:"No cargado" }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Servicio</div>
+                            <div class="info-value">{{ preingreso.servicio|default:"No cargado" }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Médico</div>
+                            <div class="info-value">{{ preingreso.medico|default:"No cargado" }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Estado</div>
+                            <div class="info-value">
+                                {{ preingreso.get_estado_display|default:preingreso.estado|default:"Pendiente" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

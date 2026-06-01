@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 950px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        color: black;
+        border-radius: 20px;
+        padding: 1.5rem 1.8rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.16);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.4rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.95rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.9rem 1.2rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .section-title i {
+        color: #0f4c81;
+    }
+
+    .section-body {
+        padding: 1.2rem;
+    }
+
+    .form-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.92rem;
+        padding: 0.68rem 0.85rem;
+        background: #ffffff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1d7fbf;
+        box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+    }
+    .form-control::placeholder {
+        color: #c3cbd7 !important;
+    }
+
+    .help-text {
+        color: #6b7280;
+        font-size: 0.76rem;
+        margin-top: 0.25rem;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <h2>
+            <i class="fas fa-edit"></i>
+            Editar Plan
+        </h2>
+        <p>
+            Actualización del nombre del plan y su obra social asociada.
+        </p>
+    </div>
+
+    <form method="post" id="formEditarPlan">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <div class="section-title">
+                <i class="fas fa-clipboard-list"></i>
+                Datos del plan
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Nombre del plan <span class="required-mark">*</span>
+                        </label>
+                        <input type="text"
+                               name="nombre"
+                               class="form-control"
+                               value="{{ plan.nombre }}"
+                               required>
+                        <div class="help-text">Nombre identificatorio del plan.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Obra social <span class="required-mark">*</span>
+                        </label>
+                        <select name="obra_social" class="form-select" required>
+                            <option value="">Seleccione una obra social...</option>
+                            {% for obra_social in obras_sociales %}
+                                <option value="{{ obra_social.id }}"
+                                    {% if plan.obra_social_id == obra_social.id %}selected{% endif %}>
+                                    {{ obra_social.nombre }}
+                                    {% if obra_social.sigla %} - {{ obra_social.sigla }}{% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="help-text">Financiador al que pertenece este plan.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Nombre del plan <span class="required-mark">*</span>
+                        </label>
+                        <input type="text"
+                               name="nombre"
+                               class="form-control"
+                               value="{{ plan.nombre }}"
+                               required>
+                        <div class="help-text">Nombre identificatorio del plan.</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="{% url 'entidades_app:listado_planes' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalGuardarCambiosPlan">
+                <i class="fas fa-save"></i> Guardar cambios
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<div class="modal fade" id="modalGuardarCambiosPlan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-primary"></i>
+                    Confirmar cambios
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Desea guardar los cambios realizados sobre el plan
+                <strong>{{ plan.nombre }}</strong>?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        onclick="document.getElementById('formEditarPlan').submit();">
+                    <i class="fas fa-save"></i> Sí, guardar cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

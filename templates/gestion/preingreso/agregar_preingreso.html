@@ -1,0 +1,1019 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.45rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.92rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .section-title-left {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .section-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .section-body {
+        padding: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.9rem;
+        padding: 0.62rem 0.8rem;
+        background: #ffffff;
+    }
+
+    .input-group .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .input-group .btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1d7fbf;
+        box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+    }
+
+    .form-control::placeholder {
+        color: #9ca3af;
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+        z-index: 10;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .btn-sm-custom {
+        padding: 0.52rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+
+    .modal-xl {
+        max-width: 1050px;
+    }
+
+    .paciente-table thead th {
+        font-size: 0.8rem;
+        color: #374151;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .paciente-table tbody td {
+        font-size: 0.88rem;
+        vertical-align: middle;
+    }
+
+    .mini-help {
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    .selected-patient-box {
+        background: #f8fbff;
+        border: 1px dashed #b8c7dc;
+        border-radius: 14px;
+        padding: 0.7rem 0.9rem;
+        color: #526179;
+        font-size: 0.86rem;
+    }
+
+    .empty-row {
+        padding: 2rem !important;
+        color: #6b7280;
+        text-align: center;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-hospital-user"></i>
+                    Nuevo Preingreso
+                </h2>
+                <p>
+                    Carga inicial del paciente, cobertura, datos médicos y contacto responsable.
+                </p>
+            </div>
+
+            <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-outline-secondary btn-sm-custom">
+                <i class="fas fa-arrow-left"></i> Volver al listado
+            </a>
+        </div>
+    </div>
+
+    <form method="post" id="formAgregarPreingreso">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">1</span>
+                    Datos del paciente
+                </div>
+
+                <button type="button"
+                        class="btn btn-primary btn-sm-custom"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalBuscarPaciente">
+                    <i class="fas fa-search"></i> Buscar / Crear paciente
+                </button>
+            </div>
+
+            <div class="section-body">
+                <input type="hidden" name="paciente" id="paciente_id" required>
+
+                <div class="row g-3">
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            Paciente <span class="required-mark">*</span>
+                        </label>
+
+                        <div class="input-group">
+                            <input type="text"
+                                   id="paciente_nombre"
+                                   class="form-control"
+                                   placeholder="Seleccione un paciente..."
+                                   readonly>
+
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalBuscarPaciente">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <div class="mini-help mt-1">
+                            Busque por DNI, apellido o nombre. No se cargan pacientes hasta buscar.
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+                        <input type="text" id="paciente_dni" class="form-control" placeholder="-" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Fecha nacimiento</label>
+                        <input type="text" id="paciente_fecha_nacimiento" class="form-control" placeholder="-" readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="paciente_telefono" class="form-control" placeholder="-" readonly>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div id="pacienteSeleccionadoBox" class="selected-patient-box">
+                            <i class="fas fa-info-circle"></i>
+                            Todavía no se seleccionó ningún paciente.
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            Obra social <span class="required-mark">*</span>
+                        </label>
+                        <select name="obra_social" class="form-select" required>
+                            <option value="">Seleccione una obra social...</option>
+                            {% for obra in obras_sociales %}
+                                <option value="{{ obra.id }}">{{ obra.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Plan</label>
+                        <select name="plan" class="form-select">
+                            <option value="">Seleccione un plan...</option>
+                            {% for plan in planes %}
+                                <option value="{{ plan.id }}">
+                                    {{ plan.nombre }}
+                                    {% if plan.obra_social %}
+                                        - {{ plan.obra_social.nombre }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">N° afiliado</label>
+                        <input type="text"
+                               name="numero_afiliado"
+                               class="form-control"
+                               placeholder="Ingrese número de afiliado">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">2</span>
+                    Datos del preingreso
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Fecha probable ingreso <span class="required-mark">*</span>
+                        </label>
+                        <input type="date"
+                               name="fecha_probable_ingreso"
+                               class="form-control"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Servicio</label>
+                        <select name="servicio" class="form-select">
+                            <option value="">Seleccione un servicio...</option>
+                            {% for servicio in servicios %}
+                                <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Médico</label>
+                        <select name="medico" class="form-select">
+                            <option value="">Seleccione un médico...</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}">
+                                    {{ medico.apellido }}, {{ medico.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Origen del paciente</label>
+                        <select name="origen_paciente" class="form-select">
+                            <option value="domicilio">Domicilio</option>
+                            <option value="guardia">Guardia</option>
+                            <option value="consultorio">Consultorio</option>
+                            <option value="derivacion">Derivación</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Prioridad</label>
+                        <select name="prioridad" class="form-select">
+                            <option value="normal">Normal</option>
+                            <option value="urgente">Urgente</option>
+                            <option value="programado">Programado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-9">
+                        <label class="form-label">Diagnóstico</label>
+                        <textarea name="diagnostico"
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="Ingrese diagnóstico o motivo del preingreso..."></textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">3</span>
+                    Contacto responsable
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Nombre y apellido</label>
+                        <input type="text"
+                               name="contacto_nombre"
+                               class="form-control"
+                               placeholder="Ingrese nombre y apellido">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+                        <input type="text"
+                               name="contacto_dni"
+                               class="form-control"
+                               placeholder="Ingrese DNI">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Parentesco</label>
+                        <input type="text"
+                               name="contacto_parentesco"
+                               class="form-control"
+                               placeholder="Ej: Madre, padre, hijo/a">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text"
+                               name="contacto_telefono"
+                               class="form-control"
+                               placeholder="Ej: 3875555555">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">4</span>
+                    Observaciones
+                </div>
+            </div>
+
+            <div class="section-body">
+                <label class="form-label">Observaciones adicionales</label>
+                <textarea name="observaciones"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Ingrese aquí cualquier observación relevante..."></textarea>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalGuardarPreingreso">
+                <i class="fas fa-save"></i> Guardar preingreso
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="modal fade" id="modalBuscarPaciente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search text-primary"></i>
+                    Buscar o crear paciente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <ul class="nav nav-tabs mb-3" id="pacienteTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active"
+                                id="buscar-paciente-tab"
+                                type="button"
+                                role="tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tabBuscarPaciente">
+                            <i class="fas fa-search"></i> Buscar paciente
+                        </button>
+                    </li>
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link"
+                                id="crear-paciente-tab"
+                                type="button"
+                                role="tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tabCrearPaciente">
+                            <i class="fas fa-user-plus"></i> Crear paciente
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+
+                    <div class="tab-pane fade show active" id="tabBuscarPaciente" role="tabpanel">
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-10">
+                                <input type="text"
+                                       id="buscarPacienteInput"
+                                       class="form-control"
+                                       placeholder="Buscar por DNI, apellido o nombre...">
+                                <div class="mini-help mt-1">
+                                    Ingrese al menos 2 caracteres. Se mostrarán 15 resultados por vez.
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 d-grid align-self-start">
+                                <button type="button" class="btn btn-primary" id="btnBuscarPaciente">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="pacientesResultadoInfo" class="text-muted small mb-2">
+                            No se cargan pacientes automáticamente. Realice una búsqueda para comenzar.
+                        </div>
+
+                        <div class="table-responsive border rounded-3">
+                            <table class="table table-sm table-hover align-middle mb-0 paciente-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Paciente</th>
+                                        <th>DNI</th>
+                                        <th>Fecha nacimiento</th>
+                                        <th class="text-end">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pacientesResultadoBody">
+                                    <tr>
+                                        <td colspan="4" class="empty-row">
+                                            <i class="fas fa-magnifying-glass"></i>
+                                            Busque un paciente por DNI, apellido o nombre.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-grid mt-3">
+                            <button type="button"
+                                    id="btnCargarMasPacientes"
+                                    class="btn btn-outline-primary d-none">
+                                <i class="fas fa-chevron-down"></i> Cargar 15 más
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="tab-pane fade" id="tabCrearPaciente" role="tabpanel">
+
+                        <form id="formCrearPacienteModal">
+
+                            <div class="form-card mb-3">
+                                <div class="section-title">
+                                    <div class="section-title-left">
+                                        <i class="fas fa-id-card text-primary"></i>
+                                        Datos principales
+                                    </div>
+                                </div>
+
+                                <div class="section-body">
+                                    <div class="row g-3">
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">
+                                                Apellido <span class="required-mark">*</span>
+                                            </label>
+                                            <input type="text"
+                                                   name="apellido"
+                                                   class="form-control"
+                                                   placeholder="Ej: Pérez"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">
+                                                Nombre <span class="required-mark">*</span>
+                                            </label>
+                                            <input type="text"
+                                                   name="nombre"
+                                                   class="form-control"
+                                                   placeholder="Ej: Juan Carlos"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">
+                                                DNI <span class="required-mark">*</span>
+                                            </label>
+                                            <input type="text"
+                                                   name="dni"
+                                                   class="form-control"
+                                                   placeholder="Ej: 30111222"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Fecha de nacimiento</label>
+                                            <input type="date"
+                                                   name="fecha_nacimiento"
+                                                   class="form-control">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Género</label>
+                                            <select name="genero" class="form-select">
+                                                <option value="">Seleccione...</option>
+                                                <option value="M">Masculino</option>
+                                                <option value="F">Femenino</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Teléfono</label>
+                                            <input type="text"
+                                                   name="telefono"
+                                                   class="form-control"
+                                                   placeholder="Ej: 3875555555">
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-card mb-3">
+                                <div class="section-title">
+                                    <div class="section-title-left">
+                                        <i class="fas fa-map-marker-alt text-primary"></i>
+                                        Datos complementarios
+                                    </div>
+                                </div>
+
+                                <div class="section-body">
+                                    <div class="row g-3">
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Dirección</label>
+                                            <input type="text"
+                                                   name="direccion"
+                                                   class="form-control"
+                                                   placeholder="Domicilio del paciente...">
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label class="form-label">Provincia</label>
+                                            <input type="text"
+                                                   name="provincia"
+                                                   class="form-control"
+                                                   placeholder="Ej: Salta">
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label class="form-label">Nacionalidad</label>
+                                            <input type="text"
+                                                   name="nacionalidad"
+                                                   class="form-control"
+                                                   placeholder="Ej: Argentina">
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="crearPacienteError" class="alert alert-danger d-none"></div>
+
+                            <div class="d-flex justify-content-between gap-2">
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="btnVolverBusquedaPaciente">
+                                    <i class="fas fa-arrow-left"></i> Volver a búsqueda
+                                </button>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Guardar paciente
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalGuardarPreingreso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-primary"></i>
+                    Confirmar preingreso
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Desea guardar el nuevo preingreso?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        onclick="validarYEnviarPreingreso();">
+                    <i class="fas fa-save"></i> Sí, guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let pacientePage = 1;
+    let pacienteQuery = "";
+    let pacienteHasNext = false;
+
+    const buscarPacienteUrl = "{% url 'gestion_app:buscar_pacientes_ajax' %}";
+    const crearPacienteUrl = "{% url 'gestion_app:crear_paciente_ajax' %}";
+
+    function getCookie(name) {
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function seleccionarPaciente(paciente) {
+        const nombreCompleto = `${paciente.apellido || ""}, ${paciente.nombre || ""}`.trim();
+
+        document.getElementById("paciente_id").value = paciente.id;
+        document.getElementById("paciente_nombre").value = nombreCompleto;
+        document.getElementById("paciente_dni").value = paciente.dni || "-";
+        document.getElementById("paciente_fecha_nacimiento").value = paciente.fecha_nacimiento || "-";
+        document.getElementById("paciente_telefono").value = paciente.telefono || "-";
+
+        document.getElementById("pacienteSeleccionadoBox").innerHTML = `
+            <i class="fas fa-check-circle text-success"></i>
+            Paciente seleccionado:
+            <strong>${escapeHtml(nombreCompleto)}</strong>
+            · DNI: <strong>${escapeHtml(paciente.dni || "-")}</strong>
+        `;
+
+        const modalElement = document.getElementById("modalBuscarPaciente");
+        const modal = bootstrap.Modal.getInstance(modalElement);
+
+        if (modal) {
+            modal.hide();
+        }
+    }
+
+    function renderPacientes(pacientes, append = false) {
+        const tbody = document.getElementById("pacientesResultadoBody");
+
+        if (!append) {
+            tbody.innerHTML = "";
+        }
+
+        if (pacientes.length === 0 && !append) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-row">
+                        <i class="fas fa-circle-info"></i>
+                        No se encontraron pacientes.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        pacientes.forEach(paciente => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>
+                    <strong>${escapeHtml(paciente.apellido)}, ${escapeHtml(paciente.nombre)}</strong>
+                </td>
+                <td>${escapeHtml(paciente.dni || "-")}</td>
+                <td>${escapeHtml(paciente.fecha_nacimiento || "-")}</td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-primary">
+                        <i class="fas fa-check"></i> Seleccionar
+                    </button>
+                </td>
+            `;
+
+            tr.querySelector("button").addEventListener("click", function () {
+                seleccionarPaciente(paciente);
+            });
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function buscarPacientes(reset = true) {
+        const input = document.getElementById("buscarPacienteInput");
+        const info = document.getElementById("pacientesResultadoInfo");
+        const btnMas = document.getElementById("btnCargarMasPacientes");
+        const tbody = document.getElementById("pacientesResultadoBody");
+
+        if (reset) {
+            pacientePage = 1;
+            pacienteQuery = input.value.trim();
+        }
+
+        if (pacienteQuery.length < 2) {
+            info.innerText = "Ingrese al menos 2 caracteres para buscar.";
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-row">
+                        <i class="fas fa-magnifying-glass"></i>
+                        Busque un paciente por DNI, apellido o nombre.
+                    </td>
+                </tr>
+            `;
+            btnMas.classList.add("d-none");
+            return;
+        }
+
+        info.innerText = "Buscando pacientes...";
+
+        if (reset) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-row">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Buscando...
+                    </td>
+                </tr>
+            `;
+        }
+
+        fetch(`${buscarPacienteUrl}?q=${encodeURIComponent(pacienteQuery)}&page=${pacientePage}`)
+            .then(response => response.json())
+            .then(data => {
+                renderPacientes(data.results || [], !reset);
+
+                pacienteHasNext = data.has_next;
+
+                if (pacienteHasNext) {
+                    btnMas.classList.remove("d-none");
+                } else {
+                    btnMas.classList.add("d-none");
+                }
+
+                if ((data.results || []).length === 0 && reset) {
+                    info.innerText = "No se encontraron pacientes. Puede crearlo desde la pestaña Crear paciente.";
+                } else {
+                    info.innerText = "Resultados encontrados.";
+                }
+            })
+            .catch(() => {
+                info.innerText = "Ocurrió un error al buscar pacientes.";
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-row text-danger">
+                            No se pudo realizar la búsqueda.
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+
+    function validarYEnviarPreingreso() {
+        const pacienteId = document.getElementById("paciente_id").value;
+        const form = document.getElementById("formAgregarPreingreso");
+
+        if (!pacienteId) {
+            const modalGuardar = bootstrap.Modal.getInstance(document.getElementById("modalGuardarPreingreso"));
+            if (modalGuardar) {
+                modalGuardar.hide();
+            }
+
+            const modalPaciente = new bootstrap.Modal(document.getElementById("modalBuscarPaciente"));
+            modalPaciente.show();
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        form.submit();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnBuscarPaciente = document.getElementById("btnBuscarPaciente");
+        const buscarPacienteInput = document.getElementById("buscarPacienteInput");
+        const btnCargarMasPacientes = document.getElementById("btnCargarMasPacientes");
+        const formCrearPacienteModal = document.getElementById("formCrearPacienteModal");
+        const btnVolverBusquedaPaciente = document.getElementById("btnVolverBusquedaPaciente");
+
+        btnBuscarPaciente.addEventListener("click", function () {
+            buscarPacientes(true);
+        });
+
+        buscarPacienteInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                buscarPacientes(true);
+            }
+        });
+
+        btnCargarMasPacientes.addEventListener("click", function () {
+            if (pacienteHasNext) {
+                pacientePage += 1;
+                buscarPacientes(false);
+            }
+        });
+
+        btnVolverBusquedaPaciente.addEventListener("click", function () {
+            const tab = new bootstrap.Tab(document.getElementById("buscar-paciente-tab"));
+            tab.show();
+        });
+
+        formCrearPacienteModal.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const errorBox = document.getElementById("crearPacienteError");
+            const formData = new FormData(form);
+
+            errorBox.classList.add("d-none");
+            errorBox.innerText = "";
+
+            fetch(crearPacienteUrl, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: formData
+            })
+            .then(async response => {
+                const data = await response.json();
+
+                if (!response.ok || !data.ok) {
+                    throw data;
+                }
+
+                seleccionarPaciente(data.paciente);
+                form.reset();
+            })
+            .catch(error => {
+                errorBox.innerText = error.error || "No se pudo crear el paciente.";
+                errorBox.classList.remove("d-none");
+            });
+        });
+    });
+</script>
+
+{% endblock %}
