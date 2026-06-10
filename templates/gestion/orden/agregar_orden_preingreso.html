@@ -4,7 +4,7 @@
 
 <style>
     .page-wrap {
-        max-width: 1240px;
+        max-width: 1320px;
         margin: 0 auto;
     }
 
@@ -173,23 +173,46 @@
         color: #6b7280;
     }
 
+    .detalle-table {
+        min-width: 1040px;
+    }
+
     .detalle-table thead th {
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         color: #374151;
         font-weight: 900;
         white-space: nowrap;
         background: #f8f9fa;
-    }
-
-    .detalle-table tbody td {
-        font-size: 0.84rem;
         vertical-align: middle;
     }
 
-    .empty-row {
-        padding: 2rem !important;
-        color: #6b7280;
-        text-align: center;
+    .detalle-table tbody td {
+        font-size: 0.82rem;
+        vertical-align: middle;
+        padding: 0.35rem;
+    }
+
+    .detalle-table .form-control,
+    .detalle-table .form-select {
+        min-height: 34px;
+        border-radius: 9px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.45rem;
+    }
+
+    .detalle-table .input-group .btn {
+        border-radius: 9px;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .detalle-table textarea.form-control {
+        min-height: 34px;
+        resize: vertical;
+    }
+
+    .detalle-row-empty .form-control,
+    .detalle-row-empty .form-select {
+        background: #fff;
     }
 
     .modal-confirmacion {
@@ -234,24 +257,23 @@
         vertical-align: middle;
     }
 
-    .badge-soft-success {
-        background: #eafaf0;
-        color: #16803c;
-        border: 1px solid #bce7ca;
-        border-radius: 999px;
-        padding: 0.3rem 0.55rem;
-        font-weight: 800;
-        font-size: 0.72rem;
+    .empty-row {
+        padding: 2rem !important;
+        color: #6b7280;
+        text-align: center;
     }
 
-    .badge-soft-warning {
-        background: #fff8db;
-        color: #7a5b00;
-        border: 1px solid #ffe08a;
-        border-radius: 999px;
-        padding: 0.3rem 0.55rem;
-        font-weight: 800;
-        font-size: 0.72rem;
+    .row-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #eef2ff;
+        color: #1d4ed8;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.78rem;
     }
 </style>
 
@@ -265,7 +287,7 @@
                     Nueva Orden de Autorización
                 </h2>
                 <p>
-                    Carga de orden vinculada al preingreso, con sus prestaciones y autorización por detalle.
+                    Carga de orden vinculada al preingreso, con prestaciones cargadas directamente en la tabla.
                 </p>
             </div>
 
@@ -360,7 +382,7 @@
                         </div>
 
                         <div class="mini-help mt-1">
-                            También se puede autorizar cada detalle individualmente.
+                            La autorización aplica a la orden completa.
                         </div>
                     </div>
 
@@ -385,34 +407,111 @@
 
                 <button type="button"
                         class="btn btn-primary btn-sm-custom"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalAgregarDetalle">
-                    <i class="fas fa-plus-circle"></i> Agregar detalle
+                        id="btnAgregarFilaDetalle">
+                    <i class="fas fa-plus-circle"></i> Agregar fila
                 </button>
             </div>
 
             <div class="section-body">
+                <div id="detalleError" class="alert alert-danger d-none mb-3"></div>
+
                 <div class="table-responsive border rounded-3">
-                    <table class="table table-sm table-hover align-middle mb-0 detalle-table">
+                    <table class="table table-sm table-hover align-middle mb-0 detalle-table" id="tablaDetallesOrden">
                         <thead>
                             <tr>
-                                <th>Prestación</th>
-                                <th>Médico</th>
-                                <th class="text-center">Cant.</th>
-                                <th>H/G</th>
-                                <th>Honorario</th>
-                                <th>Desde</th>
-                                <th>Hasta</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acciones</th>
+                                <th class="text-center" style="width:42px;">#</th>
+                                <th style="width:170px;">Código</th>
+                                <th style="width:230px;">Prestación</th>
+                                <th style="width:180px;">Médico</th>
+                                <th class="text-center" style="width:75px;">Cant.</th>
+                                <th style="width:135px;">H/G</th>
+                                <th style="width:145px;">Honorario</th>
+                                <th style="width:125px;">Desde</th>
+                                <th style="width:125px;">Hasta</th>
+                                <th class="text-end" style="width:55px;"></th>
                             </tr>
                         </thead>
 
                         <tbody id="detallesBody">
-                            <tr id="emptyDetallesRow">
-                                <td colspan="9" class="empty-row">
-                                    <i class="fas fa-circle-info"></i>
-                                    Todavía no se cargaron detalles en esta orden.
+                            <tr class="fila-detalle">
+                                <td class="text-center">
+                                    <span class="row-number">1</span>
+                                    <input type="hidden" class="detalle_prestacion_id">
+                                </td>
+
+                                <td>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text"
+                                               class="form-control detalle_prestacion_codigo"
+                                               placeholder="Código"
+                                               autocomplete="off">
+                                        <button type="button"
+                                                class="btn btn-outline-primary btnBuscarPrestacionFila"
+                                                title="Buscar prestación"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalBuscarPrestacion">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <input type="text"
+                                           class="form-control detalle_prestacion_nombre"
+                                           placeholder="Prestación"
+                                           autocomplete="off">
+                                </td>
+
+                                <td>
+                                    <select class="form-select detalle_medico_id">
+                                        <option value="">Seleccione...</option>
+                                        {% for medico in medicos %}
+                                            <option value="{{ medico.id }}">
+                                                {{ medico.apellido }}, {{ medico.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="number"
+                                           class="form-control text-center detalle_cantidad"
+                                           value="1"
+                                           min="1">
+                                </td>
+
+                                <td>
+                                    <select class="form-select detalle_honorarios_gastos">
+                                        <option value="">Seleccione...</option>
+                                        {% for value, label in honorarios_gastos %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select class="form-select detalle_tipo_honorario">
+                                        <option value="">Seleccione...</option>
+                                        {% for value, label in tipos_honorario %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="date" class="form-control detalle_fecha_desde">
+                                </td>
+
+                                <td>
+                                    <input type="date" class="form-control detalle_fecha_hasta">
+                                </td>
+
+                                <td class="text-end">
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm eliminarFilaDetalle"
+                                            title="Eliminar fila">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -420,7 +519,7 @@
                 </div>
 
                 <div class="mini-help mt-2">
-                    Los detalles se guardarán junto con la orden al presionar “Guardar orden”.
+                    Cargue los detalles directamente en la tabla. Al salir del campo código se completará la prestación si existe coincidencia exacta; también puede usar la lupa para buscar.
                 </div>
             </div>
         </div>
@@ -440,158 +539,6 @@
 
     </form>
 
-</div>
-
-<div class="modal fade" id="modalAgregarDetalle" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content modal-confirmacion">
-
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-plus-circle text-primary"></i>
-                    Agregar detalle de orden
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-
-                <input type="hidden" id="detalle_prestacion_id">
-                <input type="hidden" id="detalle_prestacion_codigo">
-                <input type="hidden" id="detalle_prestacion_nombre">
-
-                <div class="form-card mb-3">
-                    <div class="section-title">
-                        <div class="section-title-left">
-                            <i class="fas fa-search text-primary"></i>
-                            Prestación
-                        </div>
-
-                        <button type="button"
-                                class="btn btn-outline-primary btn-sm-custom"
-                                data-bs-toggle="modal"
-                                data-bs-target="#modalBuscarPrestacion">
-                            <i class="fas fa-magnifying-glass"></i> Buscar prestación
-                        </button>
-                    </div>
-
-                    <div class="section-body">
-                        <div id="prestacionSeleccionadaBox" class="selected-box">
-                            <i class="fas fa-info-circle"></i>
-                            Todavía no se seleccionó ninguna prestación.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-card mb-0">
-                    <div class="section-title">
-                        <div class="section-title-left">
-                            <i class="fas fa-clipboard-list text-primary"></i>
-                            Datos del detalle
-                        </div>
-                    </div>
-
-                    <div class="section-body">
-                        <div class="row g-3">
-
-                            <div class="col-md-4">
-                                <label class="form-label">Médico</label>
-                                <select id="detalle_medico_id" class="form-select">
-                                    <option value="">Seleccione...</option>
-                                    {% for medico in medicos %}
-                                        <option value="{{ medico.id }}">
-                                            {{ medico.apellido }}, {{ medico.nombre }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label">Cantidad</label>
-                                <input type="number"
-                                       id="detalle_cantidad"
-                                       class="form-control"
-                                       value="1"
-                                       min="1">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Honorarios / Gastos</label>
-                                <select id="detalle_honorarios_gastos" class="form-select">
-                                    <option value="">Seleccione...</option>
-                                    {% for value, label in honorarios_gastos %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Tipo honorario</label>
-                                <select id="detalle_tipo_honorario" class="form-select">
-                                    <option value="">Seleccione...</option>
-                                    {% for value, label in tipos_honorario %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Fecha desde</label>
-                                <input type="date" id="detalle_fecha_desde" class="form-control">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Fecha hasta</label>
-                                <input type="date" id="detalle_fecha_hasta" class="form-control">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Autorización</label>
-                                <div class="selected-box">
-                                    <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               role="switch"
-                                               id="detalle_autorizada">
-                                        <label class="form-check-label fw-bold" for="detalle_autorizada">
-                                            Detalle autorizado
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label">Observaciones</label>
-                                <textarea id="detalle_observaciones"
-                                          class="form-control"
-                                          rows="2"
-                                          placeholder="Observaciones del detalle..."></textarea>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div id="detalleError" class="alert alert-danger d-none mt-3 mb-0"></div>
-
-            </div>
-
-            <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        data-bs-dismiss="modal">
-                    Cancelar
-                </button>
-
-                <button type="button"
-                        class="btn btn-primary"
-                        onclick="agregarDetalleDesdeModal();">
-                    <i class="fas fa-plus-circle"></i> Agregar a la orden
-                </button>
-            </div>
-
-        </div>
-    </div>
 </div>
 
 <div class="modal fade" id="modalBuscarPrestacion" tabindex="-1" aria-hidden="true">
@@ -702,14 +649,13 @@
 </div>
 
 <script>
-    let detalles = [];
-
     let prestacionPage = 1;
     let prestacionQuery = "";
     let prestacionHasNext = false;
+    let filaActualPrestacion = null;
 
     const buscarPrestacionesUrl = "{% url 'gestion_app:buscar_prestaciones_ajax' %}";
-
+    const buscarPrestacionCodigoUrl ="{% url 'gestion_app:buscar_prestacion_por_codigo_ajax' %}";
     function escapeHtml(value) {
         if (value === null || value === undefined) {
             return "";
@@ -723,30 +669,137 @@
             .replaceAll("'", "&#039;");
     }
 
-    function seleccionarPrestacion(prestacion) {
-        document.getElementById("detalle_prestacion_id").value = prestacion.id;
-        document.getElementById("detalle_prestacion_codigo").value = prestacion.codigo || "";
-        document.getElementById("detalle_prestacion_nombre").value = prestacion.nombre || "";
+    function actualizarNumeracionFilas() {
+        document.querySelectorAll("#detallesBody tr.fila-detalle").forEach((tr, index) => {
+            const number = tr.querySelector(".row-number");
+            if (number) {
+                number.textContent = index + 1;
+            }
+        });
+    }
 
-        document.getElementById("prestacionSeleccionadaBox").innerHTML = `
-            <i class="fas fa-check-circle text-success"></i>
-            Prestación seleccionada:
-            <strong>${escapeHtml(prestacion.codigo || "-")} - ${escapeHtml(prestacion.nombre || "-")}</strong>
-            <div class="mini-help mt-1">
-                ${escapeHtml(prestacion.descripcion || "")}
-            </div>
-        `;
+    function limpiarFilaDetalle(fila) {
+        fila.querySelector(".detalle_prestacion_id").value = "";
+        fila.querySelector(".detalle_prestacion_codigo").value = "";
+        fila.querySelector(".detalle_prestacion_nombre").value = "";
+        fila.querySelector(".detalle_medico_id").value = "";
+        fila.querySelector(".detalle_cantidad").value = 1;
+        fila.querySelector(".detalle_honorarios_gastos").value = "";
+        fila.querySelector(".detalle_tipo_honorario").value = "";
+        fila.querySelector(".detalle_fecha_desde").value = "";
+        fila.querySelector(".detalle_fecha_hasta").value = "";
+    }
+
+    function agregarFilaDetalle() {
+        const tbody = document.getElementById("detallesBody");
+        const template = tbody.querySelector("tr.fila-detalle");
+        const nuevaFila = template.cloneNode(true);
+
+        limpiarFilaDetalle(nuevaFila);
+        tbody.appendChild(nuevaFila);
+        actualizarNumeracionFilas();
+
+        const codigoInput = nuevaFila.querySelector(".detalle_prestacion_codigo");
+        if (codigoInput) {
+            codigoInput.focus();
+        }
+    }
+
+    function eliminarFilaDetalle(fila) {
+        const tbody = document.getElementById("detallesBody");
+        const filas = tbody.querySelectorAll("tr.fila-detalle");
+
+        if (filas.length > 1) {
+            fila.remove();
+        } else {
+            limpiarFilaDetalle(fila);
+        }
+
+        actualizarNumeracionFilas();
+    }
+
+    function seleccionarPrestacion(prestacion) {
+        if (!filaActualPrestacion) {
+            return;
+        }
+
+        filaActualPrestacion.querySelector(".detalle_prestacion_id").value = prestacion.id || "";
+        filaActualPrestacion.querySelector(".detalle_prestacion_codigo").value = prestacion.codigo || "";
+        filaActualPrestacion.querySelector(".detalle_prestacion_nombre").value = prestacion.nombre || "";
+
+        const cantidad = filaActualPrestacion.querySelector(".detalle_cantidad");
+        if (!cantidad.value || parseInt(cantidad.value) <= 0) {
+            cantidad.value = 1;
+        }
 
         const modalBuscar = bootstrap.Modal.getInstance(document.getElementById("modalBuscarPrestacion"));
-
         if (modalBuscar) {
             modalBuscar.hide();
         }
 
-        const modalDetalle = new bootstrap.Modal(document.getElementById("modalAgregarDetalle"));
-        modalDetalle.show();
+        filaActualPrestacion.querySelector(".detalle_medico_id").focus();
     }
 
+
+    function normalizarCodigo(value) {
+        return String(value || "").trim().toLowerCase();
+    }
+
+    function marcarCodigoNoEncontrado(input) {
+        input.classList.add("is-invalid");
+        input.title = "No se encontró una prestación exacta para este código.";
+    }
+
+    function limpiarMarcaCodigo(input) {
+        input.classList.remove("is-invalid");
+        input.title = "";
+    }
+
+    function completarPrestacionEnFila(fila, prestacion) {
+        fila.querySelector(".detalle_prestacion_id").value = prestacion.id || "";
+        fila.querySelector(".detalle_prestacion_codigo").value = prestacion.codigo || "";
+        fila.querySelector(".detalle_prestacion_nombre").value = prestacion.nombre || "";
+
+        const cantidad = fila.querySelector(".detalle_cantidad");
+        if (!cantidad.value || parseInt(cantidad.value) <= 0) {
+            cantidad.value = 1;
+        }
+
+        limpiarMarcaCodigo(fila.querySelector(".detalle_prestacion_codigo"));
+    }
+
+    function buscarPrestacionPorCodigoFila(fila) {
+        const inputCodigo = fila.querySelector(".detalle_prestacion_codigo");
+        const codigo = inputCodigo.value.trim();
+
+        if (!codigo) {
+            fila.querySelector(".detalle_prestacion_id").value = "";
+            fila.querySelector(".detalle_prestacion_nombre").value = "";
+            limpiarMarcaCodigo(inputCodigo);
+            return;
+        }
+
+        fetch(`${buscarPrestacionCodigoUrl}?codigo=${encodeURIComponent(codigo)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.found) {
+                    completarPrestacionEnFila(fila, {
+                        id: data.id,
+                        codigo: data.codigo,
+                        nombre: data.nombre
+                    });
+                } else {
+                    fila.querySelector(".detalle_prestacion_id").value = "";
+                    fila.querySelector(".detalle_prestacion_nombre").value = "";
+                    marcarCodigoNoEncontrado(inputCodigo);
+                }
+            })
+            .catch(() => {
+                fila.querySelector(".detalle_prestacion_id").value = "";
+                fila.querySelector(".detalle_prestacion_nombre").value = "";
+                marcarCodigoNoEncontrado(inputCodigo);
+            });
+    }
     function renderPrestaciones(prestaciones, append = false) {
         const tbody = document.getElementById("prestacionesResultadoBody");
 
@@ -861,170 +914,118 @@
             });
     }
 
-    function agregarDetalleDesdeModal() {
-        const errorBox = document.getElementById("detalleError");
+    function filaTieneDatos(fila) {
+        const prestacionId = fila.querySelector(".detalle_prestacion_id").value.trim();
+        const codigo = fila.querySelector(".detalle_prestacion_codigo").value.trim();
+        const nombre = fila.querySelector(".detalle_prestacion_nombre").value.trim();
 
-        const prestacionId = document.getElementById("detalle_prestacion_id").value;
-        const prestacionCodigo = document.getElementById("detalle_prestacion_codigo").value;
-        const prestacionNombre = document.getElementById("detalle_prestacion_nombre").value;
+        return Boolean(prestacionId || codigo || nombre);
+    }
 
-        const medicoSelect = document.getElementById("detalle_medico_id");
-        const medicoId = medicoSelect.value;
-        const medicoTexto = medicoSelect.options[medicoSelect.selectedIndex]?.text || "";
-
-        const cantidad = document.getElementById("detalle_cantidad").value || 1;
-
-        const hgSelect = document.getElementById("detalle_honorarios_gastos");
-        const honorariosGastos = hgSelect.value;
-        const honorariosGastosTexto = hgSelect.options[hgSelect.selectedIndex]?.text || "";
-
-        const thSelect = document.getElementById("detalle_tipo_honorario");
-        const tipoHonorario = thSelect.value;
-        const tipoHonorarioTexto = thSelect.options[thSelect.selectedIndex]?.text || "";
-
-        const fechaDesde = document.getElementById("detalle_fecha_desde").value;
-        const fechaHasta = document.getElementById("detalle_fecha_hasta").value;
-        const autorizada = document.getElementById("detalle_autorizada").checked;
-        const observaciones = document.getElementById("detalle_observaciones").value.trim();
-
-        errorBox.classList.add("d-none");
-        errorBox.innerText = "";
-
-        if (!prestacionId) {
-            errorBox.innerText = "Debe seleccionar una prestación.";
-            errorBox.classList.remove("d-none");
-            return;
+    function obtenerTextoSelect(select) {
+        if (!select || !select.value) {
+            return "";
         }
 
-        if (!cantidad || parseInt(cantidad) <= 0) {
-            errorBox.innerText = "La cantidad debe ser mayor a cero.";
-            errorBox.classList.remove("d-none");
-            return;
-        }
+        return select.options[select.selectedIndex]?.text?.trim() || "";
+    }
 
-        detalles.push({
-            prestacion_id: prestacionId,
-            prestacion_codigo: prestacionCodigo,
-            prestacion_nombre: prestacionNombre,
-            medico_id: medicoId,
-            medico_texto: medicoId ? medicoTexto : "",
-            cantidad: cantidad,
-            honorarios_gastos: honorariosGastos,
-            honorarios_gastos_texto: honorariosGastos ? honorariosGastosTexto : "",
-            tipo_honorario: tipoHonorario,
-            tipo_honorario_texto: tipoHonorario ? tipoHonorarioTexto : "",
-            fecha_desde: fechaDesde,
-            fecha_hasta: fechaHasta,
-            autorizada: autorizada,
-            observaciones: observaciones,
+    function armarDetallesDesdeTabla() {
+        const detalles = [];
+        const errores = [];
+
+        document.querySelectorAll("#detallesBody tr.fila-detalle").forEach((fila, index) => {
+            if (!filaTieneDatos(fila)) {
+                return;
+            }
+
+            const prestacionId = fila.querySelector(".detalle_prestacion_id").value.trim();
+            const prestacionCodigo = fila.querySelector(".detalle_prestacion_codigo").value.trim();
+            const prestacionNombre = fila.querySelector(".detalle_prestacion_nombre").value.trim();
+            const medicoSelect = fila.querySelector(".detalle_medico_id");
+            const cantidad = fila.querySelector(".detalle_cantidad").value || 1;
+            const hgSelect = fila.querySelector(".detalle_honorarios_gastos");
+            const thSelect = fila.querySelector(".detalle_tipo_honorario");
+            const fechaDesde = fila.querySelector(".detalle_fecha_desde").value;
+            const fechaHasta = fila.querySelector(".detalle_fecha_hasta").value;
+            const autorizada = false;
+            const observaciones = "";
+
+            if (!prestacionId) {
+                errores.push(`Fila ${index + 1}: debe seleccionar una prestación válida o ingresar un código existente.`);
+            }
+
+            if (!cantidad || parseInt(cantidad) <= 0) {
+                errores.push(`Fila ${index + 1}: la cantidad debe ser mayor a cero.`);
+            }
+
+            detalles.push({
+                prestacion_id: prestacionId,
+                prestacion_codigo: prestacionCodigo,
+                prestacion_nombre: prestacionNombre,
+                medico_id: medicoSelect.value,
+                medico_texto: medicoSelect.value ? obtenerTextoSelect(medicoSelect) : "",
+                cantidad: cantidad,
+                honorarios_gastos: hgSelect.value,
+                honorarios_gastos_texto: hgSelect.value ? obtenerTextoSelect(hgSelect) : "",
+                tipo_honorario: thSelect.value,
+                tipo_honorario_texto: thSelect.value ? obtenerTextoSelect(thSelect) : "",
+                fecha_desde: fechaDesde,
+                fecha_hasta: fechaHasta,
+                autorizada: autorizada,
+                observaciones: observaciones,
+            });
         });
 
-        renderDetalles();
-        limpiarModalDetalle();
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById("modalAgregarDetalle"));
-        if (modal) {
-            modal.hide();
-        }
+        return { detalles, errores };
     }
 
-    function renderDetalles() {
-        const tbody = document.getElementById("detallesBody");
-        tbody.innerHTML = "";
-
-        if (detalles.length === 0) {
-            tbody.innerHTML = `
-                <tr id="emptyDetallesRow">
-                    <td colspan="9" class="empty-row">
-                        <i class="fas fa-circle-info"></i>
-                        Todavía no se cargaron detalles en esta orden.
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        detalles.forEach((detalle, index) => {
-            const tr = document.createElement("tr");
-
-            tr.innerHTML = `
-                <td>
-                    <strong>${escapeHtml(detalle.prestacion_codigo || "-")}</strong>
-                    <div>${escapeHtml(detalle.prestacion_nombre || "-")}</div>
-                    ${detalle.observaciones ? `<div class="mini-help">${escapeHtml(detalle.observaciones)}</div>` : ""}
-                </td>
-                <td>${escapeHtml(detalle.medico_texto || "-")}</td>
-                <td class="text-center"><strong>${escapeHtml(detalle.cantidad)}</strong></td>
-                <td>${escapeHtml(detalle.honorarios_gastos_texto || "-")}</td>
-                <td>${escapeHtml(detalle.tipo_honorario_texto || "-")}</td>
-                <td>${escapeHtml(detalle.fecha_desde || "-")}</td>
-                <td>${escapeHtml(detalle.fecha_hasta || "-")}</td>
-                <td>
-                    ${
-                        detalle.autorizada
-                        ? `<span class="badge-soft-success">Autorizado</span>`
-                        : `<span class="badge-soft-warning">Pendiente</span>`
-                    }
-                </td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarDetalle(${index});">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        });
-    }
-
-    function eliminarDetalle(index) {
-        detalles.splice(index, 1);
-        renderDetalles();
-    }
-
-    function limpiarModalDetalle() {
-        document.getElementById("detalle_prestacion_id").value = "";
-        document.getElementById("detalle_prestacion_codigo").value = "";
-        document.getElementById("detalle_prestacion_nombre").value = "";
-
-        document.getElementById("prestacionSeleccionadaBox").innerHTML = `
-            <i class="fas fa-info-circle"></i>
-            Todavía no se seleccionó ninguna prestación.
-        `;
-
-        document.getElementById("detalle_medico_id").value = "";
-        document.getElementById("detalle_cantidad").value = 1;
-        document.getElementById("detalle_honorarios_gastos").value = "";
-        document.getElementById("detalle_tipo_honorario").value = "";
-        document.getElementById("detalle_fecha_desde").value = "";
-        document.getElementById("detalle_fecha_hasta").value = "";
-        document.getElementById("detalle_autorizada").checked = false;
-        document.getElementById("detalle_observaciones").value = "";
-
+    function mostrarErrorDetalle(mensaje) {
         const errorBox = document.getElementById("detalleError");
+        errorBox.innerHTML = mensaje;
+        errorBox.classList.remove("d-none");
+        errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function limpiarErrorDetalle() {
+        const errorBox = document.getElementById("detalleError");
+        errorBox.innerHTML = "";
         errorBox.classList.add("d-none");
-        errorBox.innerText = "";
     }
 
     function guardarOrden() {
         const form = document.getElementById("formOrden");
+
+        limpiarErrorDetalle();
 
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
 
-        if (detalles.length === 0) {
+        const resultado = armarDetallesDesdeTabla();
+
+        if (resultado.detalles.length === 0) {
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalConfirmarGuardado"));
             if (modal) {
                 modal.hide();
             }
 
-            alert("Debe cargar al menos un detalle en la orden.");
+            mostrarErrorDetalle("Debe cargar al menos un detalle en la orden.");
             return;
         }
 
-        document.getElementById("detalles_json").value = JSON.stringify(detalles);
+        if (resultado.errores.length > 0) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById("modalConfirmarGuardado"));
+            if (modal) {
+                modal.hide();
+            }
+
+            mostrarErrorDetalle(resultado.errores.map(error => `<div>${escapeHtml(error)}</div>`).join(""));
+            return;
+        }
+
+        document.getElementById("detalles_json").value = JSON.stringify(resultado.detalles);
         form.submit();
     }
 
@@ -1032,6 +1033,43 @@
         const btnBuscarPrestacion = document.getElementById("btnBuscarPrestacion");
         const buscarPrestacionInput = document.getElementById("buscarPrestacionInput");
         const btnCargarMasPrestaciones = document.getElementById("btnCargarMasPrestaciones");
+        const btnAgregarFilaDetalle = document.getElementById("btnAgregarFilaDetalle");
+        const tablaDetalles = document.getElementById("tablaDetallesOrden");
+
+        btnAgregarFilaDetalle.addEventListener("click", agregarFilaDetalle);
+
+        tablaDetalles.addEventListener("click", function (e) {
+            const btnBuscar = e.target.closest(".btnBuscarPrestacionFila");
+            if (btnBuscar) {
+                filaActualPrestacion = btnBuscar.closest("tr.fila-detalle");
+                const codigo = filaActualPrestacion.querySelector(".detalle_prestacion_codigo").value.trim();
+                buscarPrestacionInput.value = codigo;
+                return;
+            }
+
+            const btnEliminar = e.target.closest(".eliminarFilaDetalle");
+            if (btnEliminar) {
+                eliminarFilaDetalle(btnEliminar.closest("tr.fila-detalle"));
+            }
+        });
+
+        tablaDetalles.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && e.target.classList.contains("detalle_prestacion_codigo")) {
+                e.preventDefault();
+                filaActualPrestacion = e.target.closest("tr.fila-detalle");
+                buscarPrestacionInput.value = e.target.value.trim();
+                new bootstrap.Modal(document.getElementById("modalBuscarPrestacion")).show();
+                if (buscarPrestacionInput.value.length >= 2) {
+                    buscarPrestaciones(true);
+                }
+            }
+        });
+
+        tablaDetalles.addEventListener("blur", function (e) {
+            if (e.target.classList.contains("detalle_prestacion_codigo")) {
+                buscarPrestacionPorCodigoFila(e.target.closest("tr.fila-detalle"));
+            }
+        }, true);
 
         btnBuscarPrestacion.addEventListener("click", function () {
             buscarPrestaciones(true);
@@ -1051,9 +1089,14 @@
             }
         });
 
-        document.getElementById("modalAgregarDetalle").addEventListener("hidden.bs.modal", function () {
-            document.body.classList.add("modal-open");
+        document.getElementById("modalBuscarPrestacion").addEventListener("shown.bs.modal", function () {
+            buscarPrestacionInput.focus();
+            if (buscarPrestacionInput.value.trim().length >= 2) {
+                buscarPrestaciones(true);
+            }
         });
+
+        actualizarNumeracionFilas();
     });
 </script>
 

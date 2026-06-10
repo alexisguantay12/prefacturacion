@@ -10,6 +10,7 @@ class Preingreso(BaseAbstractWithUser):
         ("pendiente", "Pendiente"),
         ("en_gestion", "En gestión"),
         ("ingresado", "Ingresado"),
+        ("cerrado", "Cerrado"),
         ("anulado", "Anulado"),
         ("vencido", "Vencido"),
     ]

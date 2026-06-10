@@ -1,0 +1,800 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.45rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.92rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .section-title-left {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .section-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .section-body {
+        padding: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.9rem;
+        padding: 0.62rem 0.8rem;
+        background: #ffffff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1d7fbf;
+        box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+        z-index: 10;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .btn-sm-custom {
+        padding: 0.52rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-xl {
+        max-width: 1050px;
+    }
+
+    .mini-help {
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    .selected-box {
+        background: #f8fbff;
+        border: 1px dashed #b8c7dc;
+        border-radius: 14px;
+        padding: 0.7rem 0.9rem;
+        color: #526179;
+        font-size: 0.86rem;
+    }
+
+    .empty-row {
+        padding: 2rem !important;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    .preingreso-table thead th {
+        font-size: 0.8rem;
+        color: #374151;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .preingreso-table tbody td {
+        font-size: 0.88rem;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-calendar-check"></i>
+                    Nuevo Ingreso Programado
+                </h2>
+                <p>
+                    Seleccione un preingreso pendiente o en gestión, complete fecha de ingreso y número de episodio.
+                </p>
+            </div>
+
+            <a href="{% url 'gestion_app:lista_ingresos' %}" class="btn btn-outline-secondary btn-sm-custom">
+                <i class="fas fa-arrow-left"></i> Volver al listado
+            </a>
+        </div>
+    </div>
+
+    <form method="post" id="formAgregarIngresoProgramado">
+        {% csrf_token %}
+
+        <input type="hidden" name="preingreso_id" id="preingreso_id" required>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">1</span>
+                    Selección de preingreso
+                </div>
+
+                <button type="button"
+                        class="btn btn-primary btn-sm-custom"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalBuscarPreingreso">
+                    <i class="fas fa-search"></i> Buscar preingreso
+                </button>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">N° preingreso</label>
+                        <input type="text" id="preingreso_numero_mostrar" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            Paciente <span class="required-mark">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="text"
+                                   id="paciente_nombre"
+                                   class="form-control"
+                                   placeholder="Seleccione un preingreso..."
+                                   readonly>
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalBuscarPreingreso">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="mini-help mt-1">
+                            Busque por número de preingreso, DNI, apellido o nombre.
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+                        <input type="text" id="paciente_dni" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Estado</label>
+                        <input type="text" id="preingreso_estado" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div id="preingresoSeleccionadoBox" class="selected-box">
+                            <i class="fas fa-info-circle"></i>
+                            Todavía no se seleccionó ningún preingreso.
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            Obra social <span class="required-mark">*</span>
+                        </label>
+                        <select name="obra_social" id="obra_social" class="form-select" required>
+                            <option value="">Seleccione una obra social...</option>
+                            {% for obra in obras_sociales %}
+                                <option value="{{ obra.id }}">{{ obra.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Plan</label>
+                        <select name="plan" id="plan" class="form-select">
+                            <option value="">Seleccione un plan...</option>
+                            {% for plan in planes %}
+                                <option value="{{ plan.id }}">
+                                    {{ plan.nombre }}
+                                    {% if plan.obra_social %}
+                                        - {{ plan.obra_social.nombre }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">N° afiliado</label>
+                        <input type="text"
+                               name="numero_afiliado"
+                               id="numero_afiliado"
+                               class="form-control">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">2</span>
+                    Datos del ingreso
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            N° episodio <span class="required-mark">*</span>
+                        </label>
+                        <input type="text"
+                               name="numero"
+                               id="numero"
+                               class="form-control"
+                               placeholder="Ej: 123456"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Fecha de ingreso <span class="required-mark">*</span>
+                        </label>
+                        <input type="date"
+                               name="fecha_ingreso"
+                               id="fecha_ingreso"
+                               class="form-control"
+                               value="{{ fecha_hoy|date:'Y-m-d' }}"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Servicio</label>
+                        <select name="servicio" id="servicio" class="form-select">
+                            <option value="">Seleccione un servicio...</option>
+                            {% for servicio in servicios %}
+                                <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Médico</label>
+                        <select name="medico" id="medico" class="form-select">
+                            <option value="">Seleccione un médico...</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}">
+                                    {{ medico.apellido }}, {{ medico.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Origen del paciente</label>
+                        <select name="origen_paciente" id="origen_paciente" class="form-select">
+                            <option value="domicilio">Domicilio</option>
+                            <option value="guardia">Guardia</option>
+                            <option value="consultorio">Consultorio</option>
+                            <option value="derivacion">Derivación</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Prioridad</label>
+                        <select name="prioridad" id="prioridad" class="form-select">
+                            <option value="normal">Normal</option>
+                            <option value="urgente">Urgente</option>
+                            <option value="programado" selected>Programado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Diagnóstico</label>
+                        <textarea name="diagnostico"
+                                  id="diagnostico"
+                                  class="form-control"
+                                  rows="2"></textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">3</span>
+                    Contacto responsable
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Nombre y apellido</label>
+                        <input type="text"
+                               name="contacto_nombre"
+                               id="contacto_nombre"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+                        <input type="text"
+                               name="contacto_dni"
+                               id="contacto_dni"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Parentesco</label>
+                        <input type="text"
+                               name="contacto_parentesco"
+                               id="contacto_parentesco"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text"
+                               name="contacto_telefono"
+                               id="contacto_telefono"
+                               class="form-control">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">4</span>
+                    Observaciones
+                </div>
+            </div>
+
+            <div class="section-body">
+                <label class="form-label">Observaciones adicionales</label>
+                <textarea name="observaciones"
+                          id="observaciones"
+                          class="form-control"
+                          rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="{% url 'gestion_app:lista_ingresos' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalGuardarIngresoProgramado">
+                <i class="fas fa-save"></i> Guardar ingreso programado
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="modal fade" id="modalBuscarPreingreso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search text-primary"></i>
+                    Buscar preingreso
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-10">
+                        <input type="text"
+                               id="buscarPreingresoInput"
+                               class="form-control"
+                               placeholder="Buscar por N° preingreso, DNI, apellido o nombre...">
+                        <div class="mini-help mt-1">
+                            Se muestran solo preingresos que no estén ingresados ni cerrados.
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-grid align-self-start">
+                        <button type="button" class="btn btn-primary" id="btnBuscarPreingreso">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="preingresosResultadoInfo" class="text-muted small mb-2">
+                    Realice una búsqueda para comenzar.
+                </div>
+
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-sm table-hover align-middle mb-0 preingreso-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>N° preingreso</th>
+                                <th>Paciente</th>
+                                <th>DNI</th>
+                                <th>Fecha probable</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preingresosResultadoBody">
+                            <tr>
+                                <td colspan="6" class="empty-row">
+                                    <i class="fas fa-magnifying-glass"></i>
+                                    Busque un preingreso.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-grid mt-3">
+                    <button type="button"
+                            id="btnCargarMasPreingresos"
+                            class="btn btn-outline-primary d-none">
+                        <i class="fas fa-chevron-down"></i> Cargar 15 más
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalGuardarIngresoProgramado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-primary"></i>
+                    Confirmar ingreso programado
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Desea registrar este preingreso como ingresado?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        onclick="validarYEnviarIngresoProgramado();">
+                    <i class="fas fa-save"></i> Sí, guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let preingresoPage = 1;
+    let preingresoQuery = "";
+    let preingresoHasNext = false;
+
+    const buscarPreingresosUrl = "{% url 'gestion_app:buscar_preingresos_ajax' %}";
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function setSelectValue(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.value = value || "";
+        }
+    }
+
+    function seleccionarPreingreso(preingreso) {
+        const nombreCompleto = `${preingreso.paciente_apellido || ""}, ${preingreso.paciente_nombre || ""}`.trim();
+
+        document.getElementById("preingreso_id").value = preingreso.id;
+        document.getElementById("preingreso_numero_mostrar").value = preingreso.numero || "-";
+        document.getElementById("paciente_nombre").value = nombreCompleto;
+        document.getElementById("paciente_dni").value = preingreso.paciente_dni || "-";
+        document.getElementById("preingreso_estado").value = preingreso.estado || "-";
+
+        setSelectValue("obra_social", preingreso.obra_social_id);
+        setSelectValue("plan", preingreso.plan_id);
+
+        document.getElementById("numero_afiliado").value = preingreso.numero_afiliado || "";
+
+        setSelectValue("servicio", preingreso.servicio_id);
+        setSelectValue("medico", preingreso.medico_id);
+        setSelectValue("origen_paciente", preingreso.origen_paciente);
+        setSelectValue("prioridad", preingreso.prioridad || "programado");
+
+        document.getElementById("diagnostico").value = preingreso.diagnostico || "";
+
+        document.getElementById("contacto_nombre").value = preingreso.contacto_nombre || "";
+        document.getElementById("contacto_dni").value = preingreso.contacto_dni || "";
+        document.getElementById("contacto_parentesco").value = preingreso.contacto_parentesco || "";
+        document.getElementById("contacto_telefono").value = preingreso.contacto_telefono || "";
+
+        document.getElementById("observaciones").value = preingreso.observaciones || "";
+
+        document.getElementById("preingresoSeleccionadoBox").innerHTML = `
+            <i class="fas fa-check-circle text-success"></i>
+            Preingreso seleccionado:
+            <strong>${escapeHtml(preingreso.numero || "-")}</strong>
+            · Paciente:
+            <strong>${escapeHtml(nombreCompleto)}</strong>
+            · DNI:
+            <strong>${escapeHtml(preingreso.paciente_dni || "-")}</strong>
+        `;
+
+        const modalElement = document.getElementById("modalBuscarPreingreso");
+        const modal = bootstrap.Modal.getInstance(modalElement);
+
+        if (modal) {
+            modal.hide();
+        }
+    }
+
+    function renderPreingresos(preingresos, append = false) {
+        const tbody = document.getElementById("preingresosResultadoBody");
+
+        if (!append) {
+            tbody.innerHTML = "";
+        }
+
+        if (preingresos.length === 0 && !append) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-row">
+                        <i class="fas fa-circle-info"></i>
+                        No se encontraron preingresos disponibles.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        preingresos.forEach(preingreso => {
+            const tr = document.createElement("tr");
+
+            const nombreCompleto = `${preingreso.paciente_apellido || ""}, ${preingreso.paciente_nombre || ""}`.trim();
+
+            tr.innerHTML = `
+                <td><strong>${escapeHtml(preingreso.numero || "-")}</strong></td>
+                <td>${escapeHtml(nombreCompleto)}</td>
+                <td>${escapeHtml(preingreso.paciente_dni || "-")}</td>
+                <td>${escapeHtml(preingreso.fecha_probable_ingreso || "-")}</td>
+                <td>${escapeHtml(preingreso.estado || "-")}</td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-primary">
+                        <i class="fas fa-check"></i> Seleccionar
+                    </button>
+                </td>
+            `;
+
+            tr.querySelector("button").addEventListener("click", function () {
+                seleccionarPreingreso(preingreso);
+            });
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function buscarPreingresos(reset = true) {
+        const input = document.getElementById("buscarPreingresoInput");
+        const info = document.getElementById("preingresosResultadoInfo");
+        const btnMas = document.getElementById("btnCargarMasPreingresos");
+        const tbody = document.getElementById("preingresosResultadoBody");
+
+        if (reset) {
+            preingresoPage = 1;
+            preingresoQuery = input.value.trim();
+        }
+
+        info.innerText = "Buscando preingresos...";
+
+        if (reset) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-row">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Buscando...
+                    </td>
+                </tr>
+            `;
+        }
+
+        fetch(`${buscarPreingresosUrl}?q=${encodeURIComponent(preingresoQuery)}&page=${preingresoPage}`)
+            .then(response => response.json())
+            .then(data => {
+                renderPreingresos(data.results || [], !reset);
+
+                preingresoHasNext = data.has_next;
+
+                if (preingresoHasNext) {
+                    btnMas.classList.remove("d-none");
+                } else {
+                    btnMas.classList.add("d-none");
+                }
+
+                if ((data.results || []).length === 0 && reset) {
+                    info.innerText = "No se encontraron preingresos disponibles.";
+                } else {
+                    info.innerText = "Resultados encontrados.";
+                }
+            })
+            .catch(() => {
+                info.innerText = "Ocurrió un error al buscar preingresos.";
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-row text-danger">
+                            No se pudo realizar la búsqueda.
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+
+    function validarYEnviarIngresoProgramado() {
+        const preingresoId = document.getElementById("preingreso_id").value;
+        const form = document.getElementById("formAgregarIngresoProgramado");
+
+        if (!preingresoId) {
+            const modalGuardar = bootstrap.Modal.getInstance(document.getElementById("modalGuardarIngresoProgramado"));
+            if (modalGuardar) {
+                modalGuardar.hide();
+            }
+
+            const modalPreingreso = new bootstrap.Modal(document.getElementById("modalBuscarPreingreso"));
+            modalPreingreso.show();
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        form.submit();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnBuscarPreingreso = document.getElementById("btnBuscarPreingreso");
+        const buscarPreingresoInput = document.getElementById("buscarPreingresoInput");
+        const btnCargarMasPreingresos = document.getElementById("btnCargarMasPreingresos");
+
+        btnBuscarPreingreso.addEventListener("click", function () {
+            buscarPreingresos(true);
+        });
+
+        buscarPreingresoInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                buscarPreingresos(true);
+            }
+        });
+
+        btnCargarMasPreingresos.addEventListener("click", function () {
+            if (preingresoHasNext) {
+                preingresoPage += 1;
+                buscarPreingresos(false);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

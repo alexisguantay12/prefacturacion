@@ -49,6 +49,8 @@ def lista_preingresos(request):
 
     if estado:
         preingresos = preingresos.filter(estado=estado)
+    
+    preingresos= preingresos.exclude(estado__in=['ingresado','cerrado'])
 
     context = {
         "preingresos": preingresos,
@@ -403,6 +405,53 @@ def buscar_prestaciones_ajax(request):
         "has_next": end < total,
     })
 
+def buscar_prestacion_por_codigo_ajax(request):
+    codigo = request.GET.get("codigo", "").strip()
+
+    prestacion = Prestacion.objects.filter(codigo__iexact=codigo).first()
+    print(codigo)
+    print(prestacion)
+    if not prestacion:
+        return JsonResponse({"found": False})
+
+    return JsonResponse({
+        "found": True,
+        "id": prestacion.id,
+        "codigo": prestacion.codigo,
+        "nombre": prestacion.nombre,
+    })
+
+
+
+def detalle_orden(request, orden_id):
+    orden = get_object_or_404(
+        OrdenAutorizacion.objects.select_related(
+            "preingreso",
+            "preingreso__paciente",
+            "preingreso__obra_social",
+            "preingreso__plan",
+        ),
+        pk=orden_id
+    )
+
+    detalles = (
+        orden.detalles
+        .select_related("prestacion", "medico")
+        .all()
+        .order_by("id")
+    )
+
+    return render(
+        request,
+        "gestion/orden/detalle_orden.html",
+        {
+            "orden": orden,
+            "detalles": detalles,
+        }
+    )
+
+
+
 
 def agregar_orden_preingreso(request, preingreso_id):
     preingreso = get_object_or_404(
@@ -492,4 +541,270 @@ def agregar_orden_preingreso(request, preingreso_id):
         "tipos_orden": OrdenAutorizacion.TIPOS,
         "honorarios_gastos": DetalleOrden.HONORARIOS_GASTOS,
         "tipos_honorario": DetalleOrden.TIPOS_HONORARIO,
+    })
+
+
+
+
+
+def lista_ingresos(request):
+    query = request.GET.get("q", "").strip()  
+    ingresos = (
+        Preingreso.objects
+        .select_related(
+            "paciente",
+            "obra_social",
+            "plan",
+            "medico",
+            "servicio",
+        )
+        .annotate(
+            total_ordenes=Count("ordenes", distinct=True),
+        )
+        .order_by("-fecha_ingreso",  "-id")
+    )
+
+    if query:
+        ingresos = ingresos.filter(
+            Q(numero__icontains=query) |
+            Q(paciente__apellido__icontains=query) |
+            Q(paciente__nombre__icontains=query) |
+            Q(paciente__dni__icontains=query) |
+            Q(obra_social__nombre__icontains=query)
+        )
+    print(ingresos)
+
+    ingresos = ingresos.filter(estado__in=['ingresado', 'cerrado'])
+    print(ingresos)
+    return render(request, "gestion/ingreso/lista_ingresos.html", {
+        "ingresos": ingresos,
+        "query": query, 
+        "estados": Preingreso.ESTADOS,
+    })
+
+ 
+#####################----INGRESOS----##################
+
+def agregar_ingreso(request):
+    obras_sociales = ObraSocial.objects.all().order_by("nombre")
+    medicos = Medico.objects.all().order_by("apellido", "nombre")
+    servicios = Servicio.objects.all().order_by("nombre")
+    planes = Plan.objects.all().order_by("obra_social__nombre", "nombre")
+
+    if request.method == "POST":
+        paciente_id = request.POST.get("paciente")
+        obra_social_id = request.POST.get("obra_social")
+        plan_id = request.POST.get("plan") or None
+        medico_id = request.POST.get("medico") or None
+        servicio_id = request.POST.get("servicio") or None
+
+        numero = request.POST.get("numero", "").strip()
+        fecha_ingreso = request.POST.get("fecha_ingreso") or None
+        numero_afiliado = request.POST.get("numero_afiliado", "").strip()
+        diagnostico = request.POST.get("diagnostico", "").strip()
+        origen_paciente = request.POST.get("origen_paciente") or "domicilio"
+        prioridad = request.POST.get("prioridad") or "normal"
+
+        contacto_nombre = request.POST.get("contacto_nombre", "").strip()
+        contacto_dni = request.POST.get("contacto_dni", "").strip()
+        contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
+        contacto_telefono = request.POST.get("contacto_telefono", "").strip()
+        observaciones = request.POST.get("observaciones", "").strip()
+
+        if not paciente_id:
+            messages.error(request, "Debe seleccionar un paciente.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        if not obra_social_id:
+            messages.error(request, "Debe seleccionar una obra social.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        if not numero:
+            messages.error(request, "Debe indicar el número de episodio.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        if Preingreso.objects.filter(numero=numero).exists():
+            messages.error(request, "Ya existe un ingreso con ese número de episodio.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        if not fecha_ingreso:
+            messages.error(request, "Debe indicar la fecha de ingreso.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        paciente = Paciente.objects.filter(id=paciente_id).first()
+        obra_social = ObraSocial.objects.filter(id=obra_social_id).first()
+
+        if not paciente:
+            messages.error(request, "El paciente seleccionado no existe.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        if not obra_social:
+            messages.error(request, "La obra social seleccionada no existe.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
+        medico = Medico.objects.filter(id=medico_id).first() if medico_id else None
+        servicio = Servicio.objects.filter(id=servicio_id).first() if servicio_id else None
+
+        if plan and plan.obra_social_id != obra_social.id:
+            messages.error(request, "El plan seleccionado no corresponde a la obra social indicada.")
+            return redirect("gestion_app:agregar_ingreso")
+
+        ingreso = Preingreso.objects.create(
+            paciente=paciente,
+            obra_social=obra_social,
+            plan=plan,
+            numero_afiliado=numero_afiliado or None,
+            medico=medico,
+            servicio=servicio,
+            numero=numero,
+            fecha_ingreso=fecha_ingreso,
+            fecha_probable_ingreso=None,
+            diagnostico=diagnostico or None,
+            origen_paciente=origen_paciente,
+            prioridad=prioridad,
+            contacto_nombre=contacto_nombre or None,
+            contacto_dni=contacto_dni or None,
+            contacto_parentesco=contacto_parentesco or None,
+            contacto_telefono=contacto_telefono or None,
+            observaciones=observaciones or None,
+            estado="ingresado",
+        )
+        print(ingreso)
+        messages.success(request, f"El ingreso #{ingreso.numero} fue creado correctamente.")
+        return redirect("gestion_app:lista_ingresos")
+
+    return render(request, "gestion/ingreso/agregar_ingreso.html", {
+        "obras_sociales": obras_sociales,
+        "planes": planes,
+        "medicos": medicos,
+        "servicios": servicios, 
+    })
+
+
+
+
+
+
+
+
+def buscar_preingresos_ajax(request):
+    q = request.GET.get("q", "").strip()
+    page = request.GET.get("page", 1)
+
+    preingresos = Preingreso.objects.select_related(
+        "paciente",
+        "obra_social",
+        "plan",
+        "medico",
+        "servicio",
+    ).exclude(
+        estado__in=["ingresado", "cerrado"]
+    ).order_by("-id")
+
+    if q:
+        preingresos = preingresos.filter(
+            Q(numero__icontains=q) |
+            Q(paciente__apellido__icontains=q) |
+            Q(paciente__nombre__icontains=q) |
+            Q(paciente__dni__icontains=q)
+        )
+
+    paginator = Paginator(preingresos, 15)
+    page_obj = paginator.get_page(page)
+
+    results = []
+
+    for p in page_obj:
+        paciente = p.paciente
+
+        results.append({
+            "id": p.id,
+            "numero": p.numero or "",
+            "estado": p.get_estado_display(),
+            "estado_raw": p.estado,
+
+            "paciente_id": paciente.id,
+            "paciente_nombre": paciente.nombre or "",
+            "paciente_apellido": paciente.apellido or "",
+            "paciente_dni": paciente.dni or "",
+            "paciente_fecha_nacimiento": paciente.fecha_nacimiento.strftime("%Y-%m-%d") if paciente.fecha_nacimiento else "",
+            "paciente_telefono": getattr(paciente, "telefono", "") or "",
+
+            "obra_social_id": p.obra_social_id or "",
+            "plan_id": p.plan_id or "",
+            "numero_afiliado": p.numero_afiliado or "",
+
+            "medico_id": p.medico_id or "",
+            "servicio_id": p.servicio_id or "",
+
+            "fecha_probable_ingreso": p.fecha_probable_ingreso.strftime("%Y-%m-%d") if p.fecha_probable_ingreso else "",
+            "diagnostico": p.diagnostico or "",
+            "origen_paciente": p.origen_paciente or "domicilio",
+            "prioridad": p.prioridad or "programado",
+
+            "contacto_nombre": p.contacto_nombre or "",
+            "contacto_dni": p.contacto_dni or "",
+            "contacto_telefono": p.contacto_telefono or "",
+            "contacto_parentesco": p.contacto_parentesco or "",
+
+            "observaciones": p.observaciones or "",
+        })
+
+    return JsonResponse({
+        "results": results,
+        "has_next": page_obj.has_next(),
+    })
+
+
+def agregar_ingreso_programado(request):
+    obras_sociales = ObraSocial.objects.all().order_by("nombre")
+    medicos = Medico.objects.all().order_by("apellido", "nombre")
+    servicios = Servicio.objects.all().order_by("nombre")
+    planes = Plan.objects.all().order_by("obra_social__nombre", "nombre")
+
+    if request.method == "POST":
+        preingreso_id = request.POST.get("preingreso_id")
+
+        preingreso = get_object_or_404(
+            Preingreso,
+            id=preingreso_id
+        )
+
+        if preingreso.estado in ["ingresado", "cerrado"]:
+            messages.error(request, "Este preingreso ya no está disponible para ingresar.")
+            return redirect("gestion_app:agregar_ingreso_programado")
+
+        preingreso.obra_social_id = request.POST.get("obra_social")
+        preingreso.plan_id = request.POST.get("plan") or None
+        preingreso.numero_afiliado = request.POST.get("numero_afiliado", "").strip()
+
+        preingreso.numero = request.POST.get("numero", "").strip()
+        preingreso.fecha_ingreso = request.POST.get("fecha_ingreso") or None
+
+        preingreso.servicio_id = request.POST.get("servicio") or None
+        preingreso.medico_id = request.POST.get("medico") or None
+
+        preingreso.origen_paciente = request.POST.get("origen_paciente") or "domicilio"
+        preingreso.prioridad = request.POST.get("prioridad") or "programado"
+        preingreso.diagnostico = request.POST.get("diagnostico", "").strip()
+
+        preingreso.contacto_nombre = request.POST.get("contacto_nombre", "").strip()
+        preingreso.contacto_dni = request.POST.get("contacto_dni", "").strip()
+        preingreso.contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
+        preingreso.contacto_telefono = request.POST.get("contacto_telefono", "").strip()
+
+        preingreso.observaciones = request.POST.get("observaciones", "").strip()
+
+        preingreso.estado = "ingresado"
+        preingreso.save()
+
+        messages.success(request, "Ingreso programado registrado correctamente.")
+        return redirect("gestion_app:lista_ingresos")
+
+    return render(request, "gestion/ingreso/agregar_ingreso_programado.html", {
+        "obras_sociales": obras_sociales,
+        "planes": planes,
+        "medicos": medicos,
+        "servicios": servicios, 
     })

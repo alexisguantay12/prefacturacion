@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .orden-hero {
+        background: linear-gradient(135deg, #0f4c81 0%, #1769aa 100%);
+        color: #fff;
+        border-radius: 18px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.9rem;
+        box-shadow: 0 10px 26px rgba(15, 76, 129, 0.22);
+    }
+
+    .orden-hero h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 900;
+    }
+
+    .orden-hero p {
+        margin: 0.25rem 0 0;
+        opacity: 0.9;
+        font-size: 0.86rem;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .card-pro {
+        background: #fff;
+        border: 1px solid #d8e0ea;
+        border-radius: 16px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+        margin-bottom: 0.9rem;
+    }
+
+    .card-pro-header {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid #e5eaf1;
+        background: #fbfdff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .card-pro-title {
+        font-weight: 900;
+        color: #1f2937;
+        margin: 0;
+        font-size: 0.98rem;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .card-pro-title i {
+        color: #0f4c81;
+    }
+
+    .card-pro-body {
+        padding: 1rem;
+    }
+
+    .compact-summary {
+        margin-bottom: 0.9rem;
+    }
+
+    .patient-name {
+        font-size: 1.14rem;
+        font-weight: 900;
+        color: #111827;
+        line-height: 1.2;
+    }
+
+    .patient-subtitle {
+        font-size: 0.84rem;
+        color: #526179;
+        margin-top: 0.15rem;
+    }
+
+    .badge-status {
+        border-radius: 999px;
+        padding: 0.42rem 0.7rem;
+        font-size: 0.76rem;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+    }
+
+    .badge-status-success {
+        background: #eafaf0;
+        color: #16803c;
+        border: 1px solid #bce7ca;
+    }
+
+    .badge-status-warning {
+        background: #fff8db;
+        color: #7a5b00;
+        border: 1px solid #ffe08a;
+    }
+
+    .compact-info-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.65rem;
+    }
+
+    .compact-info-grid div {
+        background: #f8fbff;
+        border: 1px solid #dbe6f3;
+        border-radius: 12px;
+        padding: 0.6rem 0.7rem;
+        min-height: 58px;
+    }
+
+    .compact-info-grid span {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 900;
+        color: #607086;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.15rem;
+    }
+
+    .compact-info-grid strong {
+        font-size: 0.86rem;
+        color: #111827;
+        word-break: break-word;
+    }
+
+    .observacion-box {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #7c5a00;
+        border-radius: 12px;
+        padding: 0.7rem 0.85rem;
+        font-size: 0.86rem;
+    }
+
+    .detalle-card {
+        border: 1px solid #c8d7e8;
+        box-shadow: 0 12px 30px rgba(15, 76, 129, 0.10);
+    }
+
+    .detalle-card .card-pro-header {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        padding: 1rem 1.1rem;
+    }
+
+    .detalle-count {
+        background: #e8f2ff;
+        color: #0f4c81;
+        border: 1px solid #b9d7ff;
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 900;
+    }
+
+    .detalle-table thead th {
+        background: #f1f5f9;
+        color: #374151;
+        font-size: 0.82rem;
+        font-weight: 900;
+        white-space: nowrap;
+        border-bottom: 1px solid #cbd5e1;
+        padding: 0.85rem 0.75rem;
+    }
+
+    .detalle-table tbody td {
+        font-size: 0.9rem;
+        vertical-align: middle;
+        padding: 0.8rem 0.75rem;
+    }
+
+    .detalle-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .prestacion-title {
+        font-weight: 900;
+        color: #111827;
+    }
+
+    .prestacion-code {
+        font-size: 0.76rem;
+        color: #526179;
+        font-weight: 800;
+    }
+
+    .medico-muted,
+    .empty-muted {
+        color: #6b7280;
+    }
+
+    .cantidad-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 28px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #1d4ed8;
+        font-weight: 900;
+    }
+
+    .empty-state {
+        padding: 2rem;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    @media (max-width: 992px) {
+        .orden-hero .d-flex {
+            flex-direction: column;
+        }
+
+        .compact-info-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 576px) {
+        .compact-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="orden-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-file-medical-alt me-2"></i>
+                    Orden de Autorización #{{ orden.id }}
+                </h2>
+                <p>
+                    Consulta de orden vinculada al preingreso.
+                </p>
+            </div>
+
+            <div class="hero-actions">
+                <a href="{% url 'gestion_app:detalle_preingreso' orden.preingreso.id %}"
+                   class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left"></i> Volver al preingreso
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-pro compact-summary">
+        <div class="card-pro-body">
+
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                <div>
+                    <div class="patient-name">
+                        {{ orden.preingreso.paciente.apellido }},
+                        {{ orden.preingreso.paciente.nombre }}
+                    </div>
+
+                    <div class="patient-subtitle">
+                        DNI {{ orden.preingreso.paciente.dni|default:"-" }}
+
+                        {% if orden.preingreso.obra_social %}
+                            · {{ orden.preingreso.obra_social.nombre }}
+                        {% endif %}
+
+                        {% if orden.preingreso.plan %}
+                            · Plan {{ orden.preingreso.plan.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    {% if orden.autorizada %}
+                        <span class="badge-status badge-status-success">
+                            <i class="fas fa-check-circle"></i> Orden autorizada
+                        </span>
+                    {% else %}
+                        <span class="badge-status badge-status-warning">
+                            <i class="fas fa-clock"></i> Orden pendiente
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr class="my-3">
+
+            <div class="compact-info-grid">
+                <div>
+                    <span>Tipo</span>
+                    <strong>{{ orden.get_tipo_display|default:"-" }}</strong>
+                </div>
+
+                <div>
+                    <span>Fecha</span>
+                    <strong>{{ orden.fecha|date:"d/m/Y"|default:"-" }}</strong>
+                </div>
+
+                <div>
+                    <span>Cupón / Orden</span>
+                    <strong>{{ orden.numero_cupon|default:"-" }}</strong>
+                </div>
+
+                <div>
+                    <span>Preingreso</span>
+                    <strong>#{{ orden.preingreso.id }}</strong>
+                </div>
+
+                <div>
+                    <span>Ingreso probable</span>
+                    <strong>
+                        {{ orden.preingreso.fecha_probable_ingreso|date:"d/m/Y"|default:"-" }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Detalles</span>
+                    <strong>{{ detalles|length }}</strong>
+                </div>
+            </div>
+
+            {% if orden.observaciones %}
+                <div class="observacion-box mt-3">
+                    <i class="fas fa-comment-dots me-1"></i>
+                    {{ orden.observaciones }}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="card-pro detalle-card">
+        <div class="card-pro-header">
+            <h5 class="card-pro-title">
+                <i class="fas fa-list-check"></i>
+                Detalles de la orden
+            </h5>
+
+            <span class="detalle-count">
+                {{ detalles|length }} detalle{% if detalles|length != 1 %}s{% endif %}
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 detalle-table">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 55px;">#</th>
+                        <th>Prestación</th>
+                        <th>Médico</th>
+                        <th class="text-center">Cantidad</th>
+                        <th>H/G</th>
+                        <th>Tipo honorario</th>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for detalle in detalles %}
+                        <tr>
+                            <td class="text-center">
+                                <strong>{{ forloop.counter }}</strong>
+                            </td>
+
+                            <td>
+                                <div class="prestacion-title">
+                                    {{ detalle.prestacion.nombre|default:"-" }}
+                                </div>
+
+                                <div class="prestacion-code">
+                                    Código: {{ detalle.prestacion.codigo|default:"-" }}
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if detalle.medico %}
+                                    {{ detalle.medico.apellido }},
+                                    {{ detalle.medico.nombre }}
+                                {% else %}
+                                    <span class="medico-muted">-</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="cantidad-pill">
+                                    {{ detalle.cantidad }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ detalle.get_honorarios_gastos_display|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ detalle.get_tipo_honorario_display|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ detalle.fecha_desde|date:"d/m/Y"|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ detalle.fecha_hasta|date:"d/m/Y"|default:"-" }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <i class="fas fa-circle-info"></i>
+                                Esta orden no tiene detalles cargados.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

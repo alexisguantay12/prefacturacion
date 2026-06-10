@@ -16,4 +16,10 @@ urlpatterns = [
     path("preingresos/<int:preingreso_id>/imprimir/",views.imprimir_preingreso,name="imprimir_preingreso"),
     path("preingresos/<int:preingreso_id>/ordenes/agregar/",views.agregar_orden_preingreso,name="agregar_orden_preingreso"),
     path("ajax/prestaciones/buscar/",views.buscar_prestaciones_ajax,name="buscar_prestaciones_ajax"),
+    path("prestaciones/buscar-por-codigo/",views.buscar_prestacion_por_codigo_ajax,name="buscar_prestacion_por_codigo_ajax"),
+    path("ordenes/<int:orden_id>/",views.detalle_orden,name="detalle_orden",),
+    path("ingresos/",views.lista_ingresos,name="lista_ingresos",),
+    path("ingresos/agregar_ingreso/",views.agregar_ingreso,name="agregar_ingreso",),
+    path("ingresos/programado/agregar/",views.agregar_ingreso_programado,name="agregar_ingreso_programado"),
+    path("ajax/buscar-preingresos/",views.buscar_preingresos_ajax,name="buscar_preingresos_ajax"),
 ]

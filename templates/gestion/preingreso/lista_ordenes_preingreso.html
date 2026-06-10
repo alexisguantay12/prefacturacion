@@ -1,34 +1,261 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.35rem;
+        font-weight: 900;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .page-title i {
+        color: #0f4c81;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 0.86rem;
+        margin-top: 0.2rem;
+    }
+
+    .patient-mini {
+        background: #f8fbff;
+        border: 1px solid #dbe6f3;
+        border-radius: 14px;
+        padding: 0.65rem 0.8rem;
+        margin-top: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        color: #374151;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .patient-mini i {
+        color: #0f4c81;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .table-card {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    .table-card-header {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid #e5eaf1;
+        background: #fbfdff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .table-card-title {
+        margin: 0;
+        font-size: 0.98rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .table-card-title i {
+        color: #0f4c81;
+    }
+
+    .table-count {
+        background: #e8f2ff;
+        color: #0f4c81;
+        border: 1px solid #b9d7ff;
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .table-ordenes {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.86rem;
+    }
+
+    .table-ordenes thead th {
+        background: #f1f5f9;
+        color: #374151;
+        font-size: 0.78rem;
+        font-weight: 900;
+        white-space: nowrap;
+        padding: 0.8rem 0.75rem;
+        border-bottom: 1px solid #cbd5e1;
+    }
+
+    .table-ordenes tbody td {
+        vertical-align: middle;
+        padding: 0.78rem 0.75rem;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .table-ordenes tbody tr:hover {
+        background: inherit !important;
+        box-shadow: none !important;
+        cursor: default;
+    }
+
+    .order-id {
+        font-weight: 900;
+        color: #111827;
+    }
+
+    .order-type {
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .order-muted {
+        color: #6b7280;
+        font-size: 0.78rem;
+    }
+
+    .badge-detail {
+        background: #eef2ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        border-radius: 999px;
+        padding: 0.32rem 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+    }
+
+    .btn-action {
+        border-radius: 9px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.55rem;
+        font-weight: 800;
+    }
+
+    .actions-cell {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.4rem;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-actions .btn {
+            flex: 1;
+        }
+    }
+</style>
+
 <div class="container-fluid py-3">
+    <div class="page-wrap">
 
-    <div class="card shadow-sm border-0 rounded-4 mb-3">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-1 fw-bold">Órdenes del Preingreso #{{ preingreso.id }}</h5>
-                <small class="text-muted">
-                    {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }} - DNI {{ preingreso.paciente.dni }}
-                </small>
-            </div>
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="page-title">
+                        <i class="fas fa-file-medical"></i>
+                        Órdenes del Preingreso #{{ preingreso.id }}
+                    </h5>
 
-            <div class="d-flex gap-2">
-                <a href="{% url 'gestion_app:agregar_orden_preingreso' preingreso.id %}" class="btn btn-success btn-sm">
-                    <i class="bi bi-plus-circle"></i> Agregar orden
-                </a>
+                    <div class="page-subtitle">
+                        Gestión y consulta de órdenes asociadas al preingreso seleccionado.
+                    </div>
 
-                <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left"></i> Volver al detalle
-                </a>
+                    <div class="patient-mini">
+                        <i class="fas fa-user-injured"></i>
+                        <span>
+                            {{ preingreso.paciente.apellido }},
+                            {{ preingreso.paciente.nombre }}
+                            · DNI {{ preingreso.paciente.dni }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <a href="{% url 'gestion_app:agregar_orden_preingreso' preingreso.id %}"
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-plus-circle"></i> Agregar orden
+                    </a>
+
+                    <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Volver al detalle
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-0">
+        <div class="table-card">
+            <div class="table-card-header">
+                <h6 class="table-card-title">
+                    <i class="fas fa-list-check"></i>
+                    Listado de órdenes
+                </h6>
+
+                <span class="table-count">
+                    {{ ordenes|length }} orden{% if ordenes|length != 1 %}es{% endif %}
+                </span>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
+                <table class="table table-ordenes align-middle">
+                    <thead>
                         <tr>
                             <th class="ps-3">#</th>
                             <th>Fecha</th>
@@ -41,36 +268,78 @@
 
                     <tbody>
                         {% for orden in ordenes %}
-                        <tr>
-                            <td class="ps-3 fw-semibold">{{ orden.id }}</td>
-                            <td>{{ orden.fecha|default:"-" }}</td>
-                            <td>{{ orden.tipo }}</td>
-                            <td>{{ orden.nro_orden }}</td>
-                            <td>
-                                {{ orden.detalles.count }} prestación/es
-                            </td>
-                            <td class="text-end pe-3">
-                                <a href="#" class="btn btn-outline-primary btn-sm">
-                                    Ver
-                                </a>
-                                <a href="#" class="btn btn-outline-secondary btn-sm">
-                                    Imprimir
-                                </a>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="order-id">#{{ orden.id }}</span>
+                                </td>
+
+                                <td>
+                                    {% if orden.fecha %}
+                                        {{ orden.fecha|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="order-muted">Sin fecha</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="order-type">
+                                        {{ orden.get_tipo_display|default:orden.tipo }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if orden.nro_orden %}
+                                        {{ orden.nro_orden }}
+                                    {% elif orden.numero_cupon %}
+                                        {{ orden.numero_cupon }}
+                                    {% else %}
+                                        <span class="order-muted">Sin número</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="badge-detail">
+                                        <i class="fas fa-notes-medical"></i>
+                                        {{ orden.detalles.count }} prestación{% if orden.detalles.count != 1 %}es{% endif %}
+                                    </span>
+                                </td>
+
+                                <td class="text-end pe-3">
+                                    <div class="actions-cell">
+                                        <a href="{% url 'gestion_app:detalle_orden' orden.id %}"
+                                           class="btn btn-sm btn-outline-primary btn-action"
+                                           title="Ver orden">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <a href="#"
+                                           class="btn btn-sm btn-outline-secondary btn-action"
+                                           title="Imprimir orden">
+                                            <i class="fas fa-print"></i> Imprimir
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                Este preingreso todavía no tiene órdenes cargadas.
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open fa-2x d-block"></i>
+                                        <div class="fw-bold">Sin órdenes cargadas</div>
+                                        <div class="small">
+                                            Este preingreso todavía no tiene órdenes asociadas.
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
 
                 </table>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
+
 {% endblock %}
