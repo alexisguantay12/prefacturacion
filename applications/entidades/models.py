@@ -36,6 +36,7 @@ class Medico(BaseAbstractWithUser):
     nombre = models.CharField(max_length=120)
     apellido = models.CharField(max_length=120)
     numero_documento = models.CharField(max_length=20, blank=True, null=True)
+    firma_nombre = models.CharField(max_length=50, blank=True, null=True)
     matricula = models.CharField(max_length=50)
     servicio = models.ForeignKey(
         "Servicio",

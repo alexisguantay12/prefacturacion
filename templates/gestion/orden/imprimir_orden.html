@@ -1,0 +1,660 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Orden #{{ orden.id }}</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 6mm;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            color: #000;
+            margin: 0;
+            background: #fff;
+        }
+
+        .screen-actions {
+            max-width: 980px;
+            margin: 8px auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-print,
+        .btn-back {
+            border: 1px solid #000;
+            background: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #000;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-print {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+        .print-wrap {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .copia {
+            height: 136mm;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .contenido-principal {
+            flex: 1;
+        }
+
+        .linea-corte {
+            border-top: 1px dashed #000;
+            margin: 3mm 0;
+        }
+
+        .header-simple {
+            display: grid;
+            grid-template-columns: 70px 1fr 160px;
+            border: 1px solid #000;
+            margin-bottom: 4px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #000;
+            padding: 4px;
+        }
+
+        .logo-box img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+        }
+
+        .title-center {
+            text-align: center;
+            padding-top: 7px;
+            font-size: 10px;
+            border-right: 1px solid #000;
+            text-transform: uppercase;
+        }
+
+        .title-center strong {
+            display: block;
+            font-size: 16px;
+            margin-top: 4px;
+            letter-spacing: 0.4px;
+        }
+
+        .order-data {
+            font-size: 9px;
+        }
+
+        .order-data div {
+            padding: 3px 5px;
+            border-bottom: 1px solid #000;
+            min-height: 13px;
+        }
+
+        .order-data div:last-child {
+            border-bottom: none;
+        }
+
+        .order-data b {
+            display: inline-block;
+            width: 45px;
+        }
+
+        .datos-lineales {
+            border: 1px solid #000;
+            padding: 5px 6px;
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 5px 20px;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .datos-lineales div {
+            min-height: 13px;
+        }
+
+        .diagnostico-simple {
+            border: 1px solid #000;
+            min-height: 24px;
+            padding: 5px 6px;
+            margin-bottom: 4px;
+            font-size: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 3px;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1f1f1;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+        .firmas {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 80px;
+            align-items: flex-end;
+        }
+
+        .firma-izquierda,
+        .firma-derecha {
+            width: 230px;
+            height: 28mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            text-align: center;
+        }
+
+        .firma-img {
+            width: 5cm;
+            height: 2cm;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto -4px auto;
+        }
+
+        .linea-firma {
+            border-top: 1px solid #000;
+        }
+
+        .texto-firma {
+            height: 32px;
+            text-align: center;
+            font-size: 11px;
+            padding-top: 4px;
+        }
+        .bottom-meta {
+            margin-top: 2mm;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            font-size: 9px;
+            align-items: end;
+            margin-bottom: 3mm;
+        }
+
+        .original {
+            text-align: right;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        @media print {
+            .screen-actions {
+                display: none;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="screen-actions">
+    <a href="javascript:history.back();" class="btn-back">Volver</a>
+    <button type="button" onclick="window.print();" class="btn-print">Imprimir</button>
+</div>
+
+<div class="print-wrap">
+
+    <!-- ORIGINAL -->
+    <div class="copia">
+
+        <div class="contenido-principal">
+
+            <div class="header-simple">
+                <div class="logo-box">
+                    <img src="{% static 'img/logo_actual.jpg' %}" alt="Logo">
+                </div>
+
+                <div class="title-center">
+                    <div>Hospital Privado Santa Clara de Asís</div>
+                    <strong>Orden de Autorización</strong>
+                </div>
+
+                <div class="order-data">
+                    <div><b>Orden</b> {{ orden.id }}</div>
+                    <div><b>Tipo</b> {{ orden.get_tipo_display }}</div>
+                    <div>
+                        <b>Fecha</b>
+                        {% if orden.fecha %}
+                            {{ orden.fecha|date:"d/m/Y" }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="datos-lineales">
+                <div>
+                    <b>Paciente:</b>
+                    {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                </div>
+
+                <div>
+                    <b>DNI:</b>
+                    {{ preingreso.paciente.dni|default:"" }}
+                </div>
+
+                <div>
+                    <b>Obra Soc.:</b>
+                    {% if preingreso.obra_social %}
+                        {{ preingreso.obra_social.nombre }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <b>Plan:</b>
+                    {% if preingreso.plan %}
+                        {{ preingreso.plan.nombre }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <b>Nº Afiliado:</b>
+                    {{ preingreso.numero_afiliado|default:"" }}
+                </div>
+
+                <div>
+                    <b>Historia Clínica:</b>
+                    {{ preingreso.paciente.historia_clinica|default:preingreso.paciente.id }}
+                </div>
+
+                <div>
+                    <b>Nº Preingreso:</b>
+                    {{ preingreso.numero|default:preingreso.id }}
+                </div>
+
+                <div>
+                    <b>Asistencia:</b>
+                    {{ preingreso.get_origen_paciente_display|default:"" }}
+                </div>
+
+                <div>
+                    <b>Fecha Ingreso:</b>
+                    {% if preingreso.fecha_ingreso %}
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <b>Fecha Orden:</b>
+                    {% if orden.fecha %}
+                        {{ orden.fecha|date:"d/m/Y" }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="diagnostico-simple">
+                <b>Diagnóstico:</b>
+                {{ preingreso.diagnostico|default:"" }}
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 11%;">Código</th>
+                        <th style="width: 6%;">Cant.</th>
+                        <th style="width: 14%;">Tipo de Honorarios</th>
+                        <th style="width: 14%;">Nivel</th>
+                        <th>Profesional</th>
+                        <th style="width: 10%;">Desde</th>
+                        <th style="width: 10%;">Hasta</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for detalle in detalles %}
+                        <tr>
+                            <td>{{ detalle.prestacion.codigo|default:"" }}</td>
+
+                            <td class="text-center">
+                                {{ detalle.cantidad|default:"1" }}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.honorarios_gastos %}
+                                    {{ detalle.get_honorarios_gastos_display }}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.tipo_honorario %}
+                                    {{ detalle.get_tipo_honorario_display }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if detalle.medico %}
+                                    {{ detalle.medico.apellido }}, {{ detalle.medico.nombre }}
+                                {% else %}
+                                    {% if preingreso.medico %}
+                                        {{ preingreso.medico.apellido }}, {{ preingreso.medico.nombre }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.fecha_desde %}
+                                    {{ detalle.fecha_desde|date:"d/m/Y" }}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.fecha_hasta %}
+                                    {{ detalle.fecha_hasta|date:"d/m/Y" }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                Sin prestaciones cargadas.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="firmas">
+            <div class="firma-izquierda">
+                <div class="linea-firma"></div>
+                <div class="texto-firma">
+                    Autorizado
+                </div>
+            </div>
+
+            <div class="firma-derecha">
+                {% if orden.medico and orden.medico.firma_nombre %}
+                    <img src="{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}"
+                        alt="Firma profesional"
+                        class="firma-img">
+                {% endif %}
+
+                <div class="linea-firma"></div>
+
+                <div class="texto-firma">
+                    Firma y Sello<br>
+                    del Profesional
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-meta">
+            <div>
+                <b>Usuario:</b>
+                {{ request.user.get_full_name|default:request.user.username }}
+            </div>
+
+            <div>
+                <b>Impresión:</b>
+                {{ fecha_impresion|date:"d/m/Y H:i:s" }}
+            </div>
+
+            <div class="original">
+                ORIGINAL
+            </div>
+        </div>
+
+    </div>
+
+    <div class="linea-corte"></div>
+
+    <!-- DUPLICADO -->
+    <div class="copia">
+
+        <div class="contenido-principal">
+
+            <div class="header-simple">
+                <div class="logo-box">
+                    <img src="{% static 'img/logo_actual.jpg' %}" alt="Logo">
+                </div>
+
+                <div class="title-center">
+                    <div>Hospital Privado Santa Clara de Asís</div>
+                    <strong>Orden de Autorización</strong>
+                </div>
+
+                <div class="order-data">
+                    <div><b>Orden</b> {{ orden.id }}</div>
+                    <div><b>Tipo</b> {{ orden.get_tipo_display }}</div>
+                    <div>
+                        <b>Fecha</b>
+                        {% if orden.fecha %}
+                            {{ orden.fecha|date:"d/m/Y" }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="datos-lineales">
+                <div>
+                    <b>Paciente:</b>
+                    {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                </div>
+
+                <div>
+                    <b>DNI:</b>
+                    {{ preingreso.paciente.dni|default:"" }}
+                </div>
+
+                <div>
+                    <b>Obra Soc.:</b>
+                    {% if preingreso.obra_social %}
+                        {{ preingreso.obra_social.nombre }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <b>Plan:</b>
+                    {% if preingreso.plan %}
+                        {{ preingreso.plan.nombre }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <b>Nº Afiliado:</b>
+                    {{ preingreso.numero_afiliado|default:"" }}
+                </div>
+
+                <div>
+                    <b>Historia Clínica:</b>
+                    {{ preingreso.paciente.historia_clinica|default:preingreso.paciente.id }}
+                </div>
+
+                <div>
+                    <b>Nº Preingreso:</b>
+                    {{ preingreso.numero|default:preingreso.id }}
+                </div>
+
+                <div>
+                    <b>Asistencia:</b>
+                    {{ preingreso.get_origen_paciente_display|default:"" }}
+                </div>
+
+                <div>
+                    <b>Fecha Ingreso:</b>
+                    {% if preingreso.fecha_ingreso %}
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <b>Fecha Orden:</b>
+                    {% if orden.fecha %}
+                        {{ orden.fecha|date:"d/m/Y" }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="diagnostico-simple">
+                <b>Diagnóstico:</b>
+                {{ preingreso.diagnostico|default:"" }}
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 11%;">Código</th>
+                        <th style="width: 6%;">Cant.</th>
+                        <th style="width: 14%;">Tipo de Honorarios</th>
+                        <th style="width: 14%;">Nivel</th>
+                        <th>Profesional</th>
+                        <th style="width: 10%;">Desde</th>
+                        <th style="width: 10%;">Hasta</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for detalle in detalles %}
+                        <tr>
+                            <td>{{ detalle.prestacion.codigo|default:"" }}</td>
+
+                            <td class="text-center">
+                                {{ detalle.cantidad|default:"1" }}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.honorarios_gastos %}
+                                    {{ detalle.get_honorarios_gastos_display }}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.tipo_honorario %}
+                                    {{ detalle.get_tipo_honorario_display }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if detalle.medico %}
+                                    {{ detalle.medico.apellido }}, {{ detalle.medico.nombre }}
+                                {% else %}
+                                    {% if preingreso.medico %}
+                                        {{ preingreso.medico.apellido }}, {{ preingreso.medico.nombre }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.fecha_desde %}
+                                    {{ detalle.fecha_desde|date:"d/m/Y" }}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if detalle.fecha_hasta %}
+                                    {{ detalle.fecha_hasta|date:"d/m/Y" }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                Sin prestaciones cargadas.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="firmas">
+            <div class="firma-izquierda">
+                <div class="linea-firma"></div>
+                <div class="texto-firma">
+                    Autorizado
+                </div>
+            </div>
+
+            <div class="firma-derecha">
+                {% if orden.medico and orden.medico.firma_nombre %}
+                    <img src="{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}"
+                        alt="Firma profesional"
+                        class="firma-img">
+                {% endif %}
+                <div class="linea-firma"></div>
+
+                <div class="texto-firma">
+                    Firma y Sello<br>
+                    del Profesional
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-meta">
+            <div>
+                <b>Usuario:</b>
+                {{ request.user.get_full_name|default:request.user.username }}
+            </div>
+
+            <div>
+                <b>Impresión:</b>
+                {{ fecha_impresion|date:"d/m/Y H:i:s" }}
+            </div>
+
+            <div class="original">
+                DUPLICADO
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    window.onload = function () {
+        window.print();
+    }
+
+    window.onafterprint = function () {
+        history.back();
+    }
+</script>
+
+</body>
+</html>

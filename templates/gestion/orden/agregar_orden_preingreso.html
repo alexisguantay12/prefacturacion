@@ -174,7 +174,7 @@
     }
 
     .detalle-table {
-        min-width: 1040px;
+        min-width: 900px;
     }
 
     .detalle-table thead th {
@@ -203,16 +203,6 @@
     .detalle-table .input-group .btn {
         border-radius: 9px;
         padding: 0.25rem 0.5rem;
-    }
-
-    .detalle-table textarea.form-control {
-        min-height: 34px;
-        resize: vertical;
-    }
-
-    .detalle-row-empty .form-control,
-    .detalle-row-empty .form-select {
-        background: #fff;
     }
 
     .modal-confirmacion {
@@ -287,7 +277,7 @@
                     Nueva Orden de Autorización
                 </h2>
                 <p>
-                    Carga de orden vinculada al preingreso, con prestaciones cargadas directamente en la tabla.
+                    Carga de orden vinculada al preingreso. El médico se carga una sola vez en el encabezado.
                 </p>
             </div>
 
@@ -358,32 +348,25 @@
                     </div>
 
                     <div class="col-md-3">
+                        <label class="form-label">
+                            Médico <span class="required-mark">*</span>
+                        </label>
+                        <select name="medico" class="form-select" required>
+                            <option value="">Seleccione médico...</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}">
+                                    {{ medico.apellido }}, {{ medico.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
                         <label class="form-label">Número cupón / orden</label>
                         <input type="text"
                                name="numero_cupon"
                                class="form-control"
                                placeholder="Ej: 123456">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Estado general</label>
-
-                        <div class="selected-box">
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       role="switch"
-                                       name="autorizada"
-                                       id="orden_autorizada">
-                                <label class="form-check-label fw-bold" for="orden_autorizada">
-                                    Orden autorizada
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mini-help mt-1">
-                            La autorización aplica a la orden completa.
-                        </div>
                     </div>
 
                     <div class="col-md-12">
@@ -421,8 +404,7 @@
                             <tr>
                                 <th class="text-center" style="width:42px;">#</th>
                                 <th style="width:170px;">Código</th>
-                                <th style="width:230px;">Prestación</th>
-                                <th style="width:180px;">Médico</th>
+                                <th style="width:260px;">Prestación</th>
                                 <th class="text-center" style="width:75px;">Cant.</th>
                                 <th style="width:135px;">H/G</th>
                                 <th style="width:145px;">Honorario</th>
@@ -460,17 +442,6 @@
                                            class="form-control detalle_prestacion_nombre"
                                            placeholder="Prestación"
                                            autocomplete="off">
-                                </td>
-
-                                <td>
-                                    <select class="form-select detalle_medico_id">
-                                        <option value="">Seleccione...</option>
-                                        {% for medico in medicos %}
-                                            <option value="{{ medico.id }}">
-                                                {{ medico.apellido }}, {{ medico.nombre }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
                                 </td>
 
                                 <td>
@@ -519,7 +490,7 @@
                 </div>
 
                 <div class="mini-help mt-2">
-                    Cargue los detalles directamente en la tabla. Al salir del campo código se completará la prestación si existe coincidencia exacta; también puede usar la lupa para buscar.
+                    Cargue los detalles directamente en la tabla. El médico de todos los detalles será el seleccionado en el encabezado de la orden.
                 </div>
             </div>
         </div>
@@ -655,7 +626,8 @@
     let filaActualPrestacion = null;
 
     const buscarPrestacionesUrl = "{% url 'gestion_app:buscar_prestaciones_ajax' %}";
-    const buscarPrestacionCodigoUrl ="{% url 'gestion_app:buscar_prestacion_por_codigo_ajax' %}";
+    const buscarPrestacionCodigoUrl = "{% url 'gestion_app:buscar_prestacion_por_codigo_ajax' %}";
+
     function escapeHtml(value) {
         if (value === null || value === undefined) {
             return "";
@@ -682,7 +654,6 @@
         fila.querySelector(".detalle_prestacion_id").value = "";
         fila.querySelector(".detalle_prestacion_codigo").value = "";
         fila.querySelector(".detalle_prestacion_nombre").value = "";
-        fila.querySelector(".detalle_medico_id").value = "";
         fila.querySelector(".detalle_cantidad").value = 1;
         fila.querySelector(".detalle_honorarios_gastos").value = "";
         fila.querySelector(".detalle_tipo_honorario").value = "";
@@ -737,12 +708,7 @@
             modalBuscar.hide();
         }
 
-        filaActualPrestacion.querySelector(".detalle_medico_id").focus();
-    }
-
-
-    function normalizarCodigo(value) {
-        return String(value || "").trim().toLowerCase();
+        filaActualPrestacion.querySelector(".detalle_cantidad").focus();
     }
 
     function marcarCodigoNoEncontrado(input) {
@@ -800,6 +766,7 @@
                 marcarCodigoNoEncontrado(inputCodigo);
             });
     }
+
     function renderPrestaciones(prestaciones, append = false) {
         const tbody = document.getElementById("prestacionesResultadoBody");
 
@@ -942,14 +909,11 @@
             const prestacionId = fila.querySelector(".detalle_prestacion_id").value.trim();
             const prestacionCodigo = fila.querySelector(".detalle_prestacion_codigo").value.trim();
             const prestacionNombre = fila.querySelector(".detalle_prestacion_nombre").value.trim();
-            const medicoSelect = fila.querySelector(".detalle_medico_id");
             const cantidad = fila.querySelector(".detalle_cantidad").value || 1;
             const hgSelect = fila.querySelector(".detalle_honorarios_gastos");
             const thSelect = fila.querySelector(".detalle_tipo_honorario");
             const fechaDesde = fila.querySelector(".detalle_fecha_desde").value;
             const fechaHasta = fila.querySelector(".detalle_fecha_hasta").value;
-            const autorizada = false;
-            const observaciones = "";
 
             if (!prestacionId) {
                 errores.push(`Fila ${index + 1}: debe seleccionar una prestación válida o ingresar un código existente.`);
@@ -963,8 +927,6 @@
                 prestacion_id: prestacionId,
                 prestacion_codigo: prestacionCodigo,
                 prestacion_nombre: prestacionNombre,
-                medico_id: medicoSelect.value,
-                medico_texto: medicoSelect.value ? obtenerTextoSelect(medicoSelect) : "",
                 cantidad: cantidad,
                 honorarios_gastos: hgSelect.value,
                 honorarios_gastos_texto: hgSelect.value ? obtenerTextoSelect(hgSelect) : "",
@@ -972,8 +934,7 @@
                 tipo_honorario_texto: thSelect.value ? obtenerTextoSelect(thSelect) : "",
                 fecha_desde: fechaDesde,
                 fecha_hasta: fechaHasta,
-                autorizada: autorizada,
-                observaciones: observaciones,
+                observaciones: "",
             });
         });
 

@@ -174,7 +174,8 @@ class OrdenAutorizacion(BaseAbstractWithUser):
         on_delete=models.CASCADE,
         related_name="ordenes"
     )
-
+    medico = models.ForeignKey("entidades.Medico",on_delete=models.SET_NULL,null=True,blank=True)
+    
     tipo = models.CharField(max_length=50, choices=TIPOS) 
  
     fecha = models.DateField(blank=True,null=True)

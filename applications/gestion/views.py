@@ -470,12 +470,11 @@ def agregar_orden_preingreso(request, preingreso_id):
     if request.method == "POST":
         tipo = request.POST.get("tipo")
         fecha = request.POST.get("fecha") or None
+        medico_id = request.POST.get("medico") or None
         numero_cupon = request.POST.get("numero_cupon", "").strip()
         observaciones = request.POST.get("observaciones", "").strip()
-        autorizada = request.POST.get("autorizada") == "on"
-
         detalles_json = request.POST.get("detalles_json", "[]")
-
+        print("El medico id es:",medico_id)
         try:
             detalles = json.loads(detalles_json)
         except json.JSONDecodeError:
@@ -485,19 +484,29 @@ def agregar_orden_preingreso(request, preingreso_id):
             messages.error(request, "Debe seleccionar el tipo de orden.")
             return redirect("gestion_app:agregar_orden_preingreso", preingreso_id=preingreso.id)
 
+        if not medico_id:
+            messages.error(request, "Debe seleccionar el médico de la orden.")
+            return redirect("gestion_app:agregar_orden_preingreso", preingreso_id=preingreso.id)
+
+        medico = Medico.objects.filter(id=medico_id).first()
+
+        if not medico:
+            messages.error(request, "El médico seleccionado no es válido.")
+            return redirect("gestion_app:agregar_orden_preingreso", preingreso_id=preingreso.id)
+
         if not detalles:
             messages.error(request, "Debe cargar al menos un detalle en la orden.")
             return redirect("gestion_app:agregar_orden_preingreso", preingreso_id=preingreso.id)
-
+        print("El medico es:",medico)
         try:
             with transaction.atomic():
                 orden = OrdenAutorizacion.objects.create(
                     preingreso=preingreso,
                     tipo=tipo,
                     fecha=fecha,
+                    medico=medico,
                     numero_cupon=numero_cupon or None,
                     observaciones=observaciones or None,
-                    autorizada=autorizada,
                 )
 
                 for item in detalles:
@@ -507,12 +516,6 @@ def agregar_orden_preingreso(request, preingreso_id):
                         continue
 
                     prestacion = get_object_or_404(Prestacion, id=prestacion_id)
-
-                    medico_id = item.get("medico_id") or None
-                    medico = None
-
-                    if medico_id:
-                        medico = Medico.objects.filter(id=medico_id).first()
 
                     DetalleOrden.objects.create(
                         orden=orden,
@@ -524,7 +527,6 @@ def agregar_orden_preingreso(request, preingreso_id):
                         fecha_desde=item.get("fecha_desde") or None,
                         fecha_hasta=item.get("fecha_hasta") or None,
                         observaciones=item.get("observaciones") or None,
-                        autorizada=bool(item.get("autorizada")),
                     )
 
             messages.success(request, "La orden fue cargada correctamente.")
@@ -542,9 +544,6 @@ def agregar_orden_preingreso(request, preingreso_id):
         "honorarios_gastos": DetalleOrden.HONORARIOS_GASTOS,
         "tipos_honorario": DetalleOrden.TIPOS_HONORARIO,
     })
-
-
-
 
 
 def lista_ingresos(request):
@@ -807,4 +806,32 @@ def agregar_ingreso_programado(request):
         "planes": planes,
         "medicos": medicos,
         "servicios": servicios, 
+    })
+
+
+
+
+ 
+def imprimir_orden(request, orden_id):
+    orden = get_object_or_404(
+        OrdenAutorizacion.objects.select_related(
+            "preingreso",
+            "preingreso__paciente",
+            "preingreso__obra_social",
+            "preingreso__plan",
+            "preingreso__medico",
+            "preingreso__servicio",
+        ).prefetch_related(
+            "detalles",
+            "detalles__prestacion",
+            "detalles__medico",
+        ),
+        id=orden_id
+    )
+    print("Esta es la orden:",orden.detalles.all())
+    return render(request, "gestion/orden/imprimir_orden.html", {
+        "orden": orden,
+        "preingreso": orden.preingreso,
+        "detalles": orden.detalles.all().order_by("id"),
+        "fecha_impresion": timezone.now(),
     })

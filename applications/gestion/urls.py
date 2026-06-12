@@ -22,4 +22,5 @@ urlpatterns = [
     path("ingresos/agregar_ingreso/",views.agregar_ingreso,name="agregar_ingreso",),
     path("ingresos/programado/agregar/",views.agregar_ingreso_programado,name="agregar_ingreso_programado"),
     path("ajax/buscar-preingresos/",views.buscar_preingresos_ajax,name="buscar_preingresos_ajax"),
+    path( "orden/<int:orden_id>/imprimir/",views.imprimir_orden,name="imprimir_orden"), 
 ]
