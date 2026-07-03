@@ -219,6 +219,17 @@
         </div>
     </div>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div id="preingresoFrontendError" class="alert alert-danger d-none" role="alert"></div>
+
     <form method="post" id="formAgregarPreingreso">
         {% csrf_token %}
 
@@ -238,7 +249,11 @@
             </div>
 
             <div class="section-body">
-                <input type="hidden" name="paciente" id="paciente_id" required>
+                <input type="hidden"
+                       name="paciente"
+                       id="paciente_id"
+                       value="{% if paciente_seleccionado %}{{ paciente_seleccionado.id }}{% else %}{{ form_data.paciente|default:'' }}{% endif %}"
+                       required>
 
                 <div class="row g-3">
 
@@ -248,16 +263,22 @@
                         </label>
 
                         <div class="input-group">
-                            <input type="text"
-                                   id="paciente_nombre"
-                                   class="form-control"
-                                   placeholder="Seleccione un paciente..."
-                                   readonly>
+                            <div id="paciente_nombre"
+                                class="form-control d-flex align-items-center bg-light text-muted"
+                                style="min-height: 44px;">
+                                {% if paciente_seleccionado %}
+                                    {{ paciente_seleccionado.apellido }}, {{ paciente_seleccionado.nombre }}
+                                {% else %}
+                                    <i class="fas fa-user me-2"></i>
+                                    Ningún paciente seleccionado
+                                {% endif %}
+                            </div>
 
                             <button type="button"
                                     class="btn btn-primary"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#modalBuscarPaciente">
+                                    data-bs-target="#modalBuscarPaciente"
+                                    title="Buscar paciente">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
@@ -269,23 +290,49 @@
 
                     <div class="col-md-2">
                         <label class="form-label">DNI</label>
-                        <input type="text" id="paciente_dni" class="form-control" placeholder="-" readonly>
+                        <input type="text"
+                               id="paciente_dni"
+                               class="form-control"
+                               placeholder="-"
+                               value="{% if paciente_seleccionado %}{{ paciente_seleccionado.dni|default:'-' }}{% endif %}"
+                               readonly>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Fecha nacimiento</label>
-                        <input type="text" id="paciente_fecha_nacimiento" class="form-control" placeholder="-" readonly>
+                        <input type="text"
+                               id="paciente_fecha_nacimiento"
+                               class="form-control"
+                               placeholder="-"
+                               value="{% if paciente_seleccionado %}{{ paciente_seleccionado.fecha_nacimiento|date:'Y-m-d'|default:'-' }}{% endif %}"
+                               readonly>
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">Teléfono</label>
-                        <input type="text" id="paciente_telefono" class="form-control" placeholder="-" readonly>
+                        <label class="form-label">Teléfono del paciente</label>
+                        <input type="text"
+                               name="paciente_telefono"
+                               id="paciente_telefono"
+                               class="form-control"
+                               placeholder="Ej: 3875555555"
+                               value="{% if form_data.paciente_telefono %}{{ form_data.paciente_telefono }}{% elif paciente_seleccionado %}{{ paciente_seleccionado.telefono|default:'' }}{% endif %}">
+                        <div class="mini-help mt-1">
+                            Este dato actualiza el teléfono registrado en el paciente.
+                        </div>
                     </div>
 
                     <div class="col-md-12">
                         <div id="pacienteSeleccionadoBox" class="selected-patient-box">
-                            <i class="fas fa-info-circle"></i>
-                            Todavía no se seleccionó ningún paciente.
+                            {% if paciente_seleccionado %}
+                                <i class="fas fa-check-circle text-success"></i>
+                                Paciente seleccionado:
+                                <strong>{{ paciente_seleccionado.apellido }}, {{ paciente_seleccionado.nombre }}</strong>
+                                · DNI: <strong>{{ paciente_seleccionado.dni|default:"-" }}</strong>
+                                · Teléfono editable: <strong>{{ paciente_seleccionado.telefono|default:"-" }}</strong>
+                            {% else %}
+                                <i class="fas fa-info-circle"></i>
+                                Todavía no se seleccionó ningún paciente.
+                            {% endif %}
                         </div>
                     </div>
 
@@ -296,7 +343,10 @@
                         <select name="obra_social" class="form-select" required>
                             <option value="">Seleccione una obra social...</option>
                             {% for obra in obras_sociales %}
-                                <option value="{{ obra.id }}">{{ obra.nombre }}</option>
+                                <option value="{{ obra.id }}"
+                                    {% if form_data.obra_social == obra.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ obra.nombre }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -306,7 +356,8 @@
                         <select name="plan" class="form-select">
                             <option value="">Seleccione un plan...</option>
                             {% for plan in planes %}
-                                <option value="{{ plan.id }}">
+                                <option value="{{ plan.id }}"
+                                    {% if form_data.plan == plan.id|stringformat:"s" %}selected{% endif %}>
                                     {{ plan.nombre }}
                                     {% if plan.obra_social %}
                                         - {{ plan.obra_social.nombre }}
@@ -321,7 +372,8 @@
                         <input type="text"
                                name="numero_afiliado"
                                class="form-control"
-                               placeholder="Ingrese número de afiliado">
+                               placeholder="Ingrese número de afiliado"
+                               value="{{ form_data.numero_afiliado|default:'' }}">
                     </div>
 
                 </div>
@@ -346,6 +398,7 @@
                         <input type="date"
                                name="fecha_probable_ingreso"
                                class="form-control"
+                               value="{{ form_data.fecha_probable_ingreso|default:'' }}"
                                required>
                     </div>
 
@@ -354,7 +407,10 @@
                         <select name="servicio" class="form-select">
                             <option value="">Seleccione un servicio...</option>
                             {% for servicio in servicios %}
-                                <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+                                <option value="{{ servicio.id }}"
+                                    {% if form_data.servicio == servicio.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ servicio.nombre }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -364,7 +420,8 @@
                         <select name="medico" class="form-select">
                             <option value="">Seleccione un médico...</option>
                             {% for medico in medicos %}
-                                <option value="{{ medico.id }}">
+                                <option value="{{ medico.id }}"
+                                    {% if form_data.medico == medico.id|stringformat:"s" %}selected{% endif %}>
                                     {{ medico.apellido }}, {{ medico.nombre }}
                                 </option>
                             {% endfor %}
@@ -372,31 +429,11 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">Origen del paciente</label>
-                        <select name="origen_paciente" class="form-select">
-                            <option value="domicilio">Domicilio</option>
-                            <option value="guardia">Guardia</option>
-                            <option value="consultorio">Consultorio</option>
-                            <option value="derivacion">Derivación</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Prioridad</label>
-                        <select name="prioridad" class="form-select">
-                            <option value="normal">Normal</option>
-                            <option value="urgente">Urgente</option>
-                            <option value="programado">Programado</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-9">
                         <label class="form-label">Diagnóstico</label>
                         <textarea name="diagnostico"
                                   class="form-control"
                                   rows="2"
-                                  placeholder="Ingrese diagnóstico o motivo del preingreso..."></textarea>
+                                  placeholder="Ingrese diagnóstico o motivo...">{{ form_data.diagnostico|default:'' }}</textarea>
                     </div>
 
                 </div>
@@ -419,7 +456,8 @@
                         <input type="text"
                                name="contacto_nombre"
                                class="form-control"
-                               placeholder="Ingrese nombre y apellido">
+                               placeholder="Ingrese nombre y apellido"
+                               value="{{ form_data.contacto_nombre|default:'' }}">
                     </div>
 
                     <div class="col-md-2">
@@ -427,7 +465,8 @@
                         <input type="text"
                                name="contacto_dni"
                                class="form-control"
-                               placeholder="Ingrese DNI">
+                               placeholder="Ingrese DNI"
+                               value="{{ form_data.contacto_dni|default:'' }}">
                     </div>
 
                     <div class="col-md-3">
@@ -435,7 +474,8 @@
                         <input type="text"
                                name="contacto_parentesco"
                                class="form-control"
-                               placeholder="Ej: Madre, padre, hijo/a">
+                               placeholder="Ej: Madre, padre, hijo/a"
+                               value="{{ form_data.contacto_parentesco|default:'' }}">
                     </div>
 
                     <div class="col-md-3">
@@ -443,7 +483,8 @@
                         <input type="text"
                                name="contacto_telefono"
                                class="form-control"
-                               placeholder="Ej: 3875555555">
+                               placeholder="Ej: 3875555555"
+                               value="{{ form_data.contacto_telefono|default:'' }}">
                     </div>
 
                 </div>
@@ -463,7 +504,7 @@
                 <textarea name="observaciones"
                           class="form-control"
                           rows="3"
-                          placeholder="Ingrese aquí cualquier observación relevante..."></textarea>
+                          placeholder="Ingrese aquí cualquier observación relevante...">{{ form_data.observaciones|default:'' }}</textarea>
             </div>
         </div>
 
@@ -549,18 +590,19 @@
                         </div>
 
                         <div class="table-responsive border rounded-3">
-                            <table class="table table-sm table-hover align-middle mb-0 paciente-table">
+                            <table class="table table-sm align-middle mb-0 paciente-table">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Paciente</th>
                                         <th>DNI</th>
                                         <th>Fecha nacimiento</th>
+                                        <th>Teléfono</th>
                                         <th class="text-end">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pacientesResultadoBody">
                                     <tr>
-                                        <td colspan="4" class="empty-row">
+                                        <td colspan="5" class="empty-row">
                                             <i class="fas fa-magnifying-glass"></i>
                                             Busque un paciente por DNI, apellido o nombre.
                                         </td>
@@ -601,7 +643,6 @@
                                             <input type="text"
                                                    name="apellido"
                                                    class="form-control"
-                                                   placeholder="Ej: Pérez"
                                                    required>
                                         </div>
 
@@ -612,7 +653,6 @@
                                             <input type="text"
                                                    name="nombre"
                                                    class="form-control"
-                                                   placeholder="Ej: Juan Carlos"
                                                    required>
                                         </div>
 
@@ -623,7 +663,6 @@
                                             <input type="text"
                                                    name="dni"
                                                    class="form-control"
-                                                   placeholder="Ej: 30111222"
                                                    required>
                                         </div>
 
@@ -670,24 +709,21 @@
                                             <label class="form-label">Dirección</label>
                                             <input type="text"
                                                    name="direccion"
-                                                   class="form-control"
-                                                   placeholder="Domicilio del paciente...">
+                                                   class="form-control">
                                         </div>
 
                                         <div class="col-md-3">
                                             <label class="form-label">Provincia</label>
                                             <input type="text"
                                                    name="provincia"
-                                                   class="form-control"
-                                                   placeholder="Ej: Salta">
+                                                   class="form-control">
                                         </div>
 
                                         <div class="col-md-3">
                                             <label class="form-label">Nacionalidad</label>
                                             <input type="text"
                                                    name="nacionalidad"
-                                                   class="form-control"
-                                                   placeholder="Ej: Argentina">
+                                                   class="form-control">
                                         </div>
 
                                     </div>
@@ -743,6 +779,7 @@
 
                 <button type="button"
                         class="btn btn-primary"
+                        id="btnConfirmarGuardarPreingreso"
                         onclick="validarYEnviarPreingreso();">
                     <i class="fas fa-save"></i> Sí, guardar
                 </button>
@@ -792,21 +829,38 @@
             .replaceAll("'", "&#039;");
     }
 
+    function mostrarErrorFrontend(mensaje) {
+        const errorBox = document.getElementById("preingresoFrontendError");
+        errorBox.innerText = mensaje;
+        errorBox.classList.remove("d-none");
+        errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function limpiarErrorFrontend() {
+        const errorBox = document.getElementById("preingresoFrontendError");
+        errorBox.innerText = "";
+        errorBox.classList.add("d-none");
+    }
+
     function seleccionarPaciente(paciente) {
         const nombreCompleto = `${paciente.apellido || ""}, ${paciente.nombre || ""}`.trim();
 
         document.getElementById("paciente_id").value = paciente.id;
-        document.getElementById("paciente_nombre").value = nombreCompleto;
+        document.getElementById("paciente_nombre").innerHTML =
+        `<i class="fas fa-user-check text-success me-2"></i>${escapeHtml(nombreCompleto)}`;
         document.getElementById("paciente_dni").value = paciente.dni || "-";
         document.getElementById("paciente_fecha_nacimiento").value = paciente.fecha_nacimiento || "-";
-        document.getElementById("paciente_telefono").value = paciente.telefono || "-";
+        document.getElementById("paciente_telefono").value = paciente.telefono || "";
 
         document.getElementById("pacienteSeleccionadoBox").innerHTML = `
             <i class="fas fa-check-circle text-success"></i>
             Paciente seleccionado:
             <strong>${escapeHtml(nombreCompleto)}</strong>
             · DNI: <strong>${escapeHtml(paciente.dni || "-")}</strong>
+            · Teléfono editable: <strong>${escapeHtml(paciente.telefono || "-")}</strong>
         `;
+
+        limpiarErrorFrontend();
 
         const modalElement = document.getElementById("modalBuscarPaciente");
         const modal = bootstrap.Modal.getInstance(modalElement);
@@ -826,7 +880,7 @@
         if (pacientes.length === 0 && !append) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">
+                    <td colspan="5" class="empty-row">
                         <i class="fas fa-circle-info"></i>
                         No se encontraron pacientes.
                     </td>
@@ -844,6 +898,7 @@
                 </td>
                 <td>${escapeHtml(paciente.dni || "-")}</td>
                 <td>${escapeHtml(paciente.fecha_nacimiento || "-")}</td>
+                <td>${escapeHtml(paciente.telefono || "-")}</td>
                 <td class="text-end">
                     <button type="button" class="btn btn-sm btn-primary">
                         <i class="fas fa-check"></i> Seleccionar
@@ -874,7 +929,7 @@
             info.innerText = "Ingrese al menos 2 caracteres para buscar.";
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">
+                    <td colspan="5" class="empty-row">
                         <i class="fas fa-magnifying-glass"></i>
                         Busque un paciente por DNI, apellido o nombre.
                     </td>
@@ -889,7 +944,7 @@
         if (reset) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">
+                    <td colspan="5" class="empty-row">
                         <i class="fas fa-spinner fa-spin"></i>
                         Buscando...
                     </td>
@@ -920,7 +975,7 @@
                 info.innerText = "Ocurrió un error al buscar pacientes.";
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="empty-row text-danger">
+                        <td colspan="5" class="empty-row text-danger">
                             No se pudo realizar la búsqueda.
                         </td>
                     </tr>
@@ -931,15 +986,19 @@
     function validarYEnviarPreingreso() {
         const pacienteId = document.getElementById("paciente_id").value;
         const form = document.getElementById("formAgregarPreingreso");
+        const btnConfirmar = document.getElementById("btnConfirmarGuardarPreingreso");
+
+        limpiarErrorFrontend();
 
         if (!pacienteId) {
             const modalGuardar = bootstrap.Modal.getInstance(document.getElementById("modalGuardarPreingreso"));
+
             if (modalGuardar) {
                 modalGuardar.hide();
             }
 
-            const modalPaciente = new bootstrap.Modal(document.getElementById("modalBuscarPaciente"));
-            modalPaciente.show();
+            mostrarErrorFrontend("Debe seleccionar un paciente antes de guardar el preingreso.");
+ 
             return;
         }
 
@@ -947,6 +1006,9 @@
             form.reportValidity();
             return;
         }
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
         form.submit();
     }
@@ -1014,6 +1076,50 @@
             });
         });
     });
+
+window.addEventListener("pageshow", function (event) {
+
+    if (!event.persisted) return;
+
+    const btnConfirmar = document.getElementById("btnConfirmarGuardarPreingreso");
+
+    if (btnConfirmar) {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="fas fa-save"></i> Sí, guardar';
+    }
+
+    const modalElement = document.getElementById("modalGuardarPreingreso");
+
+    if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+
+        if (modal) {
+            modal.hide();
+        }
+
+        modalElement.classList.remove("show");
+        modalElement.style.display = "none";
+        modalElement.setAttribute("aria-hidden", "true");
+    }
+
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+
+    document.querySelectorAll(".modal-backdrop").forEach(e => e.remove());
+
+});
+
+window.addEventListener("pageshow", function (event) {
+    const navEntries = performance.getEntriesByType("navigation");
+    const navType = navEntries.length ? navEntries[0].type : "";
+
+    const vinoPorBackForward = event.persisted || navType === "back_forward";
+
+    if (vinoPorBackForward) {
+        window.location.href = "{% url 'gestion_app:lista_preingresos' %}";
+    }
+});
 </script>
 
 {% endblock %}

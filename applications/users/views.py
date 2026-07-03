@@ -42,7 +42,7 @@ def cambiar_contraseña(request):
             user = form.save()
             update_session_auth_hash(request, user)
             messages.success(request, '✅ La contraseña fue actualizada correctamente.')
-            return redirect('presupuestos_app:presupuestos')
+            return redirect('gestion_app:lista_preingresos')
         else:
             # Traducción manual de errores (modifica el form directamente)
             for field, errors in form.errors.items():
@@ -72,7 +72,7 @@ def login_view(request):
     storage = messages.get_messages(request)
     list(storage)  # consumir completamente los mensajes antiguos
     if request.user.is_authenticated:
-        return redirect('core_app:home')
+        return redirect('gestion_app:lista_preingresos')
 
     form = AuthenticationForm(request, data=request.POST or None)
 
@@ -81,7 +81,7 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             next_url = request.GET.get('next')
-            return redirect(next_url if next_url else 'presupuestos_app:presupuestos')
+            return redirect(next_url if next_url else 'gestion_app:lista_preingresos')
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
 

@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 {% load group_tags %}
 {% block content %}
 
@@ -31,7 +31,7 @@
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-1"></i> Guardar cambios
                             </button>
-                            <a href="{% url 'presupuestos_app:presupuestos' %}" class="btn btn-secondary">
+                            <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-1"></i> Cancelar
                             </a>
                         </div>

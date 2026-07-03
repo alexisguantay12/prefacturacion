@@ -95,10 +95,24 @@
         background: #ffffff;
     }
 
+    .input-group .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .input-group .btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
     .form-control:focus,
     .form-select:focus {
         border-color: #1d7fbf;
         box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+    }
+
+    .form-control::placeholder {
+        color: #9ca3af;
     }
 
     .required-mark {
@@ -138,6 +152,16 @@
         box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
     }
 
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+
     .modal-xl {
         max-width: 1050px;
     }
@@ -173,6 +197,11 @@
         font-size: 0.88rem;
         vertical-align: middle;
     }
+
+    .preingreso-display {
+        min-height: 44px;
+        cursor: default;
+    }
 </style>
 
 <div class="page-wrap">
@@ -185,7 +214,7 @@
                     Nuevo Ingreso Programado
                 </h2>
                 <p>
-                    Seleccione un preingreso pendiente o en gestión, complete fecha de ingreso y número de episodio.
+                    Seleccione un preingreso pendiente o en gestión y complete los datos necesarios para registrarlo como ingreso.
                 </p>
             </div>
 
@@ -194,6 +223,17 @@
             </a>
         </div>
     </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div id="ingresoProgramadoFrontendError" class="alert alert-danger d-none" role="alert"></div>
 
     <form method="post" id="formAgregarIngresoProgramado">
         {% csrf_token %}
@@ -218,41 +258,57 @@
             <div class="section-body">
                 <div class="row g-3">
 
-                    <div class="col-md-3">
-                        <label class="form-label">N° preingreso</label>
-                        <input type="text" id="preingreso_numero_mostrar" class="form-control" readonly>
-                    </div>
-
                     <div class="col-md-5">
                         <label class="form-label">
-                            Paciente <span class="required-mark">*</span>
+                            Preingreso seleccionado <span class="required-mark">*</span>
                         </label>
+
                         <div class="input-group">
-                            <input type="text"
-                                   id="paciente_nombre"
-                                   class="form-control"
-                                   placeholder="Seleccione un preingreso..."
-                                   readonly>
+                            <div id="preingreso_display"
+                                 class="form-control d-flex align-items-center bg-light text-muted preingreso-display">
+                                <i class="fas fa-file-medical me-2"></i>
+                                Ningún preingreso seleccionado
+                            </div>
+
                             <button type="button"
                                     class="btn btn-primary"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#modalBuscarPreingreso">
+                                    data-bs-target="#modalBuscarPreingreso"
+                                    title="Buscar preingreso">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
+
                         <div class="mini-help mt-1">
-                            Busque por número de preingreso, DNI, apellido o nombre.
+                            Seleccione un preingreso desde la lupa. No se escribe manualmente.
                         </div>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">DNI</label>
-                        <input type="text" id="paciente_dni" class="form-control" readonly>
+                        <input type="text"
+                               id="paciente_dni"
+                               class="form-control bg-light"
+                               placeholder="-"
+                               readonly>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Estado</label>
-                        <input type="text" id="preingreso_estado" class="form-control" readonly>
+                        <input type="text"
+                               id="preingreso_estado"
+                               class="form-control bg-light"
+                               placeholder="-"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha probable</label>
+                        <input type="text"
+                               id="fecha_probable_ingreso_mostrar"
+                               class="form-control bg-light"
+                               placeholder="-"
+                               readonly>
                     </div>
 
                     <div class="col-md-12">
@@ -294,7 +350,8 @@
                         <input type="text"
                                name="numero_afiliado"
                                id="numero_afiliado"
-                               class="form-control">
+                               class="form-control"
+                               placeholder="Ingrese número de afiliado">
                     </div>
 
                 </div>
@@ -311,17 +368,16 @@
 
             <div class="section-body">
                 <div class="row g-3">
-
                     <div class="col-md-3">
                         <label class="form-label">
-                            N° episodio <span class="required-mark">*</span>
+                            Episodio <span class="required-mark">*</span>
                         </label>
                         <input type="text"
-                               name="numero"
-                               id="numero"
-                               class="form-control"
-                               placeholder="Ej: 123456"
-                               required>
+                            name="episodio"
+                            id="episodio"
+                            class="form-control"
+                            placeholder="Ingrese el número de episodio"
+                            required>
                     </div>
 
                     <div class="col-md-3">
@@ -329,11 +385,11 @@
                             Fecha de ingreso <span class="required-mark">*</span>
                         </label>
                         <input type="date"
-                               name="fecha_ingreso"
-                               id="fecha_ingreso"
-                               class="form-control"
-                               value="{{ fecha_hoy|date:'Y-m-d' }}"
-                               required>
+                            name="fecha_ingreso"
+                            id="fecha_ingreso"
+                            class="form-control"
+                            value="{{ fecha_hoy|date:'Y-m-d' }}"
+                            required>
                     </div>
 
                     <div class="col-md-3">
@@ -358,32 +414,13 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Origen del paciente</label>
-                        <select name="origen_paciente" id="origen_paciente" class="form-select">
-                            <option value="domicilio">Domicilio</option>
-                            <option value="guardia">Guardia</option>
-                            <option value="consultorio">Consultorio</option>
-                            <option value="derivacion">Derivación</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Prioridad</label>
-                        <select name="prioridad" id="prioridad" class="form-select">
-                            <option value="normal">Normal</option>
-                            <option value="urgente">Urgente</option>
-                            <option value="programado" selected>Programado</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Diagnóstico</label>
                         <textarea name="diagnostico"
                                   id="diagnostico"
                                   class="form-control"
-                                  rows="2"></textarea>
+                                  rows="2"
+                                  placeholder="Ingrese diagnóstico o motivo..."></textarea>
                     </div>
 
                 </div>
@@ -406,7 +443,8 @@
                         <input type="text"
                                name="contacto_nombre"
                                id="contacto_nombre"
-                               class="form-control">
+                               class="form-control"
+                               placeholder="Ingrese nombre y apellido">
                     </div>
 
                     <div class="col-md-2">
@@ -414,7 +452,8 @@
                         <input type="text"
                                name="contacto_dni"
                                id="contacto_dni"
-                               class="form-control">
+                               class="form-control"
+                               placeholder="Ingrese DNI">
                     </div>
 
                     <div class="col-md-3">
@@ -422,7 +461,8 @@
                         <input type="text"
                                name="contacto_parentesco"
                                id="contacto_parentesco"
-                               class="form-control">
+                               class="form-control"
+                               placeholder="Ej: Madre, padre, hijo/a">
                     </div>
 
                     <div class="col-md-3">
@@ -430,7 +470,8 @@
                         <input type="text"
                                name="contacto_telefono"
                                id="contacto_telefono"
-                               class="form-control">
+                               class="form-control"
+                               placeholder="Ej: 3875555555">
                     </div>
 
                 </div>
@@ -450,7 +491,8 @@
                 <textarea name="observaciones"
                           id="observaciones"
                           class="form-control"
-                          rows="3"></textarea>
+                          rows="3"
+                          placeholder="Ingrese aquí cualquier observación relevante..."></textarea>
             </div>
         </div>
 
@@ -492,7 +534,7 @@
                                class="form-control"
                                placeholder="Buscar por N° preingreso, DNI, apellido o nombre...">
                         <div class="mini-help mt-1">
-                            Se muestran solo preingresos que no estén ingresados ni cerrados.
+                            Se muestran solo preingresos disponibles para ingresar.
                         </div>
                     </div>
 
@@ -508,14 +550,13 @@
                 </div>
 
                 <div class="table-responsive border rounded-3">
-                    <table class="table table-sm table-hover align-middle mb-0 preingreso-table">
+                    <table class="table table-sm align-middle mb-0 preingreso-table">
                         <thead class="table-light">
                             <tr>
                                 <th>N° preingreso</th>
                                 <th>Paciente</th>
                                 <th>DNI</th>
-                                <th>Fecha probable</th>
-                                <th>Estado</th>
+                                <th>Fecha probable</th> 
                                 <th class="text-end">Acción</th>
                             </tr>
                         </thead>
@@ -567,6 +608,7 @@
 
                 <button type="button"
                         class="btn btn-primary"
+                        id="btnConfirmarGuardarIngresoProgramado"
                         onclick="validarYEnviarIngresoProgramado();">
                     <i class="fas fa-save"></i> Sí, guardar
                 </button>
@@ -580,6 +622,7 @@
     let preingresoPage = 1;
     let preingresoQuery = "";
     let preingresoHasNext = false;
+    let ingresoProgramadoEnviado = false;
 
     const buscarPreingresosUrl = "{% url 'gestion_app:buscar_preingresos_ajax' %}";
 
@@ -596,6 +639,19 @@
             .replaceAll("'", "&#039;");
     }
 
+    function mostrarErrorFrontend(mensaje) {
+        const errorBox = document.getElementById("ingresoProgramadoFrontendError");
+        errorBox.innerText = mensaje;
+        errorBox.classList.remove("d-none");
+        errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function limpiarErrorFrontend() {
+        const errorBox = document.getElementById("ingresoProgramadoFrontendError");
+        errorBox.innerText = "";
+        errorBox.classList.add("d-none");
+    }
+
     function setSelectValue(id, value) {
         const element = document.getElementById(id);
         if (element) {
@@ -603,33 +659,77 @@
         }
     }
 
+    function setInputValue(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.value = value || "";
+        }
+    }
+
+    function limpiarSeleccionPreingreso() {
+        document.getElementById("preingreso_id").value = "";
+
+        document.getElementById("preingreso_display").innerHTML = `
+            <i class="fas fa-file-medical me-2"></i>
+            Ningún preingreso seleccionado
+        `;
+        document.getElementById("preingreso_display").classList.add("text-muted");
+
+        setInputValue("paciente_dni", "");
+        setInputValue("preingreso_estado", "");
+        setInputValue("fecha_probable_ingreso_mostrar", "");
+        setInputValue("episodio", "");
+        setSelectValue("obra_social", "");
+        setSelectValue("plan", "");
+        setInputValue("numero_afiliado", "");
+
+        setSelectValue("servicio", "");
+        setSelectValue("medico", "");
+
+        setInputValue("diagnostico", "");
+        setInputValue("contacto_nombre", "");
+        setInputValue("contacto_dni", "");
+        setInputValue("contacto_parentesco", "");
+        setInputValue("contacto_telefono", "");
+        setInputValue("observaciones", "");
+
+        document.getElementById("preingresoSeleccionadoBox").innerHTML = `
+            <i class="fas fa-info-circle"></i>
+            Todavía no se seleccionó ningún preingreso.
+        `;
+    }
+
     function seleccionarPreingreso(preingreso) {
         const nombreCompleto = `${preingreso.paciente_apellido || ""}, ${preingreso.paciente_nombre || ""}`.trim();
 
         document.getElementById("preingreso_id").value = preingreso.id;
-        document.getElementById("preingreso_numero_mostrar").value = preingreso.numero || "-";
-        document.getElementById("paciente_nombre").value = nombreCompleto;
-        document.getElementById("paciente_dni").value = preingreso.paciente_dni || "-";
-        document.getElementById("preingreso_estado").value = preingreso.estado || "-";
+
+        document.getElementById("preingreso_display").innerHTML = `
+            <i class="fas fa-file-circle-check text-success me-2"></i>
+            ${escapeHtml(preingreso.numero || "-")} · ${escapeHtml(nombreCompleto)}
+        `;
+        document.getElementById("preingreso_display").classList.remove("text-muted");
+
+        setInputValue("paciente_dni", preingreso.paciente_dni || "-");
+        setInputValue("preingreso_estado", preingreso.estado || "-");
+        setInputValue("fecha_probable_ingreso_mostrar", preingreso.fecha_probable_ingreso || "-");
 
         setSelectValue("obra_social", preingreso.obra_social_id);
         setSelectValue("plan", preingreso.plan_id);
 
-        document.getElementById("numero_afiliado").value = preingreso.numero_afiliado || "";
+        setInputValue("numero_afiliado", preingreso.numero_afiliado || "");
 
         setSelectValue("servicio", preingreso.servicio_id);
         setSelectValue("medico", preingreso.medico_id);
-        setSelectValue("origen_paciente", preingreso.origen_paciente);
-        setSelectValue("prioridad", preingreso.prioridad || "programado");
 
-        document.getElementById("diagnostico").value = preingreso.diagnostico || "";
+        setInputValue("diagnostico", preingreso.diagnostico || "");
+        setInputValue("episodio", preingreso.numero || "");
+        setInputValue("contacto_nombre", preingreso.contacto_nombre || "");
+        setInputValue("contacto_dni", preingreso.contacto_dni || "");
+        setInputValue("contacto_parentesco", preingreso.contacto_parentesco || "");
+        setInputValue("contacto_telefono", preingreso.contacto_telefono || "");
 
-        document.getElementById("contacto_nombre").value = preingreso.contacto_nombre || "";
-        document.getElementById("contacto_dni").value = preingreso.contacto_dni || "";
-        document.getElementById("contacto_parentesco").value = preingreso.contacto_parentesco || "";
-        document.getElementById("contacto_telefono").value = preingreso.contacto_telefono || "";
-
-        document.getElementById("observaciones").value = preingreso.observaciones || "";
+        setInputValue("observaciones", preingreso.observaciones || "");
 
         document.getElementById("preingresoSeleccionadoBox").innerHTML = `
             <i class="fas fa-check-circle text-success"></i>
@@ -640,6 +740,8 @@
             · DNI:
             <strong>${escapeHtml(preingreso.paciente_dni || "-")}</strong>
         `;
+
+        limpiarErrorFrontend();
 
         const modalElement = document.getElementById("modalBuscarPreingreso");
         const modal = bootstrap.Modal.getInstance(modalElement);
@@ -670,15 +772,13 @@
 
         preingresos.forEach(preingreso => {
             const tr = document.createElement("tr");
-
             const nombreCompleto = `${preingreso.paciente_apellido || ""}, ${preingreso.paciente_nombre || ""}`.trim();
 
             tr.innerHTML = `
-                <td><strong>${escapeHtml(preingreso.numero || "-")}</strong></td>
+                <td><strong>${escapeHtml(preingreso.id || "-")}</strong></td>
                 <td>${escapeHtml(nombreCompleto)}</td>
                 <td>${escapeHtml(preingreso.paciente_dni || "-")}</td>
-                <td>${escapeHtml(preingreso.fecha_probable_ingreso || "-")}</td>
-                <td>${escapeHtml(preingreso.estado || "-")}</td>
+                <td>${escapeHtml(preingreso.fecha_probable_ingreso || "-")}</td> 
                 <td class="text-end">
                     <button type="button" class="btn btn-sm btn-primary">
                         <i class="fas fa-check"></i> Seleccionar
@@ -750,17 +850,24 @@
     }
 
     function validarYEnviarIngresoProgramado() {
+        if (ingresoProgramadoEnviado) {
+            return;
+        }
+
         const preingresoId = document.getElementById("preingreso_id").value;
         const form = document.getElementById("formAgregarIngresoProgramado");
+        const btnConfirmar = document.getElementById("btnConfirmarGuardarIngresoProgramado");
+
+        limpiarErrorFrontend();
 
         if (!preingresoId) {
             const modalGuardar = bootstrap.Modal.getInstance(document.getElementById("modalGuardarIngresoProgramado"));
+
             if (modalGuardar) {
                 modalGuardar.hide();
             }
 
-            const modalPreingreso = new bootstrap.Modal(document.getElementById("modalBuscarPreingreso"));
-            modalPreingreso.show();
+            mostrarErrorFrontend("Debe seleccionar un preingreso antes de guardar el ingreso programado.");
             return;
         }
 
@@ -769,7 +876,39 @@
             return;
         }
 
+        ingresoProgramadoEnviado = true;
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
         form.submit();
+    }
+
+    function limpiarEstadoModalGuardar() {
+        const btnConfirmar = document.getElementById("btnConfirmarGuardarIngresoProgramado");
+
+        if (btnConfirmar) {
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerHTML = '<i class="fas fa-save"></i> Sí, guardar';
+        }
+
+        document.querySelectorAll(".modal").forEach(modalElement => {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+
+            if (modal) {
+                modal.hide();
+            }
+
+            modalElement.classList.remove("show");
+            modalElement.style.display = "none";
+            modalElement.setAttribute("aria-hidden", "true");
+        });
+
+        document.body.classList.remove("modal-open");
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+
+        document.querySelectorAll(".modal-backdrop").forEach(e => e.remove());
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -794,6 +933,29 @@
                 buscarPreingresos(false);
             }
         });
+    });
+
+    window.addEventListener("pageshow", function (event) {
+        const navEntries = performance.getEntriesByType("navigation");
+        const navType = navEntries.length ? navEntries[0].type : "";
+
+        const vinoPorBackForward = event.persisted || navType === "back_forward";
+
+        if (!vinoPorBackForward) {
+            return;
+        }
+
+        ingresoProgramadoEnviado = false;
+
+        const form = document.getElementById("formAgregarIngresoProgramado");
+
+        if (form) {
+            form.reset();
+        }
+
+        limpiarSeleccionPreingreso();
+        limpiarEstadoModalGuardar();
+        limpiarErrorFrontend();
     });
 </script>
 

@@ -2,25 +2,46 @@ from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 
+
 @receiver(post_migrate)
 def crear_grupos(sender, **kwargs):
-    admin_group, _ = Group.objects.get_or_create(name='Administrador')
-    vendedor_group, _ = Group.objects.get_or_create(name='Vendedor')
-    cargador_group, _ = Group.objects.get_or_create(name='Cargador')
+    administrador_group, _ = Group.objects.get_or_create(name='administrador')
+    admisionista_group, _ = Group.objects.get_or_create(name='admisionista')
+    facturista_group, _ = Group.objects.get_or_create(name='facturista')
 
-    permisos_vendedor = ['view_producto', 'view_venta', 'add_venta']
-    permisos_cargador = ['view_producto', 'add_producto']
+    permisos_admisionista = [
+        'view_preingreso',
+        'add_preingreso',
+        'change_preingreso',
+        'view_ordenautorizacion',
+        'add_ordenautorizacion',
+        'change_ordenautorizacion',
+        'view_detalleorden',
+        'add_detalleorden',
+        'change_detalleorden',
+    ]
 
-    for codename in permisos_vendedor:
+    permisos_facturista = [
+        'view_preingreso',
+        'view_ordenautorizacion',
+        'change_ordenautorizacion',
+        'view_detalleorden',
+        'change_detalleorden',
+    ]
+
+    # Administrador: todos los permisos
+    administrador_group.permissions.set(Permission.objects.all())
+
+    for codename in permisos_admisionista:
         try:
             permiso = Permission.objects.get(codename=codename)
-            vendedor_group.permissions.add(permiso)
+            admisionista_group.permissions.add(permiso)
         except Permission.DoesNotExist:
             pass
 
-    for codename in permisos_cargador:
+    for codename in permisos_facturista:
         try:
             permiso = Permission.objects.get(codename=codename)
-            cargador_group.permissions.add(permiso)
+            facturista_group.permissions.add(permiso)
         except Permission.DoesNotExist:
             pass

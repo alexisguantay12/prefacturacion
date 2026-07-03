@@ -3,10 +3,7 @@
 {% block content %}
 
 <style>
-    .page-wrap {
-        max-width: 1240px;
-        margin: 0 auto;
-    }
+    .page-wrap { max-width: 1240px; margin: 0 auto; }
 
     .form-hero {
         background: #ffffff;
@@ -75,9 +72,7 @@
         font-weight: 900;
     }
 
-    .section-body {
-        padding: 1.15rem;
-    }
+    .section-body { padding: 1.15rem; }
 
     .form-label {
         font-size: 0.8rem;
@@ -111,9 +106,7 @@
         box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
     }
 
-    .required-mark {
-        color: #dc2626;
-    }
+    .required-mark { color: #dc2626; }
 
     .actions-bar {
         position: sticky;
@@ -158,9 +151,7 @@
         color: #1f2937;
     }
 
-    .modal-xl {
-        max-width: 1050px;
-    }
+    .modal-xl { max-width: 1050px; }
 
     .paciente-table thead th {
         font-size: 0.8rem;
@@ -186,6 +177,11 @@
         padding: 0.7rem 0.9rem;
         color: #526179;
         font-size: 0.86rem;
+    }
+
+    .patient-display {
+        min-height: 44px;
+        cursor: default;
     }
 
     .empty-row {
@@ -214,6 +210,17 @@
             </a>
         </div>
     </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div id="ingresoFrontendError" class="alert alert-danger d-none" role="alert"></div>
 
     <form method="post" id="formAgregarIngreso">
         {% csrf_token %}
@@ -244,38 +251,39 @@
                         </label>
 
                         <div class="input-group">
-                            <input type="text"
-                                   id="paciente_nombre"
-                                   class="form-control"
-                                   placeholder="Seleccione un paciente..."
-                                   readonly>
+                            <div id="paciente_nombre"
+                                 class="form-control d-flex align-items-center bg-light text-muted patient-display">
+                                <i class="fas fa-user me-2"></i>
+                                Ningún paciente seleccionado
+                            </div>
 
                             <button type="button"
                                     class="btn btn-primary"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#modalBuscarPaciente">
+                                    data-bs-target="#modalBuscarPaciente"
+                                    title="Buscar paciente">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
 
                         <div class="mini-help mt-1">
-                            Busque por DNI, apellido o nombre.
+                            Seleccione un paciente desde la lupa. No se escribe manualmente.
                         </div>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">DNI</label>
-                        <input type="text" id="paciente_dni" class="form-control" placeholder="-" readonly>
+                        <input type="text" id="paciente_dni" class="form-control bg-light" placeholder="-" readonly>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Fecha nacimiento</label>
-                        <input type="text" id="paciente_fecha_nacimiento" class="form-control" placeholder="-" readonly>
+                        <input type="text" id="paciente_fecha_nacimiento" class="form-control bg-light" placeholder="-" readonly>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label">Teléfono</label>
-                        <input type="text" id="paciente_telefono" class="form-control" placeholder="-" readonly>
+                        <input type="text" id="paciente_telefono" class="form-control bg-light" placeholder="-" readonly>
                     </div>
 
                     <div class="col-md-12">
@@ -337,12 +345,13 @@
 
                     <div class="col-md-3">
                         <label class="form-label">
-                            N° episodio <span class="required-mark">*</span>
+                            Episodio <span class="required-mark">*</span>
                         </label>
                         <input type="text"
-                               name="numero"
+                               name="episodio"
+                               id="episodio"
                                class="form-control"
-                               placeholder="Ej: 123456"
+                               placeholder="Ingrese el número de episodio"
                                required>
                     </div>
 
@@ -379,27 +388,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Origen del paciente</label>
-                        <select name="origen_paciente" class="form-select">
-                            <option value="domicilio">Domicilio</option>
-                            <option value="guardia">Guardia</option>
-                            <option value="consultorio">Consultorio</option>
-                            <option value="derivacion">Derivación</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Prioridad</label>
-                        <select name="prioridad" class="form-select">
-                            <option value="normal" selected>Normal</option>
-                            <option value="urgente">Urgente</option>
-                            <option value="programado">Programado</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label">Diagnóstico</label>
                         <textarea name="diagnostico"
                                   class="form-control"
@@ -557,18 +546,19 @@
                         </div>
 
                         <div class="table-responsive border rounded-3">
-                            <table class="table table-sm table-hover align-middle mb-0 paciente-table">
+                            <table class="table table-sm align-middle mb-0 paciente-table">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Paciente</th>
                                         <th>DNI</th>
                                         <th>Fecha nacimiento</th>
+                                        <th>Teléfono</th>
                                         <th class="text-end">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pacientesResultadoBody">
                                     <tr>
-                                        <td colspan="4" class="empty-row">
+                                        <td colspan="5" class="empty-row">
                                             <i class="fas fa-magnifying-glass"></i>
                                             Busque un paciente por DNI, apellido o nombre.
                                         </td>
@@ -725,6 +715,7 @@
 
                 <button type="button"
                         class="btn btn-primary"
+                        id="btnConfirmarGuardarIngreso"
                         onclick="validarYEnviarIngreso();">
                     <i class="fas fa-save"></i> Sí, guardar
                 </button>
@@ -738,6 +729,7 @@
     let pacientePage = 1;
     let pacienteQuery = "";
     let pacienteHasNext = false;
+    let ingresoEnviado = false;
 
     const buscarPacienteUrl = "{% url 'gestion_app:buscar_pacientes_ajax' %}";
     const crearPacienteUrl = "{% url 'gestion_app:crear_paciente_ajax' %}";
@@ -762,9 +754,7 @@
     }
 
     function escapeHtml(value) {
-        if (value === null || value === undefined) {
-            return "";
-        }
+        if (value === null || value === undefined) return "";
 
         return String(value)
             .replaceAll("&", "&amp;")
@@ -774,11 +764,28 @@
             .replaceAll("'", "&#039;");
     }
 
+    function mostrarErrorFrontend(mensaje) {
+        const errorBox = document.getElementById("ingresoFrontendError");
+        errorBox.innerText = mensaje;
+        errorBox.classList.remove("d-none");
+        errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function limpiarErrorFrontend() {
+        const errorBox = document.getElementById("ingresoFrontendError");
+        errorBox.innerText = "";
+        errorBox.classList.add("d-none");
+    }
+
     function seleccionarPaciente(paciente) {
         const nombreCompleto = `${paciente.apellido || ""}, ${paciente.nombre || ""}`.trim();
 
         document.getElementById("paciente_id").value = paciente.id;
-        document.getElementById("paciente_nombre").value = nombreCompleto;
+
+        document.getElementById("paciente_nombre").innerHTML =
+            `<i class="fas fa-user-check text-success me-2"></i>${escapeHtml(nombreCompleto)}`;
+
+        document.getElementById("paciente_nombre").classList.remove("text-muted");
         document.getElementById("paciente_dni").value = paciente.dni || "-";
         document.getElementById("paciente_fecha_nacimiento").value = paciente.fecha_nacimiento || "-";
         document.getElementById("paciente_telefono").value = paciente.telefono || "-";
@@ -790,6 +797,8 @@
             · DNI: <strong>${escapeHtml(paciente.dni || "-")}</strong>
         `;
 
+        limpiarErrorFrontend();
+
         const modalElement = document.getElementById("modalBuscarPaciente");
         const modal = bootstrap.Modal.getInstance(modalElement);
 
@@ -797,7 +806,7 @@
             modal.hide();
         }
     }
-
+    
     function renderPacientes(pacientes, append = false) {
         const tbody = document.getElementById("pacientesResultadoBody");
 
@@ -808,7 +817,7 @@
         if (pacientes.length === 0 && !append) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">
+                    <td colspan="5" class="empty-row">
                         <i class="fas fa-circle-info"></i>
                         No se encontraron pacientes.
                     </td>
@@ -826,6 +835,7 @@
                 </td>
                 <td>${escapeHtml(paciente.dni || "-")}</td>
                 <td>${escapeHtml(paciente.fecha_nacimiento || "-")}</td>
+                <td>${escapeHtml(paciente.telefono || "-")}</td>
                 <td class="text-end">
                     <button type="button" class="btn btn-sm btn-primary">
                         <i class="fas fa-check"></i> Seleccionar
@@ -856,7 +866,7 @@
             info.innerText = "Ingrese al menos 2 caracteres para buscar.";
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">
+                    <td colspan="5" class="empty-row">
                         <i class="fas fa-magnifying-glass"></i>
                         Busque un paciente por DNI, apellido o nombre.
                     </td>
@@ -871,7 +881,7 @@
         if (reset) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">
+                    <td colspan="5" class="empty-row">
                         <i class="fas fa-spinner fa-spin"></i>
                         Buscando...
                     </td>
@@ -902,7 +912,7 @@
                 info.innerText = "Ocurrió un error al buscar pacientes.";
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="empty-row text-danger">
+                        <td colspan="5" class="empty-row text-danger">
                             No se pudo realizar la búsqueda.
                         </td>
                     </tr>
@@ -911,17 +921,22 @@
     }
 
     function validarYEnviarIngreso() {
+        if (ingresoEnviado) return;
+
         const pacienteId = document.getElementById("paciente_id").value;
         const form = document.getElementById("formAgregarIngreso");
+        const btnConfirmar = document.getElementById("btnConfirmarGuardarIngreso");
+
+        limpiarErrorFrontend();
 
         if (!pacienteId) {
             const modalGuardar = bootstrap.Modal.getInstance(document.getElementById("modalGuardarIngreso"));
+
             if (modalGuardar) {
                 modalGuardar.hide();
             }
 
-            const modalPaciente = new bootstrap.Modal(document.getElementById("modalBuscarPaciente"));
-            modalPaciente.show();
+            mostrarErrorFrontend("Debe seleccionar un paciente antes de guardar el ingreso.");
             return;
         }
 
@@ -929,6 +944,9 @@
             form.reportValidity();
             return;
         }
+
+        ingresoEnviado = true;
+ 
 
         form.submit();
     }
@@ -995,6 +1013,17 @@
                 errorBox.classList.remove("d-none");
             });
         });
+    });
+
+    window.addEventListener("pageshow", function (event) {
+        const navEntries = performance.getEntriesByType("navigation");
+        const navType = navEntries.length ? navEntries[0].type : "";
+
+        const vinoPorBackForward = event.persisted || navType === "back_forward";
+
+        if (vinoPorBackForward) {
+            window.location.href = "{% url 'gestion_app:lista_ingresos' %}";
+        }
     });
 </script>
 

@@ -143,6 +143,9 @@
             margin-bottom: 4px;
             font-size: 10px;
         }
+        .diagnostico-simple div{
+            min-height: 18px;
+        }
 
         table {
             width: 100%;
@@ -256,7 +259,7 @@
 
                 <div class="order-data">
                     <div><b>Orden</b> {{ orden.id }}</div>
-                    <div><b>Tipo</b> {{ orden.get_tipo_display }}</div>
+                    <div><b>Ident.</b> HPSCA </div>
                     <div>
                         <b>Fecha</b>
                         {% if orden.fecha %}
@@ -288,6 +291,8 @@
                     <b>Plan:</b>
                     {% if preingreso.plan %}
                         {{ preingreso.plan.nombre }}
+                    {%else%}
+                        -
                     {% endif %}
                 </div>
 
@@ -297,13 +302,13 @@
                 </div>
 
                 <div>
-                    <b>Historia Clínica:</b>
-                    {{ preingreso.paciente.historia_clinica|default:preingreso.paciente.id }}
+                    <b>Nº Preingreso:</b>
+                    {{preingreso.id}}
                 </div>
 
-                <div>
-                    <b>Nº Preingreso:</b>
-                    {{ preingreso.numero|default:preingreso.id }}
+                <div> 
+                    <b>Nº Episodio:</b>
+                    {{ preingreso.episodio|default:"-" }}
                 </div>
 
                 <div>
@@ -314,7 +319,9 @@
                 <div>
                     <b>Fecha Ingreso:</b>
                     {% if preingreso.fecha_ingreso %}
-                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y"  }}
+                    {%else%}
+                        -
                     {% endif %}
                 </div>
 
@@ -327,16 +334,22 @@
             </div>
 
             <div class="diagnostico-simple">
-                <b>Diagnóstico:</b>
-                {{ preingreso.diagnostico|default:"" }}
-            </div>
+                <div><b>Diagnóstico:</b>
+                {{ preingreso.diagnostico|default:"-" }}
+                </div>
+                <div>
+                    
+                <b>Observaciones:</b>
+                {{ preingreso.observaciones|default:"-" }}
+                </div>
+            </div> 
 
             <table>
                 <thead>
                     <tr>
                         <th style="width: 11%;">Código</th>
                         <th style="width: 6%;">Cant.</th>
-                        <th style="width: 14%;">Tipo de Honorarios</th>
+                        <th style="width: 14%;">Concepto</th>
                         <th style="width: 14%;">Nivel</th>
                         <th>Profesional</th>
                         <th style="width: 10%;">Desde</th>
@@ -366,12 +379,10 @@
                             </td>
 
                             <td>
-                                {% if detalle.medico %}
-                                    {{ detalle.medico.apellido }}, {{ detalle.medico.nombre }}
-                                {% else %}
-                                    {% if preingreso.medico %}
-                                        {{ preingreso.medico.apellido }}, {{ preingreso.medico.nombre }}
-                                    {% endif %}
+                                {% if detalle.orden.medico %}
+                                    MP:{{detalle.orden.medico.matricula}};
+                                    {{ detalle.orden.medico.apellido }}, {{ detalle.orden.medico.nombre }}
+                             
                                 {% endif %}
                             </td>
 
@@ -442,7 +453,7 @@
     </div>
 
     <div class="linea-corte"></div>
-
+    {% if duplicado %}
     <!-- DUPLICADO -->
     <div class="copia">
 
@@ -460,7 +471,7 @@
 
                 <div class="order-data">
                     <div><b>Orden</b> {{ orden.id }}</div>
-                    <div><b>Tipo</b> {{ orden.get_tipo_display }}</div>
+                    <div><b>Ident.</b> HPSCA </div>
                     <div>
                         <b>Fecha</b>
                         {% if orden.fecha %}
@@ -492,6 +503,8 @@
                     <b>Plan:</b>
                     {% if preingreso.plan %}
                         {{ preingreso.plan.nombre }}
+                    {%else%}
+                        -
                     {% endif %}
                 </div>
 
@@ -501,13 +514,13 @@
                 </div>
 
                 <div>
-                    <b>Historia Clínica:</b>
-                    {{ preingreso.paciente.historia_clinica|default:preingreso.paciente.id }}
+                    <b>Nº Preingreso:</b>
+                    {{preingreso.id }}
                 </div>
 
-                <div>
-                    <b>Nº Preingreso:</b>
-                    {{ preingreso.numero|default:preingreso.id }}
+                <div> 
+                    <b>Nº Episodio:</b>
+                    {{ preingreso.episodio|default:"-" }}
                 </div>
 
                 <div>
@@ -518,7 +531,9 @@
                 <div>
                     <b>Fecha Ingreso:</b>
                     {% if preingreso.fecha_ingreso %}
-                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y"  }}
+                    {%else%}
+                        -
                     {% endif %}
                 </div>
 
@@ -531,16 +546,23 @@
             </div>
 
             <div class="diagnostico-simple">
-                <b>Diagnóstico:</b>
-                {{ preingreso.diagnostico|default:"" }}
-            </div>
+                <div><b>Diagnóstico:</b>
+                {{ preingreso.diagnostico|default:"-" }}
+                </div>
+                <div>
+                    
+                <b>Observaciones:</b>
+                {{ preingreso.observaciones|default:"-" }}
+                </div>
+            </div> 
+
 
             <table>
                 <thead>
                     <tr>
                         <th style="width: 11%;">Código</th>
                         <th style="width: 6%;">Cant.</th>
-                        <th style="width: 14%;">Tipo de Honorarios</th>
+                        <th style="width: 14%;">Concepto</th>
                         <th style="width: 14%;">Nivel</th>
                         <th>Profesional</th>
                         <th style="width: 10%;">Desde</th>
@@ -570,12 +592,10 @@
                             </td>
 
                             <td>
-                                {% if detalle.medico %}
-                                    {{ detalle.medico.apellido }}, {{ detalle.medico.nombre }}
-                                {% else %}
-                                    {% if preingreso.medico %}
-                                        {{ preingreso.medico.apellido }}, {{ preingreso.medico.nombre }}
-                                    {% endif %}
+                                {% if detalle.orden.medico %}
+                                    MP:{{detalle.orden.medico.matricula}};
+                                    {{ detalle.orden.medico.apellido }}, {{ detalle.orden.medico.nombre }}
+                             
                                 {% endif %}
                             </td>
 
@@ -643,6 +663,7 @@
         </div>
 
     </div>
+    {% endif %}
 
 </div>
 

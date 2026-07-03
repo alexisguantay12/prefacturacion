@@ -172,7 +172,18 @@
         font-size: 0.78rem;
         color: #6b7280;
     }
-
+    
+    .episode-badge{
+        display:inline-block;
+        margin-left:.6rem;
+        padding:.18rem .65rem;
+        background:#587bb0;
+        color:#fff;
+        border-radius:999px;
+        font-size:.74rem;
+        font-weight:700;
+        letter-spacing:.3px;
+    }
     .detalle-table {
         min-width: 900px;
     }
@@ -225,18 +236,7 @@
     .modal-xl {
         max-width: 1080px;
     }
-    
-    .episode-badge{
-        display:inline-block;
-        margin-left:.6rem;
-        padding:.18rem .65rem;
-        background:#587bb0;
-        color:#fff;
-        border-radius:999px;
-        font-size:.74rem;
-        font-weight:700;
-        letter-spacing:.3px;
-    }
+
     .prestacion-table thead th {
         font-size: 0.8rem;
         color: #374151;
@@ -288,12 +288,12 @@
                     Nueva Orden de Autorización
                 </h2>
                 <p>
-                    Carga de orden vinculada al preingreso. El médico se carga una sola vez en el encabezado.
+                    Carga de orden vinculada al ingreso. El médico se carga una sola vez en el encabezado.
                 </p>
             </div>
 
-            <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary btn-sm-custom">
-                <i class="fas fa-arrow-left"></i> Volver
+            <a href="{% url 'gestion_app:detalle_ingreso' preingreso.id %}" class="btn btn-outline-secondary btn-sm-custom">
+                <i class="fas fa-arrow-left"></i> Volver al ingreso
             </a>
         </div>
     </div>
@@ -316,13 +316,17 @@
                     {% endif %}
                     {% if preingreso.plan %}
                         · Plan {{ preingreso.plan.nombre }}
-                    {% endif %}
-                    {% if preingreso.fecha_probable_ingreso %}
-                        · Ingreso probable {{ preingreso.fecha_probable_ingreso|date:"d/m/Y" }}
-                    {% endif %}
+                    {% endif %} 
+                    {% if preingreso.numero %}
                         <span class="episode-badge">
-                            Numero Preingreso: {{ preingreso.id }}
+                            Numero Ingreso: {{ preingreso.numero }}
                         </span>
+                    {% endif %}
+                    {% if preingreso.episodio %}
+                        <span class="episode-badge">
+                            Episodio {{ preingreso.episodio }}
+                        </span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -499,7 +503,7 @@
         </div>
 
         <div class="actions-bar">
-            <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary">
+            <a href="{% url 'gestion_app:detalle_ingreso' preingreso.id %}" class="btn btn-outline-secondary">
                 <i class="fas fa-times"></i> Cancelar
             </a>
 
@@ -1081,6 +1085,10 @@
                 buscarPrestaciones(true);
             }
         });
+
+        actualizarNumeracionFilas();
+
+
         window.addEventListener("pageshow", function (event) {
             const navEntries = performance.getEntriesByType("navigation");
             const navType = navEntries.length ? navEntries[0].type : "";
@@ -1091,8 +1099,6 @@
                 window.location.replace("{% url 'gestion_app:detalle_ingreso' preingreso.id %}");
             }
         });
-
-        actualizarNumeracionFilas();
     });
 </script>
 

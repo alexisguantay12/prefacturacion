@@ -2,11 +2,13 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db import transaction
-from django.utils import timezone
+from django.db import transaction 
+from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+
+#ANCHOR: Seccion Principal
 
 
-# Create your vi 
 def home_view(request):
     return render(request,'gestion/orden_list.html')
 
@@ -14,8 +16,10 @@ def home_view(request):
 from django.shortcuts import render
 from django.db.models import Count, Q
 from .models import Preingreso
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def lista_preingresos(request):
     query = request.GET.get("q", "")
     estado = request.GET.get("estado", "")
@@ -64,7 +68,7 @@ def lista_preingresos(request):
 
 
 from .models import  *
-
+from django.db import transaction
 from applications.entidades.models import * 
  
 from .models import Preingreso
@@ -72,12 +76,21 @@ from .models import Preingreso
  
 from .models import Preingreso
 
-
 def agregar_preingreso(request):
     obras_sociales = ObraSocial.objects.all().order_by("nombre")
     medicos = Medico.objects.all().order_by("apellido", "nombre")
     servicios = Servicio.objects.all().order_by("nombre")
     planes = Plan.objects.all().order_by("obra_social__nombre", "nombre")
+
+    def render_form(paciente_seleccionado=None):
+        return render(request, "gestion/preingreso/agregar_preingreso.html", {
+            "obras_sociales": obras_sociales,
+            "planes": planes,
+            "medicos": medicos,
+            "servicios": servicios,
+            "form_data": request.POST,
+            "paciente_seleccionado": paciente_seleccionado,
+        })
 
     if request.method == "POST":
         paciente_id = request.POST.get("paciente")
@@ -97,29 +110,30 @@ def agregar_preingreso(request):
         contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
         contacto_telefono = request.POST.get("contacto_telefono", "").strip()
         observaciones = request.POST.get("observaciones", "").strip()
+        paciente_telefono = request.POST.get("paciente_telefono", "").strip()
+
+        paciente = Paciente.objects.filter(id=paciente_id).first() if paciente_id else None
+        obra_social = ObraSocial.objects.filter(id=obra_social_id).first() if obra_social_id else None
 
         if not paciente_id:
             messages.error(request, "Debe seleccionar un paciente.")
-            return redirect("gestion_app:agregar_preingreso")
-
-        if not obra_social_id:
-            messages.error(request, "Debe seleccionar una obra social.")
-            return redirect("gestion_app:agregar_preingreso")
-
-        if not fecha_probable_ingreso:
-            messages.error(request, "Debe indicar la fecha probable de ingreso.")
-            return redirect("gestion_app:agregar_preingreso")
-
-        paciente = Paciente.objects.filter(id=paciente_id).first()
-        obra_social = ObraSocial.objects.filter(id=obra_social_id).first()
+            return render_form()
 
         if not paciente:
             messages.error(request, "El paciente seleccionado no existe.")
-            return redirect("gestion_app:agregar_preingreso")
+            return render_form()
+
+        if not obra_social_id:
+            messages.error(request, "Debe seleccionar una obra social.")
+            return render_form(paciente)
 
         if not obra_social:
             messages.error(request, "La obra social seleccionada no existe.")
-            return redirect("gestion_app:agregar_preingreso")
+            return render_form(paciente)
+
+        if not fecha_probable_ingreso:
+            messages.error(request, "Debe indicar la fecha probable de ingreso.")
+            return render_form(paciente)
 
         plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
         medico = Medico.objects.filter(id=medico_id).first() if medico_id else None
@@ -127,26 +141,35 @@ def agregar_preingreso(request):
 
         if plan and plan.obra_social_id != obra_social.id:
             messages.error(request, "El plan seleccionado no corresponde a la obra social indicada.")
-            return redirect("gestion_app:agregar_preingreso")
+            return render_form(paciente)
 
-        preingreso = Preingreso.objects.create(
-            paciente=paciente,
-            obra_social=obra_social,
-            plan=plan,
-            numero_afiliado=numero_afiliado or None,
-            medico=medico,
-            servicio=servicio,
-            fecha_probable_ingreso=fecha_probable_ingreso,
-            diagnostico=diagnostico or None,
-            origen_paciente=origen_paciente,
-            prioridad=prioridad,
-            contacto_nombre=contacto_nombre or None,
-            contacto_dni=contacto_dni or None,
-            contacto_parentesco=contacto_parentesco or None,
-            contacto_telefono=contacto_telefono or None,
-            observaciones=observaciones or None,
-            estado="pendiente",
-        )
+        try:
+            with transaction.atomic():
+                paciente.telefono = paciente_telefono
+                paciente.save(update_fields=["telefono"])
+
+                preingreso = Preingreso.objects.create(
+                    paciente=paciente,
+                    obra_social=obra_social,
+                    plan=plan,
+                    numero_afiliado=numero_afiliado or None,
+                    medico=medico,
+                    servicio=servicio,
+                    fecha_probable_ingreso=fecha_probable_ingreso,
+                    diagnostico=diagnostico or None,
+                    origen_paciente=origen_paciente,
+                    prioridad=prioridad,
+                    contacto_nombre=contacto_nombre or None,
+                    contacto_dni=contacto_dni or None,
+                    contacto_parentesco=contacto_parentesco or None,
+                    contacto_telefono=contacto_telefono or None,
+                    observaciones=observaciones or None,
+                    estado="pendiente",
+                )
+
+        except Exception:
+            messages.error(request, "No se pudo guardar el preingreso. Intente nuevamente.")
+            return render_form(paciente)
 
         messages.success(request, f"El preingreso #{preingreso.id} fue creado correctamente.")
         return redirect("gestion_app:lista_preingresos")
@@ -156,8 +179,9 @@ def agregar_preingreso(request):
         "planes": planes,
         "medicos": medicos,
         "servicios": servicios,
+        "form_data": {},
+        "paciente_seleccionado": None,
     })
-
 
 
 from django.http import JsonResponse
@@ -278,12 +302,13 @@ def detalle_preingreso(request, preingreso_id):
         ),
         id=preingreso_id
     )
-
+    medicos = Medico.objects.all().order_by("apellido", "nombre")
     ordenes = OrdenAutorizacion.objects.filter(preingreso=preingreso).order_by("-created_at", "-id")
 
     return render(request, "gestion/preingreso/detalle_preingreso.html", {
         "preingreso": preingreso,
         "ordenes": ordenes,
+        "medicos":medicos
     })
 
 
@@ -421,7 +446,32 @@ def buscar_prestacion_por_codigo_ajax(request):
         "nombre": prestacion.nombre,
     })
 
+def detalle_orden_preingreso(request, orden_id):
+    orden = get_object_or_404(
+        OrdenAutorizacion.objects.select_related(
+            "preingreso",
+            "preingreso__paciente",
+            "preingreso__obra_social",
+            "preingreso__plan",
+        ),
+        pk=orden_id
+    )
 
+    detalles = (
+        orden.detalles
+        .select_related("prestacion", "medico")
+        .all()
+        .order_by("id")
+    )
+
+    return render(
+        request,
+        "gestion/orden/detalle_orden_preingreso.html",
+        {
+            "orden": orden,
+            "detalles": detalles,
+        }
+    )
 
 def detalle_orden(request, orden_id):
     orden = get_object_or_404(
@@ -450,7 +500,7 @@ def detalle_orden(request, orden_id):
         }
     )
 
-
+from datetime import date
 
 
 def agregar_orden_preingreso(request, preingreso_id):
@@ -470,8 +520,7 @@ def agregar_orden_preingreso(request, preingreso_id):
     if request.method == "POST":
         tipo = request.POST.get("tipo")
         fecha = request.POST.get("fecha") or None
-        medico_id = request.POST.get("medico") or None
-        numero_cupon = request.POST.get("numero_cupon", "").strip()
+        medico_id = request.POST.get("medico") or None 
         observaciones = request.POST.get("observaciones", "").strip()
         detalles_json = request.POST.get("detalles_json", "[]")
         print("El medico id es:",medico_id)
@@ -479,10 +528,6 @@ def agregar_orden_preingreso(request, preingreso_id):
             detalles = json.loads(detalles_json)
         except json.JSONDecodeError:
             detalles = []
-
-        if not tipo:
-            messages.error(request, "Debe seleccionar el tipo de orden.")
-            return redirect("gestion_app:agregar_orden_preingreso", preingreso_id=preingreso.id)
 
         if not medico_id:
             messages.error(request, "Debe seleccionar el médico de la orden.")
@@ -501,11 +546,9 @@ def agregar_orden_preingreso(request, preingreso_id):
         try:
             with transaction.atomic():
                 orden = OrdenAutorizacion.objects.create(
-                    preingreso=preingreso,
-                    tipo=tipo,
+                    preingreso=preingreso, 
                     fecha=fecha,
-                    medico=medico,
-                    numero_cupon=numero_cupon or None,
+                    medico=medico, 
                     observaciones=observaciones or None,
                 )
 
@@ -530,16 +573,22 @@ def agregar_orden_preingreso(request, preingreso_id):
                     )
 
             messages.success(request, "La orden fue cargada correctamente.")
-            return redirect("gestion_app:lista_ordenes_preingreso", preingreso_id=preingreso.id)
+            return redirect("gestion_app:detalle_preingreso", preingreso_id=preingreso.id)
 
         except Exception as e:
             messages.error(request, f"Ocurrió un error al guardar la orden: {e}")
             print("El error es:", e)
             return redirect("gestion_app:agregar_orden_preingreso", preingreso_id=preingreso.id)
+        
+
+    medico_default = medicos.filter(matricula="9063").first()
+ 
 
     return render(request, "gestion/orden/agregar_orden_preingreso.html", {
         "preingreso": preingreso,
         "medicos": medicos,
+        "fecha_hoy": date.today().isoformat(),
+        "medico_default": medico_default,
         "tipos_orden": OrdenAutorizacion.TIPOS,
         "honorarios_gastos": DetalleOrden.HONORARIOS_GASTOS,
         "tipos_honorario": DetalleOrden.TIPOS_HONORARIO,
@@ -597,33 +646,22 @@ def agregar_ingreso(request):
         medico_id = request.POST.get("medico") or None
         servicio_id = request.POST.get("servicio") or None
 
-        numero = request.POST.get("numero", "").strip()
         fecha_ingreso = request.POST.get("fecha_ingreso") or None
         numero_afiliado = request.POST.get("numero_afiliado", "").strip()
-        diagnostico = request.POST.get("diagnostico", "").strip()
-        origen_paciente = request.POST.get("origen_paciente") or "domicilio"
-        prioridad = request.POST.get("prioridad") or "normal"
+        diagnostico = request.POST.get("diagnostico", "").strip() 
 
         contacto_nombre = request.POST.get("contacto_nombre", "").strip()
         contacto_dni = request.POST.get("contacto_dni", "").strip()
         contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
         contacto_telefono = request.POST.get("contacto_telefono", "").strip()
         observaciones = request.POST.get("observaciones", "").strip()
-
+        episodio = request.POST.get("episodio").strip()
         if not paciente_id:
             messages.error(request, "Debe seleccionar un paciente.")
             return redirect("gestion_app:agregar_ingreso")
 
         if not obra_social_id:
             messages.error(request, "Debe seleccionar una obra social.")
-            return redirect("gestion_app:agregar_ingreso")
-
-        if not numero:
-            messages.error(request, "Debe indicar el número de episodio.")
-            return redirect("gestion_app:agregar_ingreso")
-
-        if Preingreso.objects.filter(numero=numero).exists():
-            messages.error(request, "Ya existe un ingreso con ese número de episodio.")
             return redirect("gestion_app:agregar_ingreso")
 
         if not fecha_ingreso:
@@ -649,27 +687,40 @@ def agregar_ingreso(request):
             messages.error(request, "El plan seleccionado no corresponde a la obra social indicada.")
             return redirect("gestion_app:agregar_ingreso")
 
-        ingreso = Preingreso.objects.create(
-            paciente=paciente,
-            obra_social=obra_social,
-            plan=plan,
-            numero_afiliado=numero_afiliado or None,
-            medico=medico,
-            servicio=servicio,
-            numero=numero,
-            fecha_ingreso=fecha_ingreso,
-            fecha_probable_ingreso=None,
-            diagnostico=diagnostico or None,
-            origen_paciente=origen_paciente,
-            prioridad=prioridad,
-            contacto_nombre=contacto_nombre or None,
-            contacto_dni=contacto_dni or None,
-            contacto_parentesco=contacto_parentesco or None,
-            contacto_telefono=contacto_telefono or None,
-            observaciones=observaciones or None,
-            estado="ingresado",
-        )
-        print(ingreso)
+        try:
+            with transaction.atomic():
+                numerador, creado = Numerador.objects.select_for_update().get_or_create(
+                    nombre="ingreso",
+                    defaults={"ultimo": 0}
+                )
+
+                numerador.ultimo += 1
+                numerador.save(update_fields=["ultimo"])
+
+                ingreso = Preingreso.objects.create(
+                    paciente=paciente,
+                    obra_social=obra_social,
+                    plan=plan,
+                    numero_afiliado=numero_afiliado or None,
+                    medico=medico,
+                    servicio=servicio,
+                    numero=numerador.ultimo,
+                    fecha_ingreso=fecha_ingreso,
+                    fecha_probable_ingreso=None,
+                    diagnostico=diagnostico or None, 
+                    episodio=episodio,
+                    contacto_nombre=contacto_nombre or None,
+                    contacto_dni=contacto_dni or None,
+                    contacto_parentesco=contacto_parentesco or None,
+                    contacto_telefono=contacto_telefono or None,
+                    observaciones=observaciones or None,
+                    estado="ingresado",
+                )
+
+        except Exception:
+            messages.error(request, "No se pudo guardar el ingreso. Intente nuevamente.")
+            return redirect("gestion_app:agregar_ingreso")
+
         messages.success(request, f"El ingreso #{ingreso.numero} fue creado correctamente.")
         return redirect("gestion_app:lista_ingresos")
 
@@ -677,10 +728,235 @@ def agregar_ingreso(request):
         "obras_sociales": obras_sociales,
         "planes": planes,
         "medicos": medicos,
-        "servicios": servicios, 
+        "servicios": servicios,
+    })
+
+def detalle_ingreso(request, preingreso_id):
+    preingreso = get_object_or_404(
+        Preingreso.objects.select_related(
+            "paciente",
+            "obra_social",
+            "plan",
+            "medico",
+            "servicio",
+        ),
+        id=preingreso_id
+    )
+
+    ordenes = (
+        OrdenAutorizacion.objects
+        .filter(preingreso=preingreso)
+        .select_related("medico")
+        .annotate(cantidad_prestaciones=Count("detalles"))
+        .order_by("-created_at", "-id")
+    ) 
+    medicos = Medico.objects.all().order_by("apellido", "nombre")
+    
+    return render(request, "gestion/ingreso/detalle_ingreso.html", {
+        "preingreso": preingreso,
+        "ordenes": ordenes,
+        "medicos":medicos
     })
 
 
+def editar_ingreso(request, ingreso_id):
+    ingreso = get_object_or_404(
+        Preingreso,
+        id=ingreso_id,
+        estado="ingresado"
+    )
+
+    obras_sociales = ObraSocial.objects.all().order_by("nombre")
+    medicos = Medico.objects.all().order_by("apellido", "nombre")
+    servicios = Servicio.objects.all().order_by("nombre")
+    planes = Plan.objects.all().order_by("obra_social__nombre", "nombre")
+
+    if request.method == "POST":
+        obra_social_id = request.POST.get("obra_social")
+        plan_id = request.POST.get("plan") or None
+        medico_id = request.POST.get("medico") or None
+        servicio_id = request.POST.get("servicio") or None
+
+        episodio = request.POST.get("episodio", "").strip()
+        fecha_ingreso = request.POST.get("fecha_ingreso") or None
+        numero_afiliado = request.POST.get("numero_afiliado", "").strip()
+        diagnostico = request.POST.get("diagnostico", "").strip()
+
+        contacto_nombre = request.POST.get("contacto_nombre", "").strip()
+        contacto_dni = request.POST.get("contacto_dni", "").strip()
+        contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
+        contacto_telefono = request.POST.get("contacto_telefono", "").strip()
+        observaciones = request.POST.get("observaciones", "").strip()
+
+        if not obra_social_id:
+            messages.error(request, "Debe seleccionar una obra social.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        if not episodio:
+            messages.error(request, "Debe indicar el número de episodio.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        if not fecha_ingreso:
+            messages.error(request, "Debe indicar la fecha de ingreso.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        obra_social = ObraSocial.objects.filter(id=obra_social_id).first()
+
+        if not obra_social:
+            messages.error(request, "La obra social seleccionada no existe.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        numero_existente = Preingreso.objects.filter(
+            episodio=episodio
+        ).exclude(id=ingreso.id).exists()
+
+        if numero_existente:
+            messages.error(request, "Ya existe otro ingreso con ese número de episodio.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
+        medico = Medico.objects.filter(id=medico_id).first() if medico_id else None
+        servicio = Servicio.objects.filter(id=servicio_id).first() if servicio_id else None
+
+        if plan and plan.obra_social_id != obra_social.id:
+            messages.error(request, "El plan seleccionado no corresponde a la obra social indicada.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        try:
+            with transaction.atomic():
+                ingreso.obra_social = obra_social
+                ingreso.plan = plan
+                ingreso.medico = medico
+                ingreso.servicio = servicio
+
+                ingreso.episodio = episodio
+                ingreso.fecha_ingreso = fecha_ingreso
+                ingreso.fecha_probable_ingreso = None
+
+                ingreso.numero_afiliado = numero_afiliado or None
+                ingreso.diagnostico = diagnostico or None
+
+                ingreso.contacto_nombre = contacto_nombre or None
+                ingreso.contacto_dni = contacto_dni or None
+                ingreso.contacto_parentesco = contacto_parentesco or None
+                ingreso.contacto_telefono = contacto_telefono or None
+                ingreso.observaciones = observaciones or None
+
+                ingreso.estado = "ingresado"
+                ingreso.save()
+
+        except Exception:
+            messages.error(request, "No se pudo actualizar el ingreso. Intente nuevamente.")
+            return redirect("gestion_app:editar_ingreso", ingreso_id=ingreso.id)
+
+        messages.success(request, f"El ingreso #{ingreso.numero} fue actualizado correctamente.")
+        return redirect(
+            "gestion_app:detalle_ingreso",
+            preingreso_id=ingreso.id
+        )
+
+    return render(request, "gestion/ingreso/editar_ingreso.html", {
+        "ingreso": ingreso,
+        "obras_sociales": obras_sociales,
+        "planes": planes,
+        "medicos": medicos,
+        "servicios": servicios,
+    })
+
+
+
+
+def agregar_orden_ingreso(request, preingreso_id):
+    preingreso = get_object_or_404(
+        Preingreso.objects.select_related(
+            "paciente",
+            "obra_social",
+            "plan",
+            "medico",
+            "servicio",
+        ),
+        id=preingreso_id
+    )
+
+    medicos = Medico.objects.all().order_by("apellido", "nombre")
+
+    if request.method == "POST":
+        tipo = request.POST.get("tipo")
+        fecha = request.POST.get("fecha") or None
+        medico_id = request.POST.get("medico") or None 
+        observaciones = request.POST.get("observaciones", "").strip()
+        detalles_json = request.POST.get("detalles_json", "[]")
+        print("El medico id es:",medico_id)
+        try:
+            detalles = json.loads(detalles_json)
+        except json.JSONDecodeError:
+            detalles = []
+
+        if not medico_id:
+            messages.error(request, "Debe seleccionar el médico de la orden.")
+            return redirect("gestion_app:agregar_orden_ingreso", preingreso_id=preingreso.id)
+
+        medico = Medico.objects.filter(id=medico_id).first()
+
+        if not medico:
+            messages.error(request, "El médico seleccionado no es válido.")
+            return redirect("gestion_app:agregar_orden_ingreso", preingreso_id=preingreso.id)
+
+        if not detalles:
+            messages.error(request, "Debe cargar al menos un detalle en la orden.")
+            return redirect("gestion_app:agregar_orden_ingreso", preingreso_id=preingreso.id)
+        print("El medico es:",medico)
+        try:
+            with transaction.atomic():
+                orden = OrdenAutorizacion.objects.create(
+                    preingreso=preingreso, 
+                    fecha=fecha,
+                    medico=medico, 
+                    observaciones=observaciones or None,
+                    medico_tenencia=medico,
+                )
+
+                for item in detalles:
+                    prestacion_id = item.get("prestacion_id")
+
+                    if not prestacion_id:
+                        continue
+
+                    prestacion = get_object_or_404(Prestacion, id=prestacion_id)
+
+                    DetalleOrden.objects.create(
+                        orden=orden,
+                        prestacion=prestacion,
+                        medico=medico,
+                        cantidad=item.get("cantidad") or 1,
+                        honorarios_gastos=item.get("honorarios_gastos") or None,
+                        tipo_honorario=item.get("tipo_honorario") or None,
+                        fecha_desde=item.get("fecha_desde") or None,
+                        fecha_hasta=item.get("fecha_hasta") or None,
+                        observaciones=item.get("observaciones") or None,
+                    )
+
+            messages.success(request, "La orden fue cargada correctamente.")
+            return redirect("gestion_app:detalle_ingreso", preingreso_id=preingreso.id)
+
+        except Exception as e:
+            messages.error(request, f"Ocurrió un error al guardar la orden: {e}")
+            print("El error es:", e)
+            return redirect("gestion_app:agregar_orden_ingreso", preingreso_id=preingreso.id)
+        
+
+    medico_default = medicos.filter(matricula="9063").first()
+ 
+
+    return render(request, "gestion/orden/agregar_orden_ingreso.html", {
+        "preingreso": preingreso,
+        "medicos": medicos,
+        "fecha_hoy": date.today().isoformat(),
+        "medico_default": medico_default,
+        "tipos_orden": OrdenAutorizacion.TIPOS,
+        "honorarios_gastos": DetalleOrden.HONORARIOS_GASTOS,
+        "tipos_honorario": DetalleOrden.TIPOS_HONORARIO,
+    })
 
 
 
@@ -765,54 +1041,74 @@ def agregar_ingreso_programado(request):
     if request.method == "POST":
         preingreso_id = request.POST.get("preingreso_id")
 
-        preingreso = get_object_or_404(
-            Preingreso,
-            id=preingreso_id
-        )
+        try:
+            with transaction.atomic():
 
-        if preingreso.estado in ["ingresado", "cerrado"]:
-            messages.error(request, "Este preingreso ya no está disponible para ingresar.")
+                preingreso = get_object_or_404(
+                    Preingreso.objects.select_for_update(),
+                    id=preingreso_id
+                )
+
+                if preingreso.estado in ["ingresado", "cerrado"]:
+                    messages.error(request, "Este preingreso ya no está disponible para ingresar.")
+                    return redirect("gestion_app:agregar_ingreso_programado")
+
+                numerador, creado = Numerador.objects.select_for_update().get_or_create(
+                    nombre="ingreso",
+                    defaults={"ultimo": 0}
+                )
+
+                numerador.ultimo += 1
+                numerador.save(update_fields=["ultimo"])
+
+                episodio = request.POST.get("episodio")
+
+                preingreso.obra_social_id = request.POST.get("obra_social")
+                preingreso.plan_id = request.POST.get("plan") or None
+                preingreso.numero_afiliado = request.POST.get("numero_afiliado", "").strip() or None
+
+                preingreso.numero = numerador.ultimo
+                preingreso.fecha_ingreso = request.POST.get("fecha_ingreso") or None
+
+                preingreso.servicio_id = request.POST.get("servicio") or None
+                preingreso.medico_id = request.POST.get("medico") or None
+
+                preingreso.origen_paciente = request.POST.get("origen_paciente") or "domicilio"
+                preingreso.prioridad = request.POST.get("prioridad") or "programado"
+                preingreso.diagnostico = request.POST.get("diagnostico", "").strip() or None
+
+                preingreso.contacto_nombre = request.POST.get("contacto_nombre", "").strip() or None
+                preingreso.contacto_dni = request.POST.get("contacto_dni", "").strip() or None
+                preingreso.contacto_parentesco = request.POST.get("contacto_parentesco", "").strip() or None
+                preingreso.contacto_telefono = request.POST.get("contacto_telefono", "").strip() or None
+
+                preingreso.observaciones = request.POST.get("observaciones", "").strip() or None
+                preingreso.episodio=episodio
+
+                preingreso.estado = "ingresado"
+                preingreso.save()
+
+        except Exception:
+            messages.error(request, "No se pudo registrar el ingreso programado. Intente nuevamente.")
             return redirect("gestion_app:agregar_ingreso_programado")
 
-        preingreso.obra_social_id = request.POST.get("obra_social")
-        preingreso.plan_id = request.POST.get("plan") or None
-        preingreso.numero_afiliado = request.POST.get("numero_afiliado", "").strip()
-
-        preingreso.numero = request.POST.get("numero", "").strip()
-        preingreso.fecha_ingreso = request.POST.get("fecha_ingreso") or None
-
-        preingreso.servicio_id = request.POST.get("servicio") or None
-        preingreso.medico_id = request.POST.get("medico") or None
-
-        preingreso.origen_paciente = request.POST.get("origen_paciente") or "domicilio"
-        preingreso.prioridad = request.POST.get("prioridad") or "programado"
-        preingreso.diagnostico = request.POST.get("diagnostico", "").strip()
-
-        preingreso.contacto_nombre = request.POST.get("contacto_nombre", "").strip()
-        preingreso.contacto_dni = request.POST.get("contacto_dni", "").strip()
-        preingreso.contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
-        preingreso.contacto_telefono = request.POST.get("contacto_telefono", "").strip()
-
-        preingreso.observaciones = request.POST.get("observaciones", "").strip()
-
-        preingreso.estado = "ingresado"
-        preingreso.save()
-
-        messages.success(request, "Ingreso programado registrado correctamente.")
+        messages.success(
+            request,
+            f"Ingreso programado registrado correctamente. Episodio #{preingreso.numero}"
+        )
         return redirect("gestion_app:lista_ingresos")
 
     return render(request, "gestion/ingreso/agregar_ingreso_programado.html", {
         "obras_sociales": obras_sociales,
         "planes": planes,
         "medicos": medicos,
-        "servicios": servicios, 
+        "servicios": servicios,
     })
-
-
 
 
  
 def imprimir_orden(request, orden_id):
+    imprimir_duplicado = request.GET.get("duplicado") == "1"
     orden = get_object_or_404(
         OrdenAutorizacion.objects.select_related(
             "preingreso",
@@ -834,4 +1130,71 @@ def imprimir_orden(request, orden_id):
         "preingreso": orden.preingreso,
         "detalles": orden.detalles.all().order_by("id"),
         "fecha_impresion": timezone.now(),
+        "duplicado":imprimir_duplicado
     })
+
+ 
+from django.utils import timezone
+def redirigir_segun_origen(request, orden):
+    es_preingreso = request.POST.get("preingreso") == "true"
+
+    if es_preingreso:
+        return redirect("gestion_app:detalle_preingreso", preingreso_id=orden.preingreso_id)
+
+    return redirect("gestion_app:detalle_ingreso", preingreso_id=orden.preingreso_id)
+
+
+@require_POST
+def autorizar_orden(request, orden_id):
+    orden = get_object_or_404(OrdenAutorizacion, id=orden_id)
+
+    if orden.estado == "anulada":
+        messages.error(request, "No se puede autorizar una orden anulada.")
+        return redirigir_segun_origen(request, orden)
+
+    orden.autorizada = True
+    orden.estado = "autorizada"
+    orden.save()
+
+    orden.detalles.update(autorizada=True)
+
+    messages.success(request, "Orden autorizada correctamente.")
+    return redirigir_segun_origen(request, orden)
+
+
+@require_POST
+def anular_orden(request, orden_id):
+    orden = get_object_or_404(OrdenAutorizacion, id=orden_id)
+
+    orden.estado = "anulada"
+    orden.autorizada = False
+    orden.fecha_anulacion = timezone.now()
+    orden.motivo_anulacion = request.POST.get("motivo_anulacion", "").strip()
+    orden.save()
+
+    orden.detalles.update(autorizada=False)
+
+    messages.success(request, "Orden anulada correctamente.")
+    return redirigir_segun_origen(request, orden)
+
+
+@require_POST
+def cambiar_tenencia_orden(request, orden_id):
+    orden = get_object_or_404(OrdenAutorizacion, id=orden_id)
+
+    if orden.estado == "anulada":
+        messages.error(request, "No se puede cambiar la tenencia de una orden anulada.")
+        return redirigir_segun_origen(request, orden)
+
+    if orden.estado != "autorizada" and not orden.autorizada:
+        messages.error(request, "Solo se puede cambiar la tenencia de una orden autorizada.")
+        return redirigir_segun_origen(request, orden)
+
+    medico_id = request.POST.get("medico_id")
+    medico = get_object_or_404(Medico, id=medico_id)
+
+    orden.medico_tenencia = medico
+    orden.save()
+
+    messages.success(request, "Tenencia actualizada correctamente.")
+    return redirigir_segun_origen(request, orden)

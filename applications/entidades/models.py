@@ -47,7 +47,7 @@ class Medico(BaseAbstractWithUser):
     )
 
     def __str__(self):
-        return f"Dr/a. {self.apellido}, {self.nombre} - MP {self.matricula}"
+        return f"{self.apellido}, {self.nombre} - MP {self.matricula}"
 
 
 class ObraSocial(models.Model):

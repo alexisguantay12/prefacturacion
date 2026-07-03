@@ -77,7 +77,14 @@ class Preingreso(BaseAbstractWithUser):
         blank=True,
         null=True
     )
- 
+    
+    episodio = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
     fecha_probable_ingreso = models.DateField(
         blank=True,
         null=True
@@ -150,6 +157,12 @@ class Preingreso(BaseAbstractWithUser):
         null=True
     )
 
+    es_preingreso = models.BooleanField(
+        blank=True,
+        null=True,
+        default=True
+    )
+
     observaciones = models.TextField(
         blank=True,
         null=True
@@ -157,6 +170,29 @@ class Preingreso(BaseAbstractWithUser):
 
     def __str__(self):
         return f"{self.numero or self.id} - {self.paciente}"
+
+
+
+
+class Numerador(models.Model):
+    nombre = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    ultimo = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Numerador"
+        verbose_name_plural = "Numeradores"
+
+    def __str__(self):
+        return f"{self.nombre}: {self.ultimo}"
+
+
+
+
+
 
 
 class OrdenAutorizacion(BaseAbstractWithUser):
@@ -167,6 +203,19 @@ class OrdenAutorizacion(BaseAbstractWithUser):
         ("practica","Practica"), 
         ("otra", "Otra"),
     ]
+    ESTADOS = [
+        ("pendiente", "Pendiente"),
+        ("autorizada", "Autorizada"),
+        ("anulada", "Anulada"),
+    ]
+
+    # lo que ya tenés...
+
+    estado = models.CharField(
+        max_length=30,
+        choices=ESTADOS,
+        default="pendiente"
+    )
 
 
     preingreso = models.ForeignKey(
@@ -174,8 +223,10 @@ class OrdenAutorizacion(BaseAbstractWithUser):
         on_delete=models.CASCADE,
         related_name="ordenes"
     )
-    medico = models.ForeignKey("entidades.Medico",on_delete=models.SET_NULL,null=True,blank=True)
+    medico = models.ForeignKey("entidades.Medico",on_delete=models.SET_NULL,null=True,blank=True,related_name="ordenes_autorizacion")
     
+    medico_tenencia= models.ForeignKey("entidades.Medico",on_delete=models.SET_NULL,null=True,blank=True, related_name="ordenes_tenencia")
+
     tipo = models.CharField(max_length=50, choices=TIPOS) 
  
     fecha = models.DateField(blank=True,null=True)
@@ -186,6 +237,30 @@ class OrdenAutorizacion(BaseAbstractWithUser):
 
     autorizada = models.BooleanField(default=False, null=True, blank=True)
 
+    user_anulacion = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="%(class)s_user_anuled"
+    )
+    user_autorizacion= models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="%(class)s_user_autorized"
+    )
+    user_tenencia= models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="%(class)s_user_tenencia"
+    )
+    fecha_autorizacion = models.DateField(blank=True,null=True)
+    fecha_anulacion = models.DateField(blank=True,null=True)
+    fecha_tenencia = models.DateField(blank=True,null=True)
     def __str__(self):
         return f"Orden {self.id} - {self.get_tipo_display()}"
 
@@ -200,7 +275,8 @@ class DetalleOrden(BaseAbstractWithUser):
     TIPOS_HONORARIO = [
         ("anestesista", "Anestesista"),  
         ("ayudante1", "Ayudante 1"),
-        ("ayudante2", "Ayudante 2"),         
+        ("ayudante2", "Ayudante 2"),    
+        ("ayudante3", "Ayudante 3"),         
         ("especialista", "Especialista"),
     ]
 

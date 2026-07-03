@@ -156,6 +156,12 @@
         border: 1px solid #a7f3d0;
     }
 
+    .badge-cerrado {
+        background: #eef2ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+    }
+
     .badge-anulado {
         background: #fef2f2;
         color: #b91c1c;
@@ -220,6 +226,22 @@
         color: #6b7280;
     }
 
+    .pagination-wrap {
+        margin-top: 1rem;
+    }
+
+    .pagination .page-link {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #0f4c81;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #0f4c81;
+        border-color: #0f4c81;
+        color: #fff;
+    }
+
     @media (max-width: 768px) {
         .page-header .d-flex {
             flex-direction: column;
@@ -253,7 +275,7 @@
                 </div>
 
                 <div class="header-actions">
-                    <a href="{% url 'gestion_app:agregar_ingreso_programado'%}"
+                    <a href="{% url 'gestion_app:agregar_ingreso_programado' %}"
                        class="btn btn-primary btn-sm">
                         <i class="fas fa-calendar-plus"></i> Ingreso programado
                     </a>
@@ -274,22 +296,23 @@
                            name="q"
                            value="{{ query }}"
                            class="form-control"
-                           placeholder="Paciente, DNI, número u obra social">
+                           placeholder="Nombre, apellido, DNI, episodio o N° ingreso">
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label mb-1">Estado</label>
-                    <select name="estado" class="form-select">
-                        <option value="">Todos</option>
-                        {% for value, label in estados %}
-                            <option value="{{ value }}" {% if estado == value %}selected{% endif %}>
-                                {{ label }}
+                <div class="col-md-4">
+                    <label class="form-label mb-1">Obra social</label>
+                    <select name="obra_social" class="form-select">
+                        <option value="">Todas</option>
+                        {% for os in obras_sociales %}
+                            <option value="{{ os.id }}"
+                                {% if obra_social_id|stringformat:"s" == os.id|stringformat:"s" %}selected{% endif %}>
+                                {{ os.nombre|title }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="col-md-4 d-flex gap-2">
+                <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-dark">
                         <i class="fas fa-search"></i> Filtrar
                     </button>
@@ -309,7 +332,7 @@
                 </h6>
 
                 <span class="table-count">
-                    {{ ingresos|length }} registro{% if ingresos|length != 1 %}s{% endif %}
+                    {{ page_obj.paginator.count }} registro{% if page_obj.paginator.count != 1 %}s{% endif %}
                 </span>
             </div>
 
@@ -317,15 +340,13 @@
                 <table class="table table-ingresos align-middle">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>N°</th>
                             <th>Ingreso</th>
                             <th>Egreso</th>
                             <th>Paciente</th>
                             <th>DNI</th>
                             <th>Obra Social</th>
                             <th>Médico</th>
-                            <th>Servicio</th>
-                            <th>Prioridad</th>
                             <th>Órdenes</th>
                             <th>Estado</th>
                             <th class="text-end">Acciones</th>
@@ -336,12 +357,7 @@
                         {% for p in ingresos %}
                             <tr>
                                 <td>
-                                    <strong>#{{ p.numero|default:p.id }}</strong>
-                                    {% if p.fecha_probable_ingreso and not p.fecha_ingreso %}
-                                        <div class="text-muted-small">
-                                            Probable: {{ p.fecha_probable_ingreso|date:"d/m/Y" }}
-                                        </div>
-                                    {% endif %}
+                                    <strong>{{ p.numero|default:p.id }}</strong>
                                 </td>
 
                                 <td>
@@ -362,50 +378,36 @@
 
                                 <td>
                                     <div class="patient-name">
-                                        {{ p.paciente.apellido }}, {{ p.paciente.nombre }}
+                                        {{ p.paciente.apellido|title }}, {{ p.paciente.nombre|title }}
                                     </div>
-                                    <div class="text-muted-small">
-                                        Origen: {{ p.get_origen_paciente_display }}
-                                    </div>
+
+                                    {% if p.episodio %}
+                                        <div class="text-muted-small">
+                                            Episodio N° <strong>{{ p.episodio }}</strong>
+                                        </div>
+                                    {% endif %}
                                 </td>
 
                                 <td>{{ p.paciente.dni }}</td>
 
                                 <td>
-                                    {{ p.obra_social }}
-                                    {% if p.plan %}
-                                        <div class="text-muted-small">
-                                            Plan: {{ p.plan }}
-                                        </div>
-                                    {% endif %}
+                                    {{ p.obra_social|title }}
                                 </td>
 
                                 <td>
                                     {% if p.medico %}
-                                        {{ p.medico.apellido }}, {{ p.medico.nombre }}
+                                        {{ p.medico.apellido|title }}, {{ p.medico.nombre|title }}
                                     {% else %}
                                         <span class="text-muted">Sin médico</span>
                                     {% endif %}
                                 </td>
 
                                 <td>
-                                    {% if p.servicio %}
-                                        {{ p.servicio.nombre }}
-                                    {% else %}
-                                        <span class="text-muted">Sin servicio</span>
-                                    {% endif %}
-                                </td>
-
-                                <td>
-                                    <span class="badge-prioridad prioridad-{{ p.prioridad }}">
-                                        {{ p.get_prioridad_display }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="badge-orden">
-                                        {{ p.total_ordenes }} orden{% if p.total_ordenes != 1 %}es{% endif %}
-                                    </span>
+                                    <div class="ordenes-box">
+                                        <span class="badge-orden">
+                                            Total: {{ p.total_ordenes }}
+                                        </span>
+                                    </div>
                                 </td>
 
                                 <td>
@@ -416,13 +418,13 @@
 
                                 <td class="text-end">
                                     <div class="actions-cell">
-                                        <a href="{% url 'gestion_app:detalle_preingreso' p.id %}"
+                                        <a href="{% url 'gestion_app:detalle_ingreso' p.id %}"
                                            class="btn btn-sm btn-outline-primary btn-action"
                                            title="Ver ingreso">
                                             <i class="fas fa-eye"></i>
                                         </a>
 
-                                        <a href="{% url 'gestion_app:editar_preingreso' p.id %}"
+                                        <a href="{% url 'gestion_app:editar_ingreso' p.id %}"
                                            class="btn btn-sm btn-outline-secondary btn-action"
                                            title="Editar ingreso">
                                             <i class="fas fa-edit"></i>
@@ -438,7 +440,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="12">
+                                <td colspan="10">
                                     <div class="empty-state">
                                         <i class="fas fa-folder-open fa-2x mb-2"></i>
                                         <div class="fw-bold">No se encontraron ingresos.</div>
@@ -452,6 +454,61 @@
                 </table>
             </div>
         </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination-wrap d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="text-muted-small">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </div>
+
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.previous_page_number }}&q={{ query }}&obra_social={{ obra_social_id }}">
+                                    Anterior
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Anterior</span>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num == page_obj.number %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ num }}&q={{ query }}&obra_social={{ obra_social_id }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.next_page_number }}&q={{ query }}&obra_social={{ obra_social_id }}">
+                                    Siguiente
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Siguiente</span>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
 
     </div>
 </div>

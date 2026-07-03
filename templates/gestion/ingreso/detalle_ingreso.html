@@ -114,7 +114,7 @@
 
     .summary-value {
         font-size: .84rem;
-        font-weight: 560;
+        font-weight: 550;
         color: #111827;
         line-height: 1.36;
     }
@@ -219,7 +219,7 @@
         color: #0f4c81;
     }
 
-    .episode-badge{
+    .episode-badge {
         display:inline-block;
         margin-left:.6rem;
         padding:.18rem .65rem;
@@ -357,19 +357,19 @@
             <div>
                 <h2 class="title">
                     <i class="fas fa-file-medical-alt text-primary"></i>
-                    Preingreso N° {{ preingreso.id }}
+                    Ingreso N° {{ preingreso.numero|default:preingreso.id }}
                 </h2>
                 <div class="subtitle">
-                    Detalle compacto del preingreso y datos principales del paciente.
+                    Detalle compacto del ingreso y datos principales del paciente.
                 </div>
             </div>
 
             <div class="actions">
-                <a href="{% url 'gestion_app:lista_preingresos' %}" class="btn btn-outline-secondary btn-sm-custom">
+                <a href="{% url 'gestion_app:lista_ingresos' %}" class="btn btn-outline-secondary btn-sm-custom">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
 
-                <a href="{% url 'gestion_app:editar_preingreso' preingreso.id %}" class="btn btn-primary btn-sm-custom">
+                <a href="{% url 'gestion_app:editar_ingreso' preingreso.id %}" class="btn btn-primary btn-sm-custom">
                     <i class="fas fa-pen-to-square"></i> Editar
                 </a>
 
@@ -396,6 +396,12 @@
                     {% if preingreso.paciente.telefono %}
                         · Tel. {{ preingreso.paciente.telefono }}
                     {% endif %}
+
+                    {% if preingreso.episodio %}
+                        <span class="episode-badge">
+                            Episodio {{ preingreso.episodio }}
+                        </span>
+                    {% endif %}
                 </div>
             </div>
 
@@ -416,10 +422,12 @@
             </div>
 
             <div class="summary-block">
-                <div class="summary-label">Preingreso</div>
+                <div class="summary-label">Ingreso</div>
 
                 <div class="summary-value">
-                    {% if preingreso.fecha_probable_ingreso %}
+                    {% if preingreso.fecha_ingreso %}
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                    {% elif preingreso.fecha_probable_ingreso %}
                         Probable {{ preingreso.fecha_probable_ingreso|date:"d/m/Y" }}
                     {% else %}
                         Sin fecha
@@ -487,6 +495,17 @@
                 <span class="extra-label">Provincia:</span>
                 {{ preingreso.paciente.provincia|default:"No cargado" }}
             </div>
+
+            <div class="extra-item">
+                <i class="fas fa-calendar-check"></i>
+                <span class="extra-label">F. egreso:</span>
+
+                {% if preingreso.fecha_egreso %}
+                    {{ preingreso.fecha_egreso|date:"d/m/Y" }}
+                {% else %}
+                    No cargada
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -521,7 +540,7 @@
                 Órdenes asociadas ({{ ordenes|length }})
             </div>
 
-            <a href="{% url 'gestion_app:agregar_orden_preingreso' preingreso.id %}" class="btn btn-outline-primary btn-sm-custom">
+            <a href="{% url 'gestion_app:agregar_orden_ingreso' preingreso.id %}" class="btn btn-outline-primary btn-sm-custom">
                 <i class="fas fa-plus-circle"></i> Nueva orden
             </a>
         </div>
@@ -563,11 +582,10 @@
                                 <td class="text-center">
                                     {{ orden.cantidad_prestaciones|default:0 }}
                                 </td>
-
+                                
                                 <td>
                                     {{ orden.medico_tenencia|title|default:"No cargado" }}
                                 </td>
-
                                 <td>
                                     {% if orden.estado == "anulada" %}
                                         <span class="badge-anulada">Anulada</span>
@@ -579,7 +597,7 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a href="{% url 'gestion_app:detalle_orden_preingreso' orden.id %}"
+                                    <a href="{% url 'gestion_app:detalle_orden' orden.id %}"
                                        class="btn btn-outline-primary btn-sm action-circle"
                                        title="Ver orden">
                                         <i class="fas fa-eye"></i>
@@ -613,7 +631,7 @@
                                                     class="btn btn-outline-warning btn-sm action-circle btnAbrirModalTenencia"
                                                     title="Cambiar tenencia"
                                                     data-url="{% url 'gestion_app:cambiar_tenencia_orden' orden.id %}"
-                                                    data-medico-id="{% if orden.medico_tenencia_id %}{{ orden.medico_tenencia_id }}{% else %}{{ orden.medico_id|default:'' }}{% endif %}"
+                                                    data-medico-id="{{ orden.medico_id|default:'' }}"
                                                     data-orden="{{ orden.id|stringformat:'06d' }}"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#modalCambiarTenencia">
@@ -651,7 +669,7 @@
                 No hay órdenes asociadas todavía.
 
                 <div class="mt-2">
-                    <a href="{% url 'gestion_app:agregar_orden_preingreso' preingreso.id %}" class="btn btn-primary btn-sm-custom">
+                    <a href="{% url 'gestion_app:agregar_orden_ingreso' preingreso.id %}" class="btn btn-primary btn-sm-custom">
                         <i class="fas fa-plus-circle"></i> Cargar primera orden
                     </a>
                 </div>
@@ -714,8 +732,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <form method="post" id="formAutorizarOrden" class="modal-content" style="border-radius:16px; overflow:hidden;">
             {% csrf_token %}
-            <input type="hidden" name="preingreso" value="true">
-
+            <input type="hidden" name="preingreso" value="false">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-check text-success"></i>
@@ -748,8 +765,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <form method="post" id="formAnularOrden" class="modal-content" style="border-radius:16px; overflow:hidden;">
             {% csrf_token %}
-            <input type="hidden" name="preingreso" value="true">
-
+            <input type="hidden" name="preingreso" value="false">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-ban text-danger"></i>
@@ -762,7 +778,7 @@
                 <p>
                     ¿Desea anular la orden <strong id="textoOrdenAnular"></strong>?
                 </p>
-
+                <input type="hidden" name="preingreso" value="false">
                 <label class="form-label fw-bold">Motivo de anulación</label>
                 <textarea name="motivo_anulacion"
                           class="form-control"
@@ -790,8 +806,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <form method="post" id="formCambiarTenencia" class="modal-content" style="border-radius:16px; overflow:hidden;">
             {% csrf_token %}
-            <input type="hidden" name="preingreso" value="true">
-
+            <input type="hidden" name="preingreso" value="false">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-user-doctor text-warning"></i>
@@ -817,7 +832,7 @@
                 </select>
 
                 <div class="text-muted small mt-2">
-                    Esto cambia el médico ejecutante de la orden.
+                    Esto cambia el médico ejecutante de los detalles de la orden.
                 </div>
             </div>
 

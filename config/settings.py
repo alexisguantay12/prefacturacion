@@ -144,7 +144,7 @@ else:
 
 AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = '/usuarios/login/'
-LOGIN_REDIRECT_URL = '/presupuestos/'  # opcional, si querés que redirija ahí después de login
+LOGIN_REDIRECT_URL = '/gestion/preingresos/'  # opcional, si querés que redirija ahí después de login
 
 
 # Password validation
@@ -203,3 +203,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Configuración de AWS S3
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# 30 minutos
+SESSION_COOKIE_AGE = 3600
+
+# Renueva los 30 minutos cada vez que el usuario usa el sistema
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Si cierra el navegador, se cierra la sesión
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

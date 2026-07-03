@@ -18,9 +18,23 @@ urlpatterns = [
     path("ajax/prestaciones/buscar/",views.buscar_prestaciones_ajax,name="buscar_prestaciones_ajax"),
     path("prestaciones/buscar-por-codigo/",views.buscar_prestacion_por_codigo_ajax,name="buscar_prestacion_por_codigo_ajax"),
     path("ordenes/<int:orden_id>/",views.detalle_orden,name="detalle_orden",),
+    path("ordenes/preingreso/<int:orden_id>/",views.detalle_orden_preingreso,name="detalle_orden_preingreso",),
     path("ingresos/",views.lista_ingresos,name="lista_ingresos",),
     path("ingresos/agregar_ingreso/",views.agregar_ingreso,name="agregar_ingreso",),
     path("ingresos/programado/agregar/",views.agregar_ingreso_programado,name="agregar_ingreso_programado"),
     path("ajax/buscar-preingresos/",views.buscar_preingresos_ajax,name="buscar_preingresos_ajax"),
     path( "orden/<int:orden_id>/imprimir/",views.imprimir_orden,name="imprimir_orden"), 
+
+    path("ingresos/<int:preingreso_id>/ordenes/agregar/",views.agregar_orden_ingreso,name="agregar_orden_ingreso"),
+
+    path(
+    "ingresos/<int:ingreso_id>/editar/",
+    views.editar_ingreso,
+    name="editar_ingreso"
+    ),
+    path("ingresos/<int:preingreso_id>/detalle/", views.detalle_ingreso, name="detalle_ingreso"),
+    path("ordenes/<int:orden_id>/autorizar/", views.autorizar_orden, name="autorizar_orden"),
+    path("ordenes/<int:orden_id>/anular/", views.anular_orden, name="anular_orden"),
+    path("ordenes/<int:orden_id>/cambiar-tenencia/", views.cambiar_tenencia_orden, name="cambiar_tenencia_orden"),
+        
 ]
