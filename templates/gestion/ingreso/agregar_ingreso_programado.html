@@ -246,13 +246,7 @@
                     <span class="section-number">1</span>
                     Selección de preingreso
                 </div>
-
-                <button type="button"
-                        class="btn btn-primary btn-sm-custom"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalBuscarPreingreso">
-                    <i class="fas fa-search"></i> Buscar preingreso
-                </button>
+ 
             </div>
 
             <div class="section-body">
@@ -323,9 +317,12 @@
                             Obra social <span class="required-mark">*</span>
                         </label>
                         <select name="obra_social" id="obra_social" class="form-select" required>
-                            <option value="">Seleccione una obra social...</option>
-                            {% for obra in obras_sociales %}
-                                <option value="{{ obra.id }}">{{ obra.nombre }}</option>
+                            <option value="">Seleccione una obra social</option>
+                            {% for obra_social in obras_sociales %}
+                                <option value="{{ obra_social.id }}"  
+                                >
+                                    {{ obra_social.nombre }}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -333,13 +330,13 @@
                     <div class="col-md-4">
                         <label class="form-label">Plan</label>
                         <select name="plan" id="plan" class="form-select">
-                            <option value="">Seleccione un plan...</option>
+                            <option value="">Seleccione un plan</option>
                             {% for plan in planes %}
-                                <option value="{{ plan.id }}">
+                                <option 
+                                    value="{{ plan.id }}"
+                                    data-obra-social-id="{{ plan.obra_social_id }}"
+                                >
                                     {{ plan.nombre }}
-                                    {% if plan.obra_social %}
-                                        - {{ plan.obra_social.nombre }}
-                                    {% endif %}
                                 </option>
                             {% endfor %}
                         </select>
@@ -956,6 +953,38 @@
         limpiarSeleccionPreingreso();
         limpiarEstadoModalGuardar();
         limpiarErrorFrontend();
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const selectObraSocial = document.getElementById("obra_social");
+    const selectPlan = document.getElementById("plan");
+
+    if (!selectObraSocial || !selectPlan) {
+        return;
+    }
+
+    const opcionesPlanes = Array.from(selectPlan.options);
+
+    function filtrarPlanes() {
+        const obraSocialId = selectObraSocial.value;
+
+        selectPlan.value = "";
+
+        opcionesPlanes.forEach(option => {
+            if (!option.value) {
+                option.hidden = false;
+                return;
+            }
+
+            const planObraSocialId = option.dataset.obraSocialId;
+
+            option.hidden = planObraSocialId !== obraSocialId;
+        });
+    }
+
+    selectObraSocial.addEventListener("change", filtrarPlanes);
+
+    filtrarPlanes();
     });
 </script>
 

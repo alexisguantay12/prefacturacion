@@ -75,7 +75,7 @@ class Plan(BaseAbstractWithUser):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="obras_sociales"
+        related_name="planes"
     )
 
     def __str__(self):

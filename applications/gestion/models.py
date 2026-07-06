@@ -162,7 +162,17 @@ class Preingreso(BaseAbstractWithUser):
         null=True,
         default=True
     )
-
+    fecha_pasaje_internacion = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+    user_pasaje_internacion = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="%(class)s_user_pasaje_internacion"
+    )
     observaciones = models.TextField(
         blank=True,
         null=True
@@ -237,6 +247,8 @@ class OrdenAutorizacion(BaseAbstractWithUser):
 
     autorizada = models.BooleanField(default=False, null=True, blank=True)
 
+
+
     user_anulacion = models.ForeignKey(
         'users.User',
         on_delete=models.SET_NULL,
@@ -258,9 +270,28 @@ class OrdenAutorizacion(BaseAbstractWithUser):
         blank=True, 
         related_name="%(class)s_user_tenencia"
     )
+
+    user_entrega= models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="%(class)s_user_entrega"
+    )
+
+    esta_entregada = models.BooleanField(
+        blank=True,
+        null=True,
+        default=False
+    )
+
     fecha_autorizacion = models.DateField(blank=True,null=True)
     fecha_anulacion = models.DateField(blank=True,null=True)
     fecha_tenencia = models.DateField(blank=True,null=True)
+    fecha_entrega = models.DateField(blank=True,null=True)
+    
+
+
     def __str__(self):
         return f"Orden {self.id} - {self.get_tipo_display()}"
 
@@ -326,3 +357,61 @@ class DetalleOrden(BaseAbstractWithUser):
 
     def __str__(self):
         return f"{self.prestacion.codigo} - {self.prestacion.nombre}"
+    
+
+
+class PlanillaEntrega(BaseAbstractWithUser):
+    medico = models.ForeignKey(
+        "entidades.Medico",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="planilla_entrega"
+    )
+    observaciones = models.CharField(
+        null=True,
+        blank=True,
+        max_length=500,
+    )
+
+class DetallePlanillaEntrega(BaseAbstractWithUser):
+    planilla_entrega = models.ForeignKey(
+        PlanillaEntrega,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    orden = models.ForeignKey(
+        OrdenAutorizacion,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+    )
+
+
+
+class PlanillaEntrega(BaseAbstractWithUser):
+    medico = models.ForeignKey(
+        "entidades.Medico",
+        on_delete=models.PROTECT,
+        related_name="planillas_entrega"
+    )
+    entregada = models.BooleanField(default=False)
+    fecha_entrega = models.DateField(blank=True,null=True)
+    observaciones = models.CharField(max_length=500, blank=True, null=True)
+    anulada = models.BooleanField(default=False)
+    fecha_anulacion = models.DateTimeField(blank=True, null=True)
+
+
+class DetallePlanillaEntrega(BaseAbstractWithUser):
+    planilla_entrega = models.ForeignKey(
+        PlanillaEntrega,
+        on_delete=models.CASCADE,
+        related_name="detalles"
+    )
+    orden = models.ForeignKey(
+        OrdenAutorizacion,
+        on_delete=models.PROTECT,
+        related_name="detalles_entrega"
+    )

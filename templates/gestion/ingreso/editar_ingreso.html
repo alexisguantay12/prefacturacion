@@ -260,12 +260,12 @@
                         <label class="form-label">
                             Obra social <span class="required-mark">*</span>
                         </label>
-                        <select name="obra_social" class="form-select" required>
-                            <option value="">Seleccione una obra social...</option>
-                            {% for os in obras_sociales %}
-                                <option value="{{ os.id }}"
-                                    {% if ingreso.obra_social_id == os.id %}selected{% endif %}>
-                                    {{ os.nombre }}
+                        <select name="obra_social" id="id_obra_social" class="form-select" required>
+                            <option value="">Seleccione una obra social</option>
+                            {% for obra_social in obras_sociales %}
+                                <option value="{{ obra_social.id }}"
+                                {% if ingreso.obra_social.id == obra_social.id %}selected{% endif %}>
+                                    {{ obra_social.nombre }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -273,19 +273,19 @@
 
                     <div class="col-md-3">
                         <label class="form-label">Plan</label>
-                        <select name="plan" class="form-select">
-                            <option value="">Seleccione un plan...</option>
+                        <select name="plan" id="id_plan" class="form-select">
+                            <option value="">Seleccione un plan</option>
                             {% for plan in planes %}
-                                <option value="{{ plan.id }}"
-                                    {% if ingreso.plan_id == plan.id %}selected{% endif %}>
+                                <option 
+                                    value="{{ plan.id }}"
+                                    data-obra-social-id="{{ plan.obra_social_id }}"
+                                    {% if ingreso.plan.id == plan.id %}selected{% endif %}
+                                >
                                     {{ plan.nombre }}
-                                    {% if plan.obra_social %}
-                                        - {{ plan.obra_social.nombre }}
-                                    {% endif %}
                                 </option>
                             {% endfor %}
                         </select>
-                    </div>
+                                            </div>
 
                     <div class="col-md-3">
                         <label class="form-label">N° afiliado</label>
@@ -521,6 +521,36 @@
         if (vinoPorBackForward) {
             window.location.href = "{% url 'gestion_app:lista_ingresos' %}";
         }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectObraSocial = document.getElementById("id_obra_social");
+        const selectPlan = document.getElementById("id_plan");
+
+        if (!selectObraSocial || !selectPlan) {
+            return;
+        }
+
+        const opcionesPlanes = Array.from(selectPlan.options);
+
+        function filtrarPlanes() {
+            const obraSocialId = selectObraSocial.value;
+
+            selectPlan.value = "";
+
+            opcionesPlanes.forEach(option => {
+                if (!option.value) {
+                    option.hidden = false;
+                    return;
+                }
+
+                const planObraSocialId = option.dataset.obraSocialId;
+
+                option.hidden = planObraSocialId !== obraSocialId;
+            });
+        }
+
+        selectObraSocial.addEventListener("change", filtrarPlanes);
+ 
     });
 </script>
 

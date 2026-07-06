@@ -239,13 +239,7 @@
                     <span class="section-number">1</span>
                     Datos del paciente
                 </div>
-
-                <button type="button"
-                        class="btn btn-primary btn-sm-custom"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalBuscarPaciente">
-                    <i class="fas fa-search"></i> Buscar / Crear paciente
-                </button>
+ 
             </div>
 
             <div class="section-body">
@@ -340,28 +334,26 @@
                         <label class="form-label">
                             Obra social <span class="required-mark">*</span>
                         </label>
-                        <select name="obra_social" class="form-select" required>
-                            <option value="">Seleccione una obra social...</option>
-                            {% for obra in obras_sociales %}
-                                <option value="{{ obra.id }}"
-                                    {% if form_data.obra_social == obra.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ obra.nombre }}
+                        <select name="obra_social" id="id_obra_social" class="form-select" required>
+                            <option value="">Seleccione una obra social</option>
+                            {% for obra_social in obras_sociales %}
+                                <option value="{{ obra_social.id }}">
+                                    {{ obra_social.nombre }}
                                 </option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Plan</label>
-                        <select name="plan" class="form-select">
-                            <option value="">Seleccione un plan...</option>
+                        <label class="form-label">Plan <span class="required-mark">*</span></label>
+                        <select name="plan" id="id_plan" class="form-select">
+                            <option value="">Seleccione un plan</option>
                             {% for plan in planes %}
-                                <option value="{{ plan.id }}"
-                                    {% if form_data.plan == plan.id|stringformat:"s" %}selected{% endif %}>
+                                <option 
+                                    value="{{ plan.id }}"
+                                    data-obra-social-id="{{ plan.obra_social_id }}"
+                                >
                                     {{ plan.nombre }}
-                                    {% if plan.obra_social %}
-                                        - {{ plan.obra_social.nombre }}
-                                    {% endif %}
                                 </option>
                             {% endfor %}
                         </select>
@@ -1120,6 +1112,38 @@ window.addEventListener("pageshow", function (event) {
         window.location.href = "{% url 'gestion_app:lista_preingresos' %}";
     }
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const selectObraSocial = document.getElementById("id_obra_social");
+    const selectPlan = document.getElementById("id_plan");
+
+    if (!selectObraSocial || !selectPlan) {
+        return;
+    }
+
+    const opcionesPlanes = Array.from(selectPlan.options);
+
+    function filtrarPlanes() {
+        const obraSocialId = selectObraSocial.value;
+
+        selectPlan.value = "";
+
+        opcionesPlanes.forEach(option => {
+            if (!option.value) {
+                option.hidden = false;
+                return;
+            }
+
+            const planObraSocialId = option.dataset.obraSocialId;
+
+            option.hidden = planObraSocialId !== obraSocialId;
+        });
+    }
+
+    selectObraSocial.addEventListener("change", filtrarPlanes);
+
+    filtrarPlanes();
+});
 </script>
+
 
 {% endblock %}

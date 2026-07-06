@@ -12,7 +12,8 @@ class CrearUsuarioForm(forms.ModelForm):
         choices=[
             ('administrador', 'Administrador'),
             ('admisionista', 'Admisionista'),
-            ('facturista', 'Facturista'),
+            ('facturista', 'Facturador'),
+            ('prefacturista', 'Prefacturador'),
         ],
         widget=forms.Select(attrs={'class': 'form-select'}),
         label='Rol'

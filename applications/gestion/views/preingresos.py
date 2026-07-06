@@ -327,6 +327,7 @@ def agregar_orden_preingreso(request, preingreso_id):
                     preingreso=preingreso,
                     fecha=fecha,
                     medico=medico,
+                    medico_tenencia=medico,
                     observaciones=observaciones or None,
                     user_made=request.user
                 )

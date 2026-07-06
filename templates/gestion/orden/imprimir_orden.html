@@ -301,19 +301,27 @@
                     {{ preingreso.numero_afiliado|default:"" }}
                 </div>
 
-                <div>
-                    <b>Nº Preingreso:</b>
-                    {{preingreso.id}}
-                </div>
 
+                <div>
+                    <b>Nº Asistencia:</b>
+                    {%if preingreso.episodio %}
+                    {{preingreso.numero }}
+                    {%else%}
+                    {{preingreso.id }}
+                    {%endif%}
+                </div>
                 <div> 
                     <b>Nº Episodio:</b>
                     {{ preingreso.episodio|default:"-" }}
                 </div>
 
                 <div>
-                    <b>Asistencia:</b>
-                    {{ preingreso.get_origen_paciente_display|default:"" }}
+                    <b>Tipo Asistencia:</b>
+                    {%if preingreso.es_preingreso%}
+                    Programada
+                    {%else%}
+                    No programada
+                    {%endif%}
                 </div>
 
                 <div>
@@ -420,11 +428,19 @@
 
             <div class="firma-derecha">
                 {% if orden.medico and orden.medico.firma_nombre %}
-                    <img src="{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}"
+                    <img
+                        src="{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}.jpg"
                         alt="Firma profesional"
-                        class="firma-img">
+                        class="firma-img"
+                        onerror="
+                            if (!this.dataset.intentado) {
+                                this.dataset.intentado = '1';
+                                this.src = '{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}.JPG';
+                            } else {
+                                this.style.display = 'none';
+                            }
+                        ">
                 {% endif %}
-
                 <div class="linea-firma"></div>
 
                 <div class="texto-firma">
@@ -514,8 +530,12 @@
                 </div>
 
                 <div>
-                    <b>Nº Preingreso:</b>
+                    <b>Nº Asistencia:</b>
+                    {%if preingreso.episodio%}
+                    {{preingreso.numero }}
+                    {%else%}
                     {{preingreso.id }}
+                    {%endif%}
                 </div>
 
                 <div> 
@@ -523,9 +543,14 @@
                     {{ preingreso.episodio|default:"-" }}
                 </div>
 
+                
                 <div>
-                    <b>Asistencia:</b>
-                    {{ preingreso.get_origen_paciente_display|default:"" }}
+                    <b>Tipo Asistencia:</b>
+                    {%if preingreso.es_preingreso%}
+                    Programada
+                    {%else%}
+                    No programada
+                    {%endif%}
                 </div>
 
                 <div>
@@ -632,11 +657,20 @@
             </div>
 
             <div class="firma-derecha">
-                {% if orden.medico and orden.medico.firma_nombre %}
-                    <img src="{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}"
-                        alt="Firma profesional"
-                        class="firma-img">
-                {% endif %}
+            {% if orden.medico and orden.medico.firma_nombre %}
+                <img
+                    src="{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}.jpg"
+                    alt="Firma profesional"
+                    class="firma-img"
+                    onerror="
+                        if (!this.dataset.intentado) {
+                            this.dataset.intentado = '1';
+                            this.src = '{% static 'img/medicos/' %}{{ orden.medico.firma_nombre }}.JPG';
+                        } else {
+                            this.style.display = 'none';
+                        }
+                    ">
+            {% endif %}
                 <div class="linea-firma"></div>
 
                 <div class="texto-firma">

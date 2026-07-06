@@ -10,6 +10,7 @@ from applications.entidades.models import *
 from ..models import *
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 # =============================================================================
 # INGRESOS
@@ -132,6 +133,7 @@ def agregar_ingreso(request):
                     plan=plan,
                     numero_afiliado=numero_afiliado or None,
                     medico=medico,
+                    es_preingreso= False,
                     servicio=servicio,
                     numero=numerador.ultimo,
                     fecha_ingreso=fecha_ingreso,
@@ -342,6 +344,8 @@ def agregar_ingreso_programado(request):
                 preingreso.episodio = request.POST.get("episodio")
                 preingreso.estado = "ingresado"
                 preingreso.user_updated= request.user
+                preingreso.user_pasaje_internacion= request.user
+                preingreso.fecha_pasaje_internacion=timezone.now()
                 preingreso.save()
 
         except Exception:

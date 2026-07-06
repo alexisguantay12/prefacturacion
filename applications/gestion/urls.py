@@ -36,5 +36,34 @@ urlpatterns = [
     path("ordenes/<int:orden_id>/autorizar/", views.autorizar_orden, name="autorizar_orden"),
     path("ordenes/<int:orden_id>/anular/", views.anular_orden, name="anular_orden"),
     path("ordenes/<int:orden_id>/cambiar-tenencia/", views.cambiar_tenencia_orden, name="cambiar_tenencia_orden"),
+
+    path(
+    "entregas/",
+    views.lista_planillas_entrega,
+    name="lista_planillas_entrega"
+    ),
+
+    path(
+        "entregas/<int:planilla_id>/anular/",
+        views.anular_planilla_entrega,
+        name="anular_planilla_entrega"
+    ),
+
+    path(
+        "entregas/<int:planilla_id>/entregar/",
+        views.entregar_planilla_entrega,
+        name="entregar_planilla_entrega"
+    ),
+
+    path(
+        "entregas/<int:planilla_id>/imprimir/",
+        views.imprimir_planilla_entrega,
+        name="imprimir_planilla_entrega"
+    ),
+    path(
+    "entregas/confeccionar/",
+    views.confeccionar_planilla_entrega,
+    name="confeccionar_planilla_entrega"
+    ),
         
 ]

@@ -1,0 +1,544 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .page-title i {
+        color: #0f4c81;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 0.88rem;
+        margin-top: 0.2rem;
+    }
+
+    .card-filter {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        margin-bottom: 1rem;
+        border: 1px solid #d8e0ea;
+    }
+
+    .table-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        border: 1px solid #d8e0ea;
+        overflow: hidden;
+    }
+
+    .table-card-header {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid #e5eaf1;
+        background: #fbfdff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-card-title {
+        margin: 0;
+        font-size: 0.98rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .table-card-title i {
+        color: #0f4c81;
+    }
+
+    .table-count {
+        background: #e8f2ff;
+        color: #0f4c81;
+        border: 1px solid #b9d7ff;
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 900;
+    }
+
+    .table-entregas {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.85rem;
+    }
+
+    .table-entregas thead th {
+        background: #f1f5f9;
+        color: #374151;
+        font-size: 0.78rem;
+        font-weight: 900;
+        white-space: nowrap;
+        padding: 0.8rem 0.75rem;
+        border-bottom: 1px solid #cbd5e1;
+    }
+
+    .table-entregas tbody td {
+        vertical-align: middle;
+        padding: 0.78rem 0.75rem;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .medico-name {
+        font-weight: 900;
+        color: #111827;
+    }
+
+    .text-muted-small {
+        color: #6b7280;
+        font-size: 0.78rem;
+    }
+
+    .badge-estado {
+        padding: 0.38rem 0.62rem;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .badge-pendiente {
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #fed7aa;
+    }
+
+    .badge-entregada {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+
+    .badge-anulada {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .badge-orden {
+        background: #eef2ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 900;
+    }
+
+    .btn-action {
+        border-radius: 9px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.55rem;
+        font-weight: 800;
+    }
+
+    .actions-cell {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: #6b7280;
+    }
+
+    .pagination-wrap {
+        margin-top: 1rem;
+    }
+
+    .pagination .page-link {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #0f4c81;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #0f4c81;
+        border-color: #0f4c81;
+        color: #fff;
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="page-wrap">
+
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h2 class="page-title">
+                        <i class="fas fa-file-invoice"></i>
+                        Entregas de honorarios
+                    </h2>
+
+                    <div class="page-subtitle">
+                        Listado de planillas confeccionadas para entrega de órdenes autorizadas por médico ejecutor.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-filter">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label mb-1">Buscar</label>
+                    <input type="text"
+                           name="q"
+                           value="{{ query }}"
+                           class="form-control"
+                           placeholder="Médico, matrícula, observación o N° planilla">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label mb-1">Estado</label>
+                    <select name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="pendiente" {% if estado == "pendiente" %}selected{% endif %}>
+                            Pendiente de entrega
+                        </option>
+                        <option value="entregada" {% if estado == "entregada" %}selected{% endif %}>
+                            Entregada
+                        </option>
+                        <option value="anulada" {% if estado == "anulada" %}selected{% endif %}>
+                            Anulada
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+
+                    <a href="{% url 'gestion_app:lista_planillas_entrega' %}" class="btn btn-outline-secondary">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-card">
+            <div class="table-card-header">
+                <h6 class="table-card-title">
+                    <i class="fas fa-list-check"></i>
+                    Listado de planillas
+                </h6>
+
+                <span class="table-count">
+                    {{ page_obj.paginator.count }} registro{% if page_obj.paginator.count != 1 %}s{% endif %}
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-entregas align-middle">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Médico</th>
+                            <th>Matrícula</th>
+                            <th>Fecha entrega</th>
+                            <th>Órdenes</th>
+                            <th>Estado</th>
+                            <th>Observaciones</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for p in planillas %}
+                            <tr id="fila-planilla-{{ p.id }}">
+                                <td>
+                                    <strong>#{{ p.id }}</strong>
+                                </td>
+
+                                <td>
+                                    {% if p.medico %}
+                                        <div class="medico-name">
+                                            {{ p.medico.apellido|title }}, {{ p.medico.nombre|title }}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Sin médico</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if p.medico and p.medico.matricula %}
+                                        {{ p.medico.matricula }}
+                                    {% else %}
+                                        <span class="text-muted">Sin matrícula</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if p.fecha_entrega %}
+                                        {{ p.fecha_entrega|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="text-muted">No tiene</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="badge-orden">
+                                        {{ p.total_ordenes }} orden{% if p.total_ordenes != 1 %}es{% endif %}
+                                    </span>
+                                </td>
+
+                                <td class="estado-cell">
+                                    {% if p.anulada %}
+                                        <span class="badge-estado badge-anulada">
+                                            Anulada
+                                        </span>
+                                    {% elif p.entregada %}
+                                        <span class="badge-estado badge-entregada">
+                                            Entregada
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-estado badge-pendiente">
+                                            Pendiente de entrega
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if p.observaciones %}
+                                        {{ p.observaciones }}
+                                    {% else %}
+                                        <span class="text-muted">Sin observaciones</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end">
+                                    <div class="actions-cell">
+
+                                        <a href="#"
+                                           class="btn btn-sm btn-outline-primary btn-action"
+                                           title="Ver detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        {% if not p.anulada and not p.entregada %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-success btn-action btn-entregar"
+                                                    data-url="{% url 'gestion_app:entregar_planilla_entrega' p.id %}"
+                                                    title="Entregar e imprimir">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger btn-action btn-anular"
+                                                    data-url="{% url 'gestion_app:anular_planilla_entrega' p.id %}"
+                                                    title="Anular confección">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        {% endif %}
+
+                                        {% if not p.anulada %}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-dark btn-action btn-imprimir"
+                                                    data-url="{% url 'gestion_app:imprimir_planilla_entrega' p.id %}"
+                                                    title="Imprimir">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                        <div class="fw-bold">No se encontraron planillas.</div>
+                                        <div class="small">Todavía no hay registros cargados para los filtros seleccionados.</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination-wrap d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="text-muted-small">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </div>
+
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.previous_page_number }}&q={{ query }}&estado={{ estado }}">
+                                    Anterior
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Anterior</span>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num == page_obj.number %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ num }}&q={{ query }}&estado={{ estado }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.next_page_number }}&q={{ query }}&estado={{ estado }}">
+                                    Siguiente
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Siguiente</span>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
+
+    async function postBackend(url) {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest",
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+            throw new Error(data.message || "Ocurrió un error.");
+        }
+
+        return data;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".btn-anular").forEach(btn => {
+            btn.addEventListener("click", async function () {
+                const url = this.dataset.url;
+
+                if (!confirm("¿Desea anular esta confección? Esta acción solo es posible si todavía no fue entregada.")) {
+                    return;
+                }
+
+                try {
+                    await postBackend(url);
+                    window.location.reload();
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
+
+        document.querySelectorAll(".btn-entregar").forEach(btn => {
+            btn.addEventListener("click", async function () {
+                const url = this.dataset.url;
+
+                if (!confirm("¿Desea marcar esta planilla como entregada e imprimirla?")) {
+                    return;
+                }
+
+                try {
+                    const data = await postBackend(url);
+
+                    if (data.print_url) {
+                        window.open(data.print_url, "_blank");
+                    }
+
+                    window.location.reload();
+
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
+
+        document.querySelectorAll(".btn-imprimir").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const url = this.dataset.url;
+                window.open(url, "_blank");
+            });
+        });
+
+    });
+</script>
+
+{% endblock %}

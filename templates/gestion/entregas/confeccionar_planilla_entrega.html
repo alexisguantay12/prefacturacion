@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .page-title i {
+        color: #0f4c81;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 0.88rem;
+        margin-top: 0.2rem;
+    }
+
+    .card-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        margin-bottom: 1rem;
+        border: 1px solid #d8e0ea;
+    }
+
+    .table-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        border: 1px solid #d8e0ea;
+        overflow: hidden;
+    }
+
+    .table-card-header {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid #e5eaf1;
+        background: #fbfdff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-card-title {
+        margin: 0;
+        font-size: 0.98rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .table-card-title i {
+        color: #0f4c81;
+    }
+
+    .table-count {
+        background: #e8f2ff;
+        color: #0f4c81;
+        border: 1px solid #b9d7ff;
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 900;
+    }
+
+    .table-ordenes {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.84rem;
+    }
+
+    .table-ordenes thead th {
+        background: #f1f5f9;
+        color: #374151;
+        font-size: 0.76rem;
+        font-weight: 900;
+        white-space: nowrap;
+        padding: 0.8rem 0.75rem;
+        border-bottom: 1px solid #cbd5e1;
+    }
+
+    .table-ordenes tbody td {
+        vertical-align: middle;
+        padding: 0.75rem;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .patient-name {
+        font-weight: 900;
+        color: #111827;
+    }
+
+    .text-muted-small {
+        color: #6b7280;
+        font-size: 0.78rem;
+    }
+
+    .badge-estado {
+        padding: 0.35rem 0.58rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .badge-autorizada {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+
+    .badge-no-autorizada {
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #fed7aa;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: #6b7280;
+    }
+
+    .summary-box {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .summary-pill {
+        border-radius: 999px;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.76rem;
+        font-weight: 900;
+        border: 1px solid #d8e0ea;
+        background: #f8fafc;
+        color: #334155;
+    }
+
+    .summary-pill strong {
+        color: #0f4c81;
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="page-wrap">
+
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h2 class="page-title">
+                        <i class="fas fa-file-signature"></i>
+                        Confeccionar planilla de entrega
+                    </h2>
+
+                    <div class="page-subtitle">
+                        Seleccione el médico ejecutor y confeccione una planilla con órdenes no entregadas.
+                    </div>
+                </div>
+
+                <div>
+                    <a href="{% url 'gestion_app:lista_planillas_entrega' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-7">
+                    <label class="form-label mb-1">Médico ejecutor</label>
+                    <select name="medico" class="form-select" required>
+                        <option value="">Seleccione un médico</option>
+                        {% for m in medicos %}
+                            <option value="{{ m.id }}"
+                                {% if medico_id|stringformat:"s" == m.id|stringformat:"s" %}selected{% endif %}>
+                                {{ m.apellido|title }}, {{ m.nombre|title }}
+                                {% if m.matricula %} - Mat. {{ m.matricula }}{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-5 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="fas fa-search"></i> Buscar órdenes
+                    </button>
+
+                    <a href="{% url 'gestion_app:confeccionar_planilla_entrega' %}" class="btn btn-outline-secondary">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        {% if medico %}
+            <form method="post" id="formConfeccionarPlanilla">
+                {% csrf_token %}
+
+                <input type="hidden" name="medico" value="{{ medico.id }}">
+                <input type="hidden" name="accion" id="accionPlanilla" value="">
+
+                <div class="card-box">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label mb-1">Fecha de entrega</label>
+                            <input type="date"
+                                   name="fecha_entrega"
+                                   value="{{ fecha_hoy|date:'Y-m-d' }}"
+                                   class="form-control">
+                            <div class="text-muted-small mt-1">
+                                Se usará solo si confirma y entrega.
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label mb-1">Observaciones</label>
+                            <input type="text"
+                                   name="observaciones"
+                                   class="form-control"
+                                   maxlength="500"
+                                   placeholder="Observaciones de la confección">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-card-header">
+                        <div>
+                            <h6 class="table-card-title">
+                                <i class="fas fa-file-medical"></i>
+                                Órdenes no entregadas de {{ medico.apellido|title }}, {{ medico.nombre|title }}
+                            </h6>
+
+                            <div class="summary-box mt-2">
+                                <span class="summary-pill">
+                                    Total: <strong>{{ ordenes|length }}</strong>
+                                </span>
+
+                                <span class="summary-pill">
+                                    Seleccionadas: <strong id="contadorSeleccionadas">0</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-success btn-sm"
+                                id="btnAbrirConfirmacion"
+                                {% if not ordenes %}disabled{% endif %}>
+                            <i class="fas fa-check-circle"></i> Confeccionar
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-ordenes align-middle">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="checkTodos">
+                                    </th>
+                                    <th>N° Orden</th>
+                                    <th>N° Ingreso</th>
+                                    <th>Paciente</th>
+                                    <th>Obra Social</th>
+                                    <th>Fecha orden</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for o in ordenes %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox"
+                                                   class="check-orden"
+                                                   name="ordenes"
+                                                   value="{{ o.id }}"
+                                                   {% if not o.autorizada or o.estado != "autorizada" %}disabled{% endif %}>
+                                        </td>
+
+                                        <td>
+                                            <strong>#{{ o.id }}</strong>
+                                        </td>
+
+                                        <td>
+                                            {% if o.preingreso.numero %}
+                                                {{ o.preingreso.numero }}
+                                            {% elif o.preingreso.episodio %}
+                                                {{ o.preingreso.episodio }}
+                                            {% else %}
+                                                #{{ o.preingreso.id }}
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            <div class="patient-name">
+                                                {{ o.preingreso.paciente.apellido|title }},
+                                                {{ o.preingreso.paciente.nombre|title }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {% if o.preingreso.obra_social %}
+                                                {{ o.preingreso.obra_social|title }}
+                                            {% else %}
+                                                <span class="text-muted">Sin obra social</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if o.fecha %}
+                                                {{ o.fecha|date:"d/m/Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Sin fecha</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if o.autorizada and o.estado == "autorizada" %}
+                                                <span class="badge-estado badge-autorizada">
+                                                    Autorizada
+                                                </span>
+                                            {% else %}
+                                                <span class="badge-estado badge-no-autorizada">
+                                                    No autorizada
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="empty-state">
+                                                <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                                <div class="fw-bold">No hay órdenes pendientes para este médico.</div>
+                                                <div class="small">
+                                                    Puede que ya estén entregadas o incluidas en una planilla pendiente.
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalConfirmarPlanilla" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    Confirmar confección
+                                </h5>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <p class="mb-2">
+                                    Se confeccionará una planilla para:
+                                </p>
+
+                                <div class="fw-bold mb-2">
+                                    {{ medico.apellido|title }}, {{ medico.nombre|title }}
+                                </div>
+
+                                <div class="alert alert-info mb-0">
+                                    Órdenes seleccionadas:
+                                    <strong id="modalCantidadSeleccionadas">0</strong>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        data-bs-dismiss="modal">
+                                    Cancelar
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-warning"
+                                        id="btnConfirmarPendiente">
+                                    Confirmar y dejar pendiente
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-success"
+                                        id="btnConfirmarEntregar">
+                                    Confirmar, entregar e imprimir
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const checks = document.querySelectorAll(".check-orden");
+        const checkTodos = document.getElementById("checkTodos");
+        const contadorSeleccionadas = document.getElementById("contadorSeleccionadas");
+        const modalCantidadSeleccionadas = document.getElementById("modalCantidadSeleccionadas");
+
+        const btnAbrirConfirmacion = document.getElementById("btnAbrirConfirmacion");
+        const btnConfirmarPendiente = document.getElementById("btnConfirmarPendiente");
+        const btnConfirmarEntregar = document.getElementById("btnConfirmarEntregar");
+
+        const form = document.getElementById("formConfeccionarPlanilla");
+        const accionPlanilla = document.getElementById("accionPlanilla");
+
+        function contarSeleccionadas() {
+            const total = document.querySelectorAll(".check-orden:checked").length;
+
+            if (contadorSeleccionadas) {
+                contadorSeleccionadas.textContent = total;
+            }
+
+            if (modalCantidadSeleccionadas) {
+                modalCantidadSeleccionadas.textContent = total;
+            }
+
+            return total;
+        }
+
+        checks.forEach(check => {
+            check.addEventListener("change", contarSeleccionadas);
+        });
+
+        if (checkTodos) {
+            checkTodos.addEventListener("change", function () {
+                checks.forEach(check => {
+                    if (!check.disabled) {
+                        check.checked = this.checked;
+                    }
+                });
+
+                contarSeleccionadas();
+            });
+        }
+
+        if (btnAbrirConfirmacion) {
+            btnAbrirConfirmacion.addEventListener("click", function () {
+                const total = contarSeleccionadas();
+
+                if (total === 0) {
+                    alert("Debe seleccionar al menos una orden autorizada.");
+                    return;
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById("modalConfirmarPlanilla"));
+                modal.show();
+            });
+        }
+
+        if (btnConfirmarPendiente) {
+            btnConfirmarPendiente.addEventListener("click", function () {
+                accionPlanilla.value = "pendiente";
+                form.submit();
+            });
+        }
+
+        if (btnConfirmarEntregar) {
+            btnConfirmarEntregar.addEventListener("click", function () {
+                accionPlanilla.value = "entregar";
+                form.submit();
+            });
+        }
+
+        contarSeleccionadas();
+    });
+</script>
+
+{% endblock %}

@@ -36,7 +36,7 @@ def detalle_orden(request, orden_id):
 @login_required
 def imprimir_orden(request, orden_id):
     imprimir_duplicado = request.GET.get("duplicado") == "1"
-
+    
     orden = get_object_or_404(
         OrdenAutorizacion.objects.select_related(
             "preingreso",
@@ -52,6 +52,7 @@ def imprimir_orden(request, orden_id):
         ),
         id=orden_id
     )
+    
 
     return render(request, "gestion/orden/imprimir_orden.html", {
         "orden": orden,

@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .print-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 1.5rem;
+        color: #111827;
+        font-family: Arial, sans-serif;
+    }
+
+    .hospital-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2.2rem;
+    }
+
+    .logo-box {
+        width: 54px;
+        height: 54px;
+        border: 1px solid #111827;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.25rem;
+    }
+
+    .hospital-name {
+        font-size: 1.45rem;
+        font-weight: 900;
+        line-height: 1.05;
+    }
+
+    .print-header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 2px solid #111827;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .print-title {
+        font-size: 1.35rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .print-subtitle {
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+    }
+
+    .planilla-number {
+        font-size: 1.05rem;
+        font-weight: 900;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.85rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .info-box {
+        border: 1px solid #111827;
+        border-radius: 10px;
+        padding: 0.75rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 0.35rem;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        font-weight: 900;
+    }
+
+    .observaciones {
+        border: 1px solid #111827;
+        padding: 0.6rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .table-print {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+    }
+
+    .table-print th,
+    .table-print td {
+        border: 1px solid #111827;
+        padding: 0.42rem;
+        vertical-align: middle;
+    }
+
+    .table-print th {
+        background: transparent;
+        font-weight: 900;
+        text-align: center;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .footer-box {
+        margin-top: 4rem;
+        border-top: 2px solid #111827;
+        padding-top: 1.2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .footer-info {
+        font-size: 0.9rem;
+    }
+
+    .footer-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .footer-value {
+        font-weight: 900;
+    }
+
+    .system-footer {
+        margin-top: 2rem;
+        border-top: 1px solid #111827;
+        padding-top: 0.8rem;
+        text-align: center;
+        font-size: 0.78rem;
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background: #fff !important;
+        }
+
+        .container-fluid {
+            padding: 0 !important;
+        }
+
+        .print-wrap {
+            max-width: 100%;
+            padding: 0;
+        }
+
+        @page {
+            size: A4;
+            margin: 14mm;
+        }
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="print-wrap">
+
+        <div class="no-print mb-3">
+            <button onclick="window.print()" class="btn btn-dark btn-sm">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+
+            <a href="{% url 'gestion_app:lista_planillas_entrega' %}" class="btn btn-outline-secondary btn-sm">
+                Volver
+            </a>
+        </div>
+
+        <div class="hospital-header">
+            <div class="logo-box">SC+</div>
+            <div class="hospital-name">
+                Santa Clara<br>
+                Hospital
+            </div>
+        </div>
+
+        <div class="print-header">
+            <div>
+                <h1 class="print-title">Planilla de entrega de honorarios</h1>
+                <div class="print-subtitle">
+                    Fecha y hora de impresión: {{ fecha_impresion|date:"d/m/Y H:i" }}
+                </div>
+            </div>
+
+            <div class="planilla-number">
+                Planilla N° {{ planilla.id }}
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="info-label">Médico</div>
+                <div class="info-value">
+                    {{ planilla.medico.apellido|title }}, {{ planilla.medico.nombre|title }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Matrícula</div>
+                <div class="info-value">
+                    {{ planilla.medico.matricula|default:"Sin matrícula" }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Fecha entrega</div>
+                <div class="info-value">
+                    {% if planilla.fecha_entrega %}
+                        {{ planilla.fecha_entrega|date:"d/m/Y" }}
+                    {% else %}
+                        Pendiente
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if planilla.observaciones %}
+            <div class="observaciones">
+                <strong>Observaciones:</strong> {{ planilla.observaciones }}
+            </div>
+        {% endif %}
+
+        <table class="table-print">
+            <thead>
+                <tr>
+                    <th>FechaOrden</th>
+                    <th>NroOrden</th>
+                    <th>NroIngreso</th>
+                    <th>Codigo</th>
+                    <th>Paciente</th>
+                    <th>Obra Social</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for d in detalles %}
+                    {% for det in d.orden.detalles.all %}
+                        <tr>
+                            <td class="text-center">
+                                {% if d.orden.fecha %}
+                                    {{ d.orden.fecha|date:"d/m/Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {{ d.orden.id }}
+                            </td>
+
+                            <td class="text-center">
+                                {% if d.orden.preingreso.numero %}
+                                    {{ d.orden.preingreso.numero }}
+                                {% elif d.orden.preingreso.episodio %}
+                                    {{ d.orden.preingreso.episodio }}
+                                {% else %}
+                                    {{ d.orden.preingreso.id }}
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {{ det.prestacion.codigo }}
+                            </td>
+
+                            <td>
+                                {{ d.orden.preingreso.paciente.apellido|title }},
+                                {{ d.orden.preingreso.paciente.nombre|title }}
+                            </td>
+
+                            <td>
+                                {{ d.orden.preingreso.obra_social|default:"-" }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Sin órdenes asociadas.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="footer-box">
+            <div class="footer-info">
+                <div class="footer-label">Entregado por</div>
+                <div class="footer-value">
+                    {{ planilla.user_made.get_full_name|default:planilla.user_made.username }}
+                </div>
+                <div>Usuario del sistema</div>
+            </div>
+
+            <div class="footer-info">
+                <div class="footer-label">Recibido por</div>
+                <div class="footer-value">
+                    Médico / profesional
+                </div>
+            </div>
+        </div>
+
+        <div class="system-footer">
+            Sistema de Gestión de Órdenes de Autorización · Área de Sistemas
+        </div>
+
+    </div>
+</div>
+
+<script>
+window.addEventListener("load", function () {
+    window.print();
+});
+
+window.addEventListener("afterprint", function () {
+    window.location.href = "{% url 'gestion_app:lista_planillas_entrega' %}";
+});
+</script>
+
+{% endblock %}
