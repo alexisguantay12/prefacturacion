@@ -359,36 +359,7 @@ class DetalleOrden(BaseAbstractWithUser):
         return f"{self.prestacion.codigo} - {self.prestacion.nombre}"
     
 
-
-class PlanillaEntrega(BaseAbstractWithUser):
-    medico = models.ForeignKey(
-        "entidades.Medico",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="planilla_entrega"
-    )
-    observaciones = models.CharField(
-        null=True,
-        blank=True,
-        max_length=500,
-    )
-
-class DetallePlanillaEntrega(BaseAbstractWithUser):
-    planilla_entrega = models.ForeignKey(
-        PlanillaEntrega,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-
-    orden = models.ForeignKey(
-        OrdenAutorizacion,
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-    )
-
+ 
 
 
 class PlanillaEntrega(BaseAbstractWithUser):
