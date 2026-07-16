@@ -12,43 +12,55 @@ from ..models import *
 # AJAX PACIENTES
 # =============================================================================
 
-@require_GET
+
 def buscar_pacientes_ajax(request):
-    q = request.GET.get("q", "").strip()
-    page = request.GET.get("page", 1)
+    apellido = request.GET.get("apellido", "").strip()
+    nombre = request.GET.get("nombre", "").strip()
+    dni = request.GET.get("dni", "").strip()
+    page_number = request.GET.get("page", 1)
 
-    if len(q) < 2:
-        return JsonResponse({
-            "results": [],
-            "has_next": False,
-        })
+    pacientes = Paciente.objects.all()
 
-    pacientes = Paciente.objects.filter(
-        Q(dni__icontains=q) |
-        Q(apellido__icontains=q) |
-        Q(nombre__icontains=q)
-    ).order_by("apellido", "nombre")
+    if apellido:
+        pacientes = pacientes.filter(
+            apellido__icontains=apellido
+        )
+
+    if nombre:
+        pacientes = pacientes.filter(
+            nombre__icontains=nombre
+        )
+
+    if dni:
+        pacientes = pacientes.filter(
+            dni__icontains=dni
+        )
+
+    pacientes = pacientes.order_by("apellido", "nombre")
 
     paginator = Paginator(pacientes, 15)
-    page_obj = paginator.get_page(page)
+    page_obj = paginator.get_page(page_number)
 
-    results = []
-
-    for paciente in page_obj.object_list:
-        results.append({
+    resultados = [
+        {
             "id": paciente.id,
-            "apellido": paciente.apellido or "",
-            "nombre": paciente.nombre or "",
-            "dni": paciente.dni or "",
-            "fecha_nacimiento": paciente.fecha_nacimiento.strftime("%d/%m/%Y") if paciente.fecha_nacimiento else "",
+            "apellido": paciente.apellido,
+            "nombre": paciente.nombre,
+            "dni": paciente.dni,
+            "fecha_nacimiento": (
+                paciente.fecha_nacimiento.strftime("%d/%m/%Y")
+                if paciente.fecha_nacimiento
+                else ""
+            ),
             "telefono": paciente.telefono or "",
-        })
+        }
+        for paciente in page_obj
+    ]
 
     return JsonResponse({
-        "results": results,
+        "results": resultados,
         "has_next": page_obj.has_next(),
     })
-
 
 @require_POST
 def crear_paciente_ajax(request):
@@ -86,7 +98,7 @@ def crear_paciente_ajax(request):
             provincia=provincia or None,
             nacionalidad=nacionalidad or None,
         )
-
+        paciente.refresh_from_db()
         return JsonResponse({
             "ok": True,
             "paciente": {
@@ -94,7 +106,7 @@ def crear_paciente_ajax(request):
                 "apellido": paciente.apellido or "",
                 "nombre": paciente.nombre or "",
                 "dni": paciente.dni or "",
-                "fecha_nacimiento": paciente.fecha_nacimiento.strftime("%d/%m/%Y") if paciente.fecha_nacimiento else "",
+                "fecha_nacimiento": paciente.fecha_nacimiento.strftime("%Y-%m-%d") if paciente.fecha_nacimiento else "",
                 "telefono": paciente.telefono or "",
             }
         })

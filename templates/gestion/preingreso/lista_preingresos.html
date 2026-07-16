@@ -108,7 +108,12 @@
         padding: 0.8rem 0.75rem;
         border-bottom: 1px solid #cbd5e1;
     }
-
+     .form-control::placeholder,
+    .form-select::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+        font-weight: 400;
+    }
     .table-preingresos tbody td {
         vertical-align: middle;
         padding: 0.78rem 0.75rem;
@@ -346,12 +351,7 @@
                                            title="Editar preingreso">
                                             <i class="fas fa-edit"></i>
                                         </a>
-
-                                        <a href="{% url 'gestion_app:lista_ordenes_preingreso' p.id %}"
-                                           class="btn btn-sm btn-outline-success btn-action"
-                                           title="Ver órdenes">
-                                            <i class="fas fa-file-medical"></i>
-                                        </a>
+ 
                                     </div>
                                 </td>
                             </tr>

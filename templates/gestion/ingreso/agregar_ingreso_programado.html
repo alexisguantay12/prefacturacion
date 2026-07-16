@@ -328,8 +328,8 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Plan</label>
-                        <select name="plan" id="plan" class="form-select">
+                        <label class="form-label">Plan<span class="required-mark">*</span></label>
+                        <select name="plan" id="plan" class="form-select" required>
                             <option value="">Seleccione un plan</option>
                             {% for plan in planes %}
                                 <option 
@@ -343,11 +343,13 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">N° afiliado</label>
+                        <label class="form-label">N° afiliado<span class="required-mark">*</span></label>
                         <input type="text"
                                name="numero_afiliado"
+                               autocomplete="one-time-code"
                                id="numero_afiliado"
                                class="form-control"
+                               required
                                placeholder="Ingrese número de afiliado">
                     </div>
 
@@ -390,8 +392,8 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">Servicio</label>
-                        <select name="servicio" id="servicio" class="form-select">
+                        <label class="form-label">Servicio<span class="required-mark">*</span></label>
+                        <select name="servicio" id="servicio" class="form-select" required>
                             <option value="">Seleccione un servicio...</option>
                             {% for servicio in servicios %}
                                 <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
@@ -400,8 +402,8 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">Médico</label>
-                        <select name="medico" id="medico" class="form-select">
+                        <label class="form-label">Médico<span class="required-mark">*</span></label>
+                        <select name="medico" id="medico" class="form-select" required>
                             <option value="">Seleccione un médico...</option>
                             {% for medico in medicos %}
                                 <option value="{{ medico.id }}">
@@ -412,11 +414,12 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Diagnóstico</label>
+                        <label class="form-label">Diagnóstico<span class="required-mark">*</span></label>
                         <textarea name="diagnostico"
                                   id="diagnostico"
                                   class="form-control"
                                   rows="2"
+                                  required
                                   placeholder="Ingrese diagnóstico o motivo..."></textarea>
                     </div>
 

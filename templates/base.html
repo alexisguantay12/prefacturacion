@@ -368,14 +368,7 @@
                         <i class="fas fa-bed"></i> Ingresos
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    <a class="nav-link {% if url == 'imprimir_orden' %}active{% endif %}"
-                       href="#">
-                        <i class="fas fa-file-medical"></i> Órdenes
-                    </a>
-                </li>
-                {% if request.user.groups.first.name == "administrador" %}
+  
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -414,6 +407,8 @@
                         </li>
                     </ul>
                 </li> 
+                
+                {% if request.user.groups.first.name == "administrador" %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-chart-bar"></i> Reportes
@@ -437,7 +432,6 @@
                         </li>
                     </ul>
                 </li>
- 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-cog"></i> Administración

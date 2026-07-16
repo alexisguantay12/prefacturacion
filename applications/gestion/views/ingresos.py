@@ -17,7 +17,10 @@ from django.utils import timezone
 # =============================================================================
 @login_required
 def lista_ingresos(request):
-    query = request.GET.get("q", "").strip()
+    paciente = request.GET.get("paciente", "").strip()
+    dni = request.GET.get("dni", "").strip()
+    episodio = request.GET.get("episodio", "").strip()
+    orden = request.GET.get("orden", "").strip()
     obra_social_id = request.GET.get("obra_social", "").strip()
 
     ingresos = (
@@ -29,22 +32,46 @@ def lista_ingresos(request):
             "medico",
             "servicio",
         )
-        .annotate(total_ordenes=Count("ordenes", distinct=True))
-        .filter(estado__in=["ingresado", "cerrado"])
+        .annotate(
+            total_ordenes=Count("ordenes", distinct=True)
+        )
+        .filter(
+            estado__in=["ingresado", "cerrado"]
+        )
         .order_by("-fecha_ingreso", "-id")
     )
 
-    if query:
+    if paciente:
         ingresos = ingresos.filter(
-            Q(numero__icontains=query) |
-            Q(episodio__icontains=query) |
-            Q(paciente__apellido__icontains=query) |
-            Q(paciente__nombre__icontains=query) |
-            Q(paciente__dni__icontains=query)
+            Q(paciente__apellido__icontains=paciente) |
+            Q(paciente__nombre__icontains=paciente)
         )
 
+    if dni:
+        ingresos = ingresos.filter(
+            paciente__dni__icontains=dni
+        )
+
+    if episodio:
+        ingresos = ingresos.filter(
+            episodio__icontains=episodio
+        )
+
+    if orden:
+        try:
+            orden_id = int(orden)
+
+            ingresos = ingresos.filter(
+                ordenes__id=orden_id
+            ).distinct()
+
+        except (TypeError, ValueError):
+            ingresos = ingresos.none()
+
     if obra_social_id:
-        ingresos = ingresos.filter(obra_social_id=obra_social_id)
+        ingresos = ingresos.filter(
+            obra_social_id=obra_social_id
+        )
 
     paginator = Paginator(ingresos, 20)
     page_number = request.GET.get("page")
@@ -52,15 +79,20 @@ def lista_ingresos(request):
 
     obras_sociales = ObraSocial.objects.all().order_by("nombre")
 
-    return render(request, "gestion/ingreso/lista_ingresos.html", {
-        "ingresos": page_obj,
-        "page_obj": page_obj,
-        "query": query,
-        "obra_social_id": obra_social_id,
-        "obras_sociales": obras_sociales,
-    })
-
-
+    return render(
+        request,
+        "gestion/ingreso/lista_ingresos.html",
+        {
+            "ingresos": page_obj,
+            "page_obj": page_obj,
+            "paciente": paciente,
+            "dni": dni,
+            "episodio": episodio,
+            "orden": orden,
+            "obra_social_id": obra_social_id,
+            "obras_sociales": obras_sociales,
+        }
+    )
 @login_required
 def agregar_ingreso(request):
     obras_sociales = ObraSocial.objects.all().order_by("nombre")

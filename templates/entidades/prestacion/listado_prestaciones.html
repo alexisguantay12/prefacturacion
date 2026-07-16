@@ -294,7 +294,7 @@
                                        title="Editar prestación">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    
+                                    {% if request.user.groups.first.name == "administrador" %}
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger btn-action"
                                             title="Eliminar prestacion"
@@ -302,7 +302,7 @@
                                             data-bs-target="#modalEliminarPrestacion{{ prestacion.id }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
-
+                                    {%endif%}
                                     <div class="modal fade" id="modalEliminarPrestacion{{ prestacion.id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content modal-confirmacion">
@@ -356,7 +356,62 @@
 
                 </table>
             </div>
+            {% if page_obj.has_other_pages %}
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
 
+                    <div class="text-muted-small">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </div>
+
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.previous_page_number }}&buscar={{ buscar }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if num == page_obj.number %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ num }}&buscar={{ buscar }}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.next_page_number }}&buscar={{ buscar }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            {% endif %}
+
+                        </ul>
+                    </nav>
+
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

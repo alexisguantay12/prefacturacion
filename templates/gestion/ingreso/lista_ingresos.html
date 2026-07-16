@@ -241,7 +241,12 @@
         border-color: #0f4c81;
         color: #fff;
     }
-
+    .form-control::placeholder,
+    .form-select::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+        font-weight: 400;
+    }
     @media (max-width: 768px) {
         .page-header .d-flex {
             flex-direction: column;
@@ -290,38 +295,74 @@
 
         <div class="card-filter">
             <form method="get" class="row g-2 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label mb-1">Buscar</label>
-                    <input type="text"
-                           name="q"
-                           value="{{ query }}"
-                           class="form-control"
-                           placeholder="Nombre, apellido, DNI, episodio o N° ingreso">
-                </div>
 
-                <div class="col-md-4">
-                    <label class="form-label mb-1">Obra social</label>
-                    <select name="obra_social" class="form-select">
-                        <option value="">Todas</option>
-                        {% for os in obras_sociales %}
-                            <option value="{{ os.id }}"
-                                {% if obra_social_id|stringformat:"s" == os.id|stringformat:"s" %}selected{% endif %}>
-                                {{ os.nombre|title }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="col-md-2">
+                <label class="form-label mb-1">Paciente</label>
+                <input
+                    type="text"
+                    name="paciente"
+                    value="{{ paciente }}"
+                    class="form-control"
+                    placeholder="Nombre o apellido">
+            </div>
 
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-dark">
-                        <i class="fas fa-search"></i> Filtrar
-                    </button>
+            <div class="col-md-2">
+                <label class="form-label mb-1">DNI</label>
+                <input
+                    type="text"
+                    name="dni"
+                    value="{{ dni }}"
+                    class="form-control"
+                    placeholder="DNI">
+            </div>
 
-                    <a href="{% url 'gestion_app:lista_ingresos' %}" class="btn btn-outline-secondary">
-                        Limpiar
-                    </a>
-                </div>
-            </form>
+            <div class="col-md-2">
+                <label class="form-label mb-1">Episodio</label>
+                <input
+                    type="text"
+                    name="episodio"
+                    value="{{ episodio }}"
+                    class="form-control"
+                    placeholder="N° Episodio">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label mb-1">Orden</label>
+                <input
+                    type="number"
+                    name="orden"
+                    value="{{ numero_orden }}"
+                    class="form-control" 
+                    placeholder="Ej: 12">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label mb-1">Obra Social</label>
+                <select name="obra_social" class="form-select">
+                    <option value="">Todas</option>
+
+                    {% for os in obras_sociales %}
+                        <option
+                            value="{{ os.id }}"
+                            {% if obra_social_id|stringformat:"s" == os.id|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+                            {{ os.nombre|title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+
+                <a href="{% url 'gestion_app:lista_ingresos' %}"
+                class="btn btn-outline-secondary">
+                    Limpiar
+                </a>
+            </div>
+
+        </form>
         </div>
 
         <div class="table-card">
@@ -429,12 +470,7 @@
                                            title="Editar ingreso">
                                             <i class="fas fa-edit"></i>
                                         </a>
-
-                                        <a href="{% url 'gestion_app:lista_ordenes_preingreso' p.id %}"
-                                           class="btn btn-sm btn-outline-success btn-action"
-                                           title="Ver órdenes">
-                                            <i class="fas fa-file-medical"></i>
-                                        </a>
+ 
                                     </div>
                                 </td>
                             </tr>
@@ -467,7 +503,7 @@
                         {% if page_obj.has_previous %}
                             <li class="page-item">
                                 <a class="page-link"
-                                   href="?page={{ page_obj.previous_page_number }}&q={{ query }}&obra_social={{ obra_social_id }}">
+                                href="?page={{ page_obj.previous_page_number }}&paciente={{ paciente }}&dni={{ dni }}&episodio={{ episodio }}&obra_social={{ obra_social_id }}">
                                     Anterior
                                 </a>
                             </li>
@@ -485,7 +521,7 @@
                             {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
                                 <li class="page-item">
                                     <a class="page-link"
-                                       href="?page={{ num }}&q={{ query }}&obra_social={{ obra_social_id }}">
+                                    href="?page={{ num }}&paciente={{ paciente }}&dni={{ dni }}&episodio={{ episodio }}&obra_social={{ obra_social_id }}">
                                         {{ num }}
                                     </a>
                                 </li>
@@ -495,7 +531,7 @@
                         {% if page_obj.has_next %}
                             <li class="page-item">
                                 <a class="page-link"
-                                   href="?page={{ page_obj.next_page_number }}&q={{ query }}&obra_social={{ obra_social_id }}">
+                                href="?page={{ page_obj.next_page_number }}&paciente={{ paciente }}&dni={{ dni }}&episodio={{ episodio }}&obra_social={{ obra_social_id }}">
                                     Siguiente
                                 </a>
                             </li>

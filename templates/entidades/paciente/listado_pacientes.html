@@ -353,7 +353,7 @@
                                        title="Editar paciente">
                                         <i class="fas fa-edit"></i>
                                     </a>
-
+                                    {% if request.user.groups.first.name == "administrador" %}
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger btn-action"
                                             title="Eliminar paciente"
@@ -361,7 +361,7 @@
                                             data-bs-target="#modalEliminarPaciente{{ paciente.id }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
-
+                                    {%endif%}
                                     <div class="modal fade" id="modalEliminarPaciente{{ paciente.id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content modal-confirmacion">

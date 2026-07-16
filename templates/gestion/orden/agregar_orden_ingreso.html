@@ -684,14 +684,33 @@
 
     function agregarFilaDetalle() {
         const tbody = document.getElementById("detallesBody");
-        const template = tbody.querySelector("tr.fila-detalle");
-        const nuevaFila = template.cloneNode(true);
+        const primeraFila = tbody.querySelector("tr.fila-detalle");
 
+        // Obtener las fechas de la primera fila
+        const fechaDesdePrimera = primeraFila
+            .querySelector(".detalle_fecha_desde")
+            .value;
+
+        const fechaHastaPrimera = primeraFila
+            .querySelector(".detalle_fecha_hasta")
+            .value;
+
+        const nuevaFila = primeraFila.cloneNode(true);
+
+        // Limpia todos los datos clonados
         limpiarFilaDetalle(nuevaFila);
+
+        // Solo copia las fechas si la primera fila tiene ambas cargadas
+        if (fechaDesdePrimera && fechaHastaPrimera) {
+            nuevaFila.querySelector(".detalle_fecha_desde").value = fechaDesdePrimera;
+            nuevaFila.querySelector(".detalle_fecha_hasta").value = fechaHastaPrimera;
+        }
+
         tbody.appendChild(nuevaFila);
         actualizarNumeracionFilas();
 
         const codigoInput = nuevaFila.querySelector(".detalle_prestacion_codigo");
+
         if (codigoInput) {
             codigoInput.focus();
         }

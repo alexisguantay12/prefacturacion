@@ -36,9 +36,11 @@ def detalle_orden(request, orden_id):
 @login_required
 def imprimir_orden(request, orden_id):
     imprimir_duplicado = request.GET.get("duplicado") == "1"
-    
+    usar_medico_orden = request.GET.get("firma_medico_orden") == "1"
+
     orden = get_object_or_404(
         OrdenAutorizacion.objects.select_related(
+            "medico",
             "preingreso",
             "preingreso__paciente",
             "preingreso__obra_social",
@@ -52,14 +54,21 @@ def imprimir_orden(request, orden_id):
         ),
         id=orden_id
     )
-    
 
+    # Por defecto se utiliza el médico de cabecera del ingreso.
+    medico_firma = orden.preingreso.medico
+
+    # Si el usuario seleccionó la opción, se usa el médico de la orden.
+    if usar_medico_orden and orden.medico:
+        medico_firma = orden.medico 
     return render(request, "gestion/orden/imprimir_orden.html", {
         "orden": orden,
         "preingreso": orden.preingreso,
         "detalles": orden.detalles.all().order_by("id"),
         "fecha_impresion": timezone.now(),
         "duplicado": imprimir_duplicado,
+        "medico_firma": medico_firma,
+        "usar_medico_orden": usar_medico_orden,
     })
 
 

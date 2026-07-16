@@ -105,7 +105,12 @@
         border-color: #1d7fbf;
         box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
     }
-
+     .form-control::placeholder,
+    .form-select::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+        font-weight: 400;
+    }
     .required-mark { color: #dc2626; }
 
     .actions-bar {
@@ -302,8 +307,8 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Plan</label>
-                        <select name="plan" id="id_plan" class="form-select">
+                        <label class="form-label">Plan<span class="required-mark">*</span></label>
+                        <select name="plan" id="id_plan" class="form-select" required>
                             <option value="">Seleccione un plan</option>
                             {% for plan in planes %}
                                 <option 
@@ -317,10 +322,11 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">N° afiliado</label>
+                        <label class="form-label">N° afiliado<span class="required-mark">*</span></label>
                         <input type="text"
                                name="numero_afiliado"
-                               class="form-control"
+                               autocomplete="one-time-code"
+                               class="form-control" required
                                placeholder="Ingrese número de afiliado">
                     </div>
 
@@ -373,8 +379,8 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">Médico</label>
-                        <select name="medico" class="form-select">
+                        <label class="form-label">Médico<span class="required-mark">*</span></label>
+                        <select name="medico" class="form-select" required>
                             <option value="">Seleccione un médico...</option>
                             {% for medico in medicos %}
                                 <option value="{{ medico.id }}">
@@ -385,10 +391,10 @@
                     </div>
 
                     <div class="col-md-12">
-                        <label class="form-label">Diagnóstico</label>
+                        <label class="form-label">Diagnóstico<span class="required-mark">*</span></label>
                         <textarea name="diagnostico"
                                   class="form-control"
-                                  rows="2"
+                                  rows="2" required
                                   placeholder="Ingrese diagnóstico o motivo del ingreso..."></textarea>
                     </div>
 
@@ -519,23 +525,52 @@
 
                     <div class="tab-pane fade show active" id="tabBuscarPaciente" role="tabpanel">
 
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-10">
-                                <input type="text"
-                                       id="buscarPacienteInput"
-                                       class="form-control"
-                                       placeholder="Buscar por DNI, apellido o nombre...">
-                                <div class="mini-help mt-1">
-                                    Ingrese al menos 2 caracteres. Se mostrarán 15 resultados por vez.
-                                </div>
-                            </div>
+                     <div class="row g-2 mb-3">
 
-                            <div class="col-md-2 d-grid align-self-start">
-                                <button type="button" class="btn btn-primary" id="btnBuscarPaciente">
-                                    <i class="fas fa-search"></i> Buscar
-                                </button>
+                        <div class="col-md-3">
+                            <label class="form-label mb-1">Apellido</label>
+                            <input
+                                type="text"
+                                id="buscarPacienteApellido"
+                                class="form-control"
+                                placeholder="Ingrese apellido">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label mb-1">Nombre</label>
+                            <input
+                                type="text"
+                                id="buscarPacienteNombre"
+                                class="form-control"
+                                placeholder="Ingrese nombre">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label mb-1">DNI</label>
+                            <input
+                                type="text"
+                                id="buscarPacienteDni"
+                                class="form-control"
+                                placeholder="Ingrese DNI">
+                        </div>
+
+                        <div class="col-md-2 d-grid">
+                            <label class="form-label mb-1">&nbsp;</label>
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                id="btnBuscarPaciente">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="mini-help">
+                                Complete uno o más campos para realizar la búsqueda.
                             </div>
                         </div>
+
+                      </div>
 
                         <div id="pacientesResultadoInfo" class="text-muted small mb-2">
                             No se cargan pacientes automáticamente. Realice una búsqueda para comenzar.
@@ -723,10 +758,11 @@
 
 <script>
     let pacientePage = 1;
-    let pacienteQuery = "";
+    let pacienteApellido = "";
+    let pacienteNombre = "";
+    let pacienteDni = "";
     let pacienteHasNext = false;
     let ingresoEnviado = false;
-
     const buscarPacienteUrl = "{% url 'gestion_app:buscar_pacientes_ajax' %}";
     const crearPacienteUrl = "{% url 'gestion_app:crear_paciente_ajax' %}";
 
@@ -848,26 +884,37 @@
     }
 
     function buscarPacientes(reset = true) {
-        const input = document.getElementById("buscarPacienteInput");
+        const inputApellido = document.getElementById("buscarPacienteApellido");
+        const inputNombre = document.getElementById("buscarPacienteNombre");
+        const inputDni = document.getElementById("buscarPacienteDni");
+
         const info = document.getElementById("pacientesResultadoInfo");
         const btnMas = document.getElementById("btnCargarMasPacientes");
         const tbody = document.getElementById("pacientesResultadoBody");
 
         if (reset) {
             pacientePage = 1;
-            pacienteQuery = input.value.trim();
+            pacienteApellido = inputApellido.value.trim();
+            pacienteNombre = inputNombre.value.trim();
+            pacienteDni = inputDni.value.trim();
         }
 
-        if (pacienteQuery.length < 2) {
-            info.innerText = "Ingrese al menos 2 caracteres para buscar.";
+        if (
+            pacienteApellido.length < 2 &&
+            pacienteNombre.length < 2 &&
+            pacienteDni.length < 2
+        ) {
+            info.innerText = "Ingrese al menos 2 caracteres en alguno de los campos.";
+
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="empty-row">
                         <i class="fas fa-magnifying-glass"></i>
-                        Busque un paciente por DNI, apellido o nombre.
+                        Busque un paciente por apellido, nombre o DNI.
                     </td>
                 </tr>
             `;
+
             btnMas.classList.add("d-none");
             return;
         }
@@ -885,7 +932,14 @@
             `;
         }
 
-        fetch(`${buscarPacienteUrl}?q=${encodeURIComponent(pacienteQuery)}&page=${pacientePage}`)
+        const params = new URLSearchParams({
+            apellido: pacienteApellido,
+            nombre: pacienteNombre,
+            dni: pacienteDni,
+            page: pacientePage
+        });
+
+        fetch(`${buscarPacienteUrl}?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 renderPacientes(data.results || [], !reset);
@@ -899,13 +953,15 @@
                 }
 
                 if ((data.results || []).length === 0 && reset) {
-                    info.innerText = "No se encontraron pacientes. Puede crearlo desde la pestaña Crear paciente.";
+                    info.innerText =
+                        "No se encontraron pacientes. Puede crearlo desde la pestaña Crear paciente.";
                 } else {
                     info.innerText = "Resultados encontrados.";
                 }
             })
             .catch(() => {
                 info.innerText = "Ocurrió un error al buscar pacientes.";
+
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="5" class="empty-row text-danger">
@@ -949,7 +1005,9 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         const btnBuscarPaciente = document.getElementById("btnBuscarPaciente");
-        const buscarPacienteInput = document.getElementById("buscarPacienteInput");
+        const buscarPacienteApellido = document.getElementById("buscarPacienteApellido");
+        const buscarPacienteNombre = document.getElementById("buscarPacienteNombre");
+        const buscarPacienteDni = document.getElementById("buscarPacienteDni");
         const btnCargarMasPacientes = document.getElementById("btnCargarMasPacientes");
         const formCrearPacienteModal = document.getElementById("formCrearPacienteModal");
         const btnVolverBusquedaPaciente = document.getElementById("btnVolverBusquedaPaciente");
@@ -958,11 +1016,17 @@
             buscarPacientes(true);
         });
 
-        buscarPacienteInput.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                buscarPacientes(true);
-            }
+        [
+            buscarPacienteApellido,
+            buscarPacienteNombre,
+            buscarPacienteDni
+        ].forEach(input => {
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    buscarPacientes(true);
+                }
+            });
         });
 
         btnCargarMasPacientes.addEventListener("click", function () {

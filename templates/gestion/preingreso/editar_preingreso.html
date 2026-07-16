@@ -128,7 +128,12 @@
         color: #111827;
         font-size: 1rem;
     }
-
+     .form-control::placeholder,
+    .form-select::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+        font-weight: 400;
+    }
     .patient-meta {
         color: #526179;
         font-size: 0.84rem;
@@ -272,7 +277,7 @@
                         <select name="obra_social" id="id_obra_social" class="form-select" required>
                             <option value="">Seleccione una obra social</option>
                             {% for obra_social in obras_sociales %}
-                                <option value="{{ obra_social.id }}">
+                                <option value="{{ obra_social.id }}"  {% if preingreso.obra_social.id == obra_social.id %}selected{% endif %}>
                                     {{ obra_social.nombre }}
                                 </option>
                             {% endfor %}
@@ -280,13 +285,14 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Plan</label>
-                    <select name="plan" id="id_plan" class="form-select">
+                        <label class="form-label">Plan<span class="required-mark">*</span></label>
+                    <select name="plan" id="id_plan" class="form-select" required>
                         <option value="">Seleccione un plan</option>
                         {% for plan in planes %}
                             <option 
                                 value="{{ plan.id }}"
                                 data-obra-social-id="{{ plan.obra_social_id }}"
+                                {% if preingreso.plan.id == plan.id %}selected{% endif %}
                             >
                                 {{ plan.nombre }}
                             </option>
@@ -295,9 +301,11 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">N° afiliado</label>
+                        <label class="form-label">N° afiliado<span class="required-mark">*</span></label>
                         <input type="text"
                                name="numero_afiliado"
+                               autocomplete="one-bit-code"
+                               required
                                class="form-control"
                                value="{{ preingreso.numero_afiliado|default:'' }}"
                                placeholder="Ingrese número de afiliado">
@@ -359,9 +367,9 @@
                     </div> 
 
                     <div class="col-md-3">
-                        <label class="form-label">Diagnóstico</label>
+                        <label class="form-label">Diagnóstico<span class="required-mark">*</span></label>
 
-                        <textarea name="diagnostico"
+                        <textarea name="diagnostico" required
                                   class="form-control"
                                   rows="2"
                                   placeholder="Ingrese diagnóstico o motivo del preingreso...">{{ preingreso.diagnostico|default:'' }}</textarea>
@@ -547,8 +555,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     selectObraSocial.addEventListener("change", filtrarPlanes);
-
-    filtrarPlanes();
+ 
 }); 
 
 </script>

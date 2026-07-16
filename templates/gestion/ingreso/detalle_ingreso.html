@@ -693,20 +693,39 @@
 
             <div class="modal-body">
                 <p class="mb-3">
-                    ¿Desea imprimir la orden con duplicado?
+                    Seleccione las opciones de impresión.
                 </p>
 
                 <div class="form-check">
                     <input class="form-check-input"
-                           type="checkbox"
-                           id="checkDuplicadoImpresion">
-                    <label class="form-check-label fw-bold" for="checkDuplicadoImpresion">
+                        type="checkbox"
+                        id="checkDuplicadoImpresion">
+
+                    <label class="form-check-label fw-bold"
+                        for="checkDuplicadoImpresion">
                         Imprimir con duplicado
                     </label>
                 </div>
 
-                <div class="text-muted small mt-2">
+                <div class="text-muted small mt-1">
                     Por defecto se imprime solamente el original.
+                </div>
+
+                <hr>
+
+                <div class="form-check">
+                    <input class="form-check-input"
+                        type="checkbox"
+                        id="checkFirmaMedicoOrden">
+
+                    <label class="form-check-label fw-bold"
+                        for="checkFirmaMedicoOrden">
+                        Utilizar firma del médico de la orden
+                    </label>
+                </div>
+
+                <div class="text-muted small mt-1">
+                    Por defecto se utilizará la firma del médico de cabecera del ingreso.
                 </div>
             </div>
 
@@ -858,11 +877,14 @@
     document.addEventListener("DOMContentLoaded", function () {
         const checkDuplicado = document.getElementById("checkDuplicadoImpresion");
         const btnConfirmar = document.getElementById("btnConfirmarImpresion");
-
+        const checkFirmaMedicoOrden = document.getElementById(
+            "checkFirmaMedicoOrden"
+        );
         document.querySelectorAll(".btnAbrirModalImpresion").forEach(btn => {
             btn.addEventListener("click", function () {
                 urlImpresionSeleccionada = this.dataset.url;
                 checkDuplicado.checked = false;
+                checkFirmaMedicoOrden.checked = false;
             });
         });
 
@@ -873,6 +895,15 @@
 
             const imprimirDuplicado = checkDuplicado.checked ? "1" : "0";
 
+            const usarFirmaMedicoOrden = checkFirmaMedicoOrden.checked
+                ? "1"
+                : "0";
+
+            const parametros = new URLSearchParams({
+                duplicado: imprimirDuplicado,
+                firma_medico_orden: usarFirmaMedicoOrden
+            });
+
             const modal = bootstrap.Modal.getInstance(
                 document.getElementById("modalImprimirOrden")
             );
@@ -881,7 +912,8 @@
                 modal.hide();
             }
 
-            window.location.href = `${urlImpresionSeleccionada}?duplicado=${imprimirDuplicado}`;
+            window.location.href =
+                `${urlImpresionSeleccionada}?${parametros.toString()}`;
         });
 
         document.querySelectorAll(".btnAbrirModalAutorizar").forEach(btn => {
