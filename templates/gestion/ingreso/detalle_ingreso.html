@@ -376,6 +376,17 @@
                 <a href="{% url 'gestion_app:imprimir_preingreso' preingreso.id %}" class="btn btn-outline-dark btn-sm-custom">
                     <i class="fas fa-print"></i> Imprimir
                 </a>
+                 {% if preingreso.estado != "cerrado" %}
+                    <button type="button"
+                            id="btnAbrirCerrarEpisodio"
+                            class="btn btn-outline-danger btn-sm-custom"
+                            data-url="{% url 'gestion_app:cerrar_episodio_ajax' preingreso.id %}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalCerrarEpisodio">
+                        <i class="fas fa-door-closed"></i>
+                        Cerrar episodio
+                    </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -463,9 +474,12 @@
                 <div class="summary-label">Estado</div>
 
                 <div class="summary-value">
-                    <span class="status-pill status-{{ preingreso.estado|default:'pendiente' }}">
+                    <span id="estadoEpisodio"
+                        class="status-pill status-{{ preingreso.estado|default:'pendiente' }}">
                         <i class="fas fa-circle"></i>
-                        {{ preingreso.get_estado_display|default:preingreso.estado|default:"Pendiente" }}
+                        <span id="estadoEpisodioTexto">
+                            {{ preingreso.get_estado_display|default:preingreso.estado|default:"Pendiente" }}
+                        </span>
                     </span>
                 </div>
             </div>
@@ -500,11 +514,13 @@
                 <i class="fas fa-calendar-check"></i>
                 <span class="extra-label">F. egreso:</span>
 
-                {% if preingreso.fecha_egreso %}
-                    {{ preingreso.fecha_egreso|date:"d/m/Y" }}
-                {% else %}
-                    No cargada
-                {% endif %}
+                <span id="fechaEgresoTexto">
+                    {% if preingreso.fecha_egreso %}
+                        {{ preingreso.fecha_egreso|date:"d/m/Y" }}
+                    {% else %}
+                        No cargada
+                    {% endif %}
+                </span>
             </div>
         </div>
     </div>
@@ -540,9 +556,20 @@
                 Órdenes asociadas ({{ ordenes|length }})
             </div>
 
-            <a href="{% url 'gestion_app:agregar_orden_ingreso' preingreso.id %}" class="btn btn-outline-primary btn-sm-custom">
-                <i class="fas fa-plus-circle"></i> Nueva orden
-            </a>
+            <div id="contenedorNuevaOrden">
+                {% if preingreso.estado != "cerrado" %}
+                    <a href="{% url 'gestion_app:agregar_orden_ingreso' preingreso.id %}"
+                    class="btn btn-outline-primary btn-sm-custom">
+                        <i class="fas fa-plus-circle"></i>
+                        Nueva orden
+                    </a>
+                {% else %}
+                    <span class="btn btn-outline-secondary btn-sm-custom disabled">
+                        <i class="fas fa-lock"></i>
+                        Episodio cerrado
+                    </span>
+                {% endif %}
+            </div>
         </div>
 
         {% if ordenes %}
@@ -668,17 +695,104 @@
                 <i class="fas fa-folder-open"></i>
                 No hay órdenes asociadas todavía.
 
-                <div class="mt-2">
-                    <a href="{% url 'gestion_app:agregar_orden_ingreso' preingreso.id %}" class="btn btn-primary btn-sm-custom">
-                        <i class="fas fa-plus-circle"></i> Cargar primera orden
-                    </a>
+                <div class="mt-2" id="contenedorPrimeraOrden">
+                    {% if preingreso.estado != "cerrado" %}
+                        <a href="{% url 'gestion_app:agregar_orden_ingreso' preingreso.id %}"
+                        class="btn btn-primary btn-sm-custom">
+                            <i class="fas fa-plus-circle"></i>
+                            Cargar primera orden
+                        </a>
+                    {% else %}
+                        <span class="btn btn-outline-secondary btn-sm-custom disabled">
+                            <i class="fas fa-lock"></i>
+                            Episodio cerrado
+                        </span>
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
     </div>
 
 </div>
+<div class="modal fade"
+     id="modalCerrarEpisodio"
+     tabindex="-1"
+     aria-hidden="true">
 
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formCerrarEpisodio"
+              class="modal-content"
+              style="border-radius:16px; overflow:hidden;">
+
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-door-closed text-danger"></i>
+                    Cerrar episodio
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="alertaCerrarEpisodio"
+                     class="alert d-none"
+                     role="alert">
+                </div>
+
+                <p class="mb-3">
+                    Al cerrar el episodio ya no será posible cargar nuevas
+                    órdenes asociadas a este ingreso.
+                </p>
+
+                <label for="fechaEgreso"
+                       class="form-label fw-bold">
+                    Fecha de egreso
+                </label>
+
+                <input type="date"
+                       name="fecha_egreso"
+                       id="fechaEgreso"
+                       class="form-control"
+                       value="{% now 'Y-m-d' %}"
+                       required>
+
+                {% if preingreso.fecha_ingreso %}
+                    <div class="form-text">
+                        Fecha de ingreso:
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                    </div>
+                {% endif %}
+
+                <div class="alert alert-warning mt-3 mb-0">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    Esta acción cerrará definitivamente el episodio para la
+                    carga de nuevas órdenes.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger"
+                        id="btnConfirmarCierreEpisodio">
+                    <i class="fas fa-door-closed"></i>
+                    Cerrar episodio
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 <div class="modal fade" id="modalImprimirOrden" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:16px; overflow:hidden;">
@@ -948,6 +1062,148 @@
                 window.location.reload();
             }
         });
+
+        const btnAbrirCerrarEpisodio = document.getElementById(
+            "btnAbrirCerrarEpisodio"
+        );
+
+        const formCerrarEpisodio = document.getElementById(
+            "formCerrarEpisodio"
+        );
+
+        const btnConfirmarCierreEpisodio = document.getElementById(
+            "btnConfirmarCierreEpisodio"
+        );
+
+        const alertaCerrarEpisodio = document.getElementById(
+            "alertaCerrarEpisodio"
+        );
+
+        if (btnAbrirCerrarEpisodio && formCerrarEpisodio) {
+            formCerrarEpisodio.addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                const url = btnAbrirCerrarEpisodio.dataset.url;
+                const formData = new FormData(formCerrarEpisodio);
+
+                alertaCerrarEpisodio.className = "alert d-none";
+                alertaCerrarEpisodio.textContent = "";
+
+                btnConfirmarCierreEpisodio.disabled = true;
+                btnConfirmarCierreEpisodio.innerHTML = `
+                    <span class="spinner-border spinner-border-sm"
+                        aria-hidden="true"></span>
+                    Cerrando...
+                `;
+
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        throw new Error(
+                            data.mensaje || "No se pudo cerrar el episodio."
+                        );
+                    }
+
+                    const estadoEpisodio = document.getElementById(
+                        "estadoEpisodio"
+                    );
+
+                    const estadoEpisodioTexto = document.getElementById(
+                        "estadoEpisodioTexto"
+                    );
+
+                    const fechaEgresoTexto = document.getElementById(
+                        "fechaEgresoTexto"
+                    );
+
+                    if (estadoEpisodio) {
+                        estadoEpisodio.className =
+                            "status-pill status-cerrado";
+                    }
+
+                    if (estadoEpisodioTexto) {
+                        estadoEpisodioTexto.textContent =
+                            data.estado_display || "Cerrado";
+                    }
+
+                    if (fechaEgresoTexto) {
+                        fechaEgresoTexto.textContent = data.fecha_egreso;
+                    }
+
+                    const contenedorNuevaOrden = document.getElementById(
+                        "contenedorNuevaOrden"
+                    );
+
+                    if (contenedorNuevaOrden) {
+                        contenedorNuevaOrden.innerHTML = `
+                            <span class="btn btn-outline-secondary btn-sm-custom disabled">
+                                <i class="fas fa-lock"></i>
+                                Episodio cerrado
+                            </span>
+                        `;
+                    }
+
+                    const contenedorPrimeraOrden = document.getElementById(
+                        "contenedorPrimeraOrden"
+                    );
+
+                    if (contenedorPrimeraOrden) {
+                        contenedorPrimeraOrden.innerHTML = `
+                            <span class="btn btn-outline-secondary btn-sm-custom disabled">
+                                <i class="fas fa-lock"></i>
+                                Episodio cerrado
+                            </span>
+                        `;
+                    }
+
+                    btnAbrirCerrarEpisodio.remove();
+
+                    alertaCerrarEpisodio.className =
+                        "alert alert-success";
+
+                    alertaCerrarEpisodio.textContent =
+                        data.mensaje || "Episodio cerrado correctamente.";
+
+                    setTimeout(function () {
+                        const modalElemento = document.getElementById(
+                            "modalCerrarEpisodio"
+                        );
+
+                        const modal = bootstrap.Modal.getInstance(
+                            modalElemento
+                        );
+
+                        if (modal) {
+                            modal.hide();
+                        }
+                    }, 700);
+
+                } catch (error) {
+                    alertaCerrarEpisodio.className =
+                        "alert alert-danger";
+
+                    alertaCerrarEpisodio.textContent =
+                        error.message || "Ocurrió un error inesperado.";
+
+                } finally {
+                    btnConfirmarCierreEpisodio.disabled = false;
+                    btnConfirmarCierreEpisodio.innerHTML = `
+                        <i class="fas fa-door-closed"></i>
+                        Cerrar episodio
+                    `;
+                }
+            });
+        }
+
     });
 </script>
 

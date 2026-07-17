@@ -413,7 +413,21 @@ def agregar_orden_ingreso(request, preingreso_id):
     )
 
     medicos = Medico.objects.all().order_by("apellido", "nombre")
+    preingreso = get_object_or_404(
+    Preingreso,
+    id=preingreso_id,
+)
 
+    if preingreso.estado == "cerrado":
+        messages.error(
+            request,
+            "No se pueden agregar órdenes porque el episodio está cerrado."
+        )
+
+        return redirect(
+            "gestion_app:detalle_ingreso",
+            preingreso_id=preingreso.id,
+        )
     if request.method == "POST":
         fecha = request.POST.get("fecha") or None
         medico_id = request.POST.get("medico") or None

@@ -99,7 +99,13 @@ class Preingreso(BaseAbstractWithUser):
         blank=True,
         null=True
     )
-
+    user_egreso = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="%(class)s_user_egreso"
+    )
     diagnostico = models.TextField(
         blank=True,
         null=True

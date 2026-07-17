@@ -65,5 +65,41 @@ urlpatterns = [
     views.confeccionar_planilla_entrega,
     name="confeccionar_planilla_entrega"
     ),
-        
+    path(
+        "ingresos/<int:preingreso_id>/cerrar-episodio/",
+        views.cerrar_episodio_ajax,
+        name="cerrar_episodio_ajax",
+    ),    
+
+
+    path(
+        "ordenes/gestion/",
+        views.gestion_ordenes,
+        name="gestion_ordenes",
+    ),
+
+    path(
+        "ordenes/gestion/<int:orden_id>/detalle/",
+        views.detalle_orden_gestion_ajax,
+        name="detalle_orden_gestion_ajax",
+    ),
+
+    path(
+        "ordenes/gestion/<int:orden_id>/autorizar/",
+        views.autorizar_orden_gestion_ajax,
+        name="autorizar_orden_gestion_ajax",
+    ),
+
+    path(
+        "ordenes/gestion/<int:orden_id>/anular/",
+        views.anular_orden_gestion_ajax,
+        name="anular_orden_gestion_ajax",
+    ),
+
+    path(
+        "ordenes/gestion/<int:orden_id>/tenencia/",
+        views.cambiar_tenencia_gestion_ajax,
+        name="cambiar_tenencia_gestion_ajax",
+    ),
+
 ]

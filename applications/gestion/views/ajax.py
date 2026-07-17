@@ -3,11 +3,12 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
-
+from datetime import datetime
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from applications.entidades.models import *
 from ..models import *
-
-
+from django.utils import timezone 
 # =============================================================================
 # AJAX PACIENTES
 # =============================================================================
@@ -236,4 +237,87 @@ def buscar_preingresos_ajax(request):
     return JsonResponse({
         "results": results,
         "has_next": page_obj.has_next(),
+    })
+
+ 
+@require_POST
+def cerrar_episodio_ajax(request, preingreso_id):
+    fecha_egreso_str = request.POST.get("fecha_egreso", "").strip()
+
+    if not fecha_egreso_str:
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "Debe indicar una fecha de egreso."
+        }, status=400)
+
+    try:
+        fecha_egreso = datetime.strptime(
+            fecha_egreso_str,
+            "%Y-%m-%d"
+        ).date()
+    except ValueError:
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "La fecha de egreso no tiene un formato válido."
+        }, status=400)
+
+    try:
+        with transaction.atomic():
+            preingreso = (
+                Preingreso.objects
+                .select_for_update()
+                .get(id=preingreso_id)
+            )
+
+            if preingreso.estado == "cerrado":
+                return JsonResponse({
+                    "ok": False,
+                    "mensaje": "El episodio ya se encuentra cerrado."
+                }, status=400)
+
+            if preingreso.estado not in ["ingresado", "en_gestion"]:
+                return JsonResponse({
+                    "ok": False,
+                    "mensaje": (
+                        "El episodio no se puede cerrar porque su estado "
+                        "actual no lo permite."
+                    )
+                }, status=400)
+
+            if (
+                preingreso.fecha_ingreso
+                and fecha_egreso < preingreso.fecha_ingreso
+            ):
+                return JsonResponse({
+                    "ok": False,
+                    "mensaje": (
+                        "La fecha de egreso no puede ser anterior "
+                        "a la fecha de ingreso."
+                    )
+                }, status=400)
+
+            preingreso.fecha_egreso = fecha_egreso
+            preingreso.estado = "cerrado"
+            preingreso.user_egreso=request.user
+            preingreso.save(
+                update_fields=[
+                    "fecha_egreso",
+                    "estado",
+                    "user_egreso"
+                ]
+            )
+            preingreso.refresh_from_db()
+
+    except Preingreso.DoesNotExist:
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "El ingreso indicado no existe."
+        }, status=404)
+
+    return JsonResponse({
+        "ok": True,
+        "mensaje": "El episodio fue cerrado correctamente.",
+        "estado": "cerrado",
+        "estado_display": preingreso.get_estado_display(),
+        "fecha_egreso": fecha_egreso.strftime("%d/%m/%Y"),
     })

@@ -1,0 +1,1686 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1380px;
+        margin: 0 auto;
+    }
+
+    .top-card,
+    .filters-card,
+    .orders-card {
+        background: #fff;
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .04);
+    }
+
+    .top-card {
+        padding: .85rem 1rem;
+        margin-bottom: .7rem;
+    }
+
+    .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .8rem;
+        flex-wrap: wrap;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #111827;
+        font-size: 1.25rem;
+        font-weight: 900;
+    }
+
+    .page-subtitle {
+        margin-top: .15rem;
+        color: #526179;
+        font-size: .78rem;
+    }
+
+    .filters-card {
+        padding: .9rem 1rem;
+        margin-bottom: .7rem;
+    }
+
+    .filters-title {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        margin-bottom: .75rem;
+        color: #111827;
+        font-size: .9rem;
+        font-weight: 900;
+    }
+
+    .filters-title i {
+        color: #0d6efd;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+        gap: .7rem;
+    }
+
+    .filter-block label {
+        display: block;
+        margin-bottom: .22rem;
+        color: #526179;
+        font-size: .72rem;
+        font-weight: 900;
+    }
+
+    .filter-block .form-control,
+    .filter-block .form-select {
+        min-height: 36px;
+        border-radius: 9px;
+        font-size: .8rem;
+    }
+
+    .filters-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        gap: .45rem;
+        margin-top: .75rem;
+    }
+
+    .btn {
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
+    .btn-sm-custom {
+        padding: .4rem .75rem;
+        font-size: .78rem;
+    }
+
+    .orders-card {
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .75rem;
+        padding: .72rem .9rem;
+        border-bottom: 1px solid #dbe3ef;
+        background: #fbfdff;
+    }
+
+    .orders-title {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        color: #111827;
+        font-size: .98rem;
+        font-weight: 900;
+    }
+
+    .orders-title i {
+        color: #0f4c81;
+    }
+
+    .orders-counter {
+        color: #6b7280;
+        font-size: .76rem;
+        font-weight: 700;
+    }
+
+    .orders-table {
+        min-width: 1220px;
+    }
+
+    .orders-table th {
+        padding: .58rem .5rem;
+        background: #f8f9fa;
+        color: #6b7280;
+        font-size: .7rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .orders-table td {
+        padding: .48rem .5rem;
+        color: #374151;
+        font-size: .78rem;
+        vertical-align: middle;
+    }
+
+    .order-number {
+        color: #111827;
+        font-weight: 900;
+    }
+
+    .patient-name {
+        color: #111827;
+        font-weight: 800;
+    }
+
+    .cell-secondary {
+        margin-top: .1rem;
+        color: #6b7280;
+        font-size: .68rem;
+    }
+
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .27rem .55rem;
+        border: 1px solid #d1d5db;
+        border-radius: 999px;
+        font-size: .7rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .badge-pendiente {
+        border-color: #d1d5db;
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .badge-autorizada {
+        border-color: #bce7ca;
+        background: #eafaf0;
+        color: #16803c;
+    }
+
+    .badge-anulada {
+        border-color: #fecaca;
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-entregada {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .action-group {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: .22rem;
+        white-space: nowrap;
+    }
+
+    .action-circle {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .empty-state {
+        padding: 2rem;
+        text-align: center;
+        color: #6b7280;
+        font-size: .85rem;
+    }
+
+    .pagination-wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .75rem;
+        padding: .7rem .9rem;
+        border-top: 1px solid #e5e7eb;
+        background: #fbfdff;
+    }
+
+    .pagination-info {
+        color: #6b7280;
+        font-size: .74rem;
+    }
+
+    .page-link {
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 800;
+    }
+
+    .modal-content-custom {
+        border: 0;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .detail-summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: .65rem;
+        margin-bottom: .85rem;
+    }
+
+    .detail-box {
+        padding: .65rem;
+        border: 1px solid #e1e7ef;
+        border-radius: 11px;
+        background: #fbfdff;
+    }
+
+    .detail-label {
+        margin-bottom: .2rem;
+        color: #6b7280;
+        font-size: .68rem;
+        font-weight: 900;
+    }
+
+    .detail-value {
+        color: #111827;
+        font-size: .8rem;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .detail-section-title {
+        margin: .85rem 0 .45rem;
+        color: #111827;
+        font-size: .85rem;
+        font-weight: 900;
+    }
+
+    .modal-table th {
+        background: #f8f9fa;
+        color: #6b7280;
+        font-size: .68rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .modal-table td {
+        font-size: .75rem;
+        vertical-align: middle;
+    }
+
+    .loading-box {
+        padding: 2rem;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .toast-container-custom {
+        position: fixed;
+        top: 95px;
+        right: 20px;
+        z-index: 2000;
+        width: min(360px, calc(100% - 40px));
+    }
+
+    @media (max-width: 1100px) {
+        .filters-grid {
+            grid-template-columns: repeat(2, minmax(160px, 1fr));
+        }
+
+        .detail-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 650px) {
+        .filters-grid,
+        .detail-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .filters-actions {
+            justify-content: stretch;
+        }
+
+        .filters-actions .btn {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="toast-container-custom">
+    <div id="alertaGeneral" class="alert d-none mb-0" role="alert"></div>
+</div>
+
+<div class="page-wrap">
+
+    <div class="top-card">
+        <div class="top-row">
+            <div>
+                <h2 class="page-title">
+                    <i class="fas fa-file-medical text-primary"></i>
+                    Gestión de Órdenes
+                </h2>
+
+                <div class="page-subtitle">
+                    Consulta, autorización, anulación y administración rápida de tenencias.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="get" class="filters-card">
+        <div class="filters-title">
+            <i class="fas fa-filter"></i>
+            Filtros de búsqueda
+        </div>
+
+        <div class="filters-grid">
+
+            <div class="filter-block">
+                <label for="fechaDesde">Fecha desde</label>
+                <input type="date"
+                       name="fecha_desde"
+                       id="fechaDesde"
+                       class="form-control"
+                       value="{{ request.GET.fecha_desde }}">
+            </div>
+
+            <div class="filter-block">
+                <label for="fechaHasta">Fecha hasta</label>
+                <input type="date"
+                       name="fecha_hasta"
+                       id="fechaHasta"
+                       class="form-control"
+                       value="{{ request.GET.fecha_hasta }}">
+            </div>
+
+            <div class="filter-block">
+                <label for="numeroOrden">N.º de orden</label>
+                <input type="number"
+                       min="1"
+                       name="numero_orden"
+                       id="numeroOrden"
+                       class="form-control"
+                       value="{{ request.GET.numero_orden }}"
+                       placeholder="Ej.: 401716">
+            </div>
+
+            <div class="filter-block">
+                <label for="episodio">Episodio</label>
+                <input type="text"
+                       name="episodio"
+                       id="episodio"
+                       class="form-control"
+                       value="{{ request.GET.episodio }}"
+                       placeholder="Número de episodio">
+            </div>
+
+            <div class="filter-block">
+                <label for="numeroPreingreso">N.º de preingreso</label>
+                <input type="text"
+                       name="numero_preingreso"
+                       id="numeroPreingreso"
+                       class="form-control"
+                       value="{{ request.GET.numero_preingreso }}"
+                       placeholder="Número de preingreso">
+            </div>
+
+            <div class="filter-block">
+                <label for="apellido">Apellido del paciente</label>
+                <input type="text"
+                       name="apellido"
+                       id="apellido"
+                       class="form-control"
+                       value="{{ request.GET.apellido }}"
+                       placeholder="Apellido">
+            </div>
+
+            <div class="filter-block">
+                <label for="nombre">Nombre del paciente</label>
+                <input type="text"
+                       name="nombre"
+                       id="nombre"
+                       class="form-control"
+                       value="{{ request.GET.nombre }}"
+                       placeholder="Nombre">
+            </div>
+
+            <div class="filter-block">
+                <label for="obraSocial">Obra social</label>
+                <select name="obra_social"
+                        id="obraSocial"
+                        class="form-select">
+                    <option value="">Todas</option>
+
+                    {% for obra_social in obras_sociales %}
+                        <option value="{{ obra_social.id }}"
+                            {% if request.GET.obra_social == obra_social.id|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+                            {{ obra_social }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-block">
+                <label for="medicoTenencia">Tenencia</label>
+                <select name="medico_tenencia"
+                        id="medicoTenencia"
+                        class="form-select">
+                    <option value="">Todas las tenencias</option>
+
+                    <option value="sin_tenencia"
+                        {% if request.GET.medico_tenencia == "sin_tenencia" %}
+                            selected
+                        {% endif %}>
+                        Sin tenencia asignada
+                    </option>
+
+                    {% for medico in medicos %}
+                        <option value="{{ medico.id }}"
+                            {% if request.GET.medico_tenencia == medico.id|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+                            {{ medico }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-block">
+                <label for="estado">Estado</label>
+                <select name="estado"
+                        id="estado"
+                        class="form-select">
+                    <option value="">Todos</option>
+
+                    <option value="pendiente"
+                        {% if request.GET.estado == "pendiente" %}
+                            selected
+                        {% endif %}>
+                        Pendientes
+                    </option>
+
+                    <option value="autorizada"
+                        {% if request.GET.estado == "autorizada" %}
+                            selected
+                        {% endif %}>
+                        Autorizadas
+                    </option>
+
+                    <option value="anulada"
+                        {% if request.GET.estado == "anulada" %}
+                            selected
+                        {% endif %}>
+                        Anuladas
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-block">
+                <label for="estadoEntrega">Estado de entrega</label>
+                <select name="estado_entrega"
+                        id="estadoEntrega"
+                        class="form-select">
+                    <option value="">Todas</option>
+
+                    <option value="no_entregadas"
+                        {% if request.GET.estado_entrega == "no_entregadas" %}
+                            selected
+                        {% endif %}>
+                        Pendientes de entrega
+                    </option>
+
+                    <option value="entregadas"
+                        {% if request.GET.estado_entrega == "entregadas" %}
+                            selected
+                        {% endif %}>
+                        Entregadas
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="filters-actions">
+            <a href="{% url 'gestion_app:gestion_ordenes' %}"
+               class="btn btn-outline-secondary btn-sm-custom">
+                <i class="fas fa-eraser"></i>
+                Limpiar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary btn-sm-custom">
+                <i class="fas fa-search"></i>
+                Buscar
+            </button>
+        </div>
+    </form>
+
+    <div class="orders-card">
+        <div class="orders-header">
+            <div class="orders-title">
+                <i class="fas fa-folder-open"></i>
+                Órdenes
+            </div>
+
+            <div class="orders-counter">
+                {{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }}
+            </div>
+        </div>
+
+        {% if ordenes %}
+            <div class="table-responsive px-2">
+                <table class="table table-hover align-middle mb-0 orders-table">
+                    <thead>
+                        <tr>
+                            <th>N.º orden</th>
+                            <th>Fecha</th>
+                            <th>Paciente</th>
+                            <th>Episodio</th>
+                            <th>Obra social</th>
+                            <th class="text-center">Prest.</th>
+                            <th>Médico de la orden</th>
+                            <th>Tenencia</th>
+                            <th>Estado</th>
+                            <th>Entrega</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for orden in ordenes %}
+                            <tr id="filaOrden{{ orden.id }}">
+                                <td class="order-number">
+                                    {{ orden.id|stringformat:"06d" }}
+                                </td>
+
+                                <td>
+                                    {{ orden.fecha|date:"d/m/Y"|default:"-" }}
+                                </td>
+
+                                <td>
+                                    <div class="patient-name">
+                                        {{ orden.preingreso.paciente.apellido }},
+                                        {{ orden.preingreso.paciente.nombre }}
+                                    </div>
+
+                                    <div class="cell-secondary">
+                                        DNI {{ orden.preingreso.paciente.dni|default:"-" }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ orden.preingreso.episodio|default:"-" }}
+
+                                    <div class="cell-secondary">
+                                        Preingreso:
+                                        {{ orden.preingreso.numero|default:"-" }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ orden.preingreso.obra_social|default:"-" }}
+
+                                    {% if orden.preingreso.plan %}
+                                        <div class="cell-secondary">
+                                            Plan {{ orden.preingreso.plan }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {{ orden.cantidad_prestaciones|default:0 }}
+                                </td>
+
+                                <td>
+                                    {{ orden.medico|default:"No cargado" }}
+                                </td>
+
+                                <td id="tenenciaOrden{{ orden.id }}">
+                                    {{ orden.medico_tenencia|default:"Sin tenencia" }}
+                                </td>
+
+                                <td>
+                                    <span id="estadoOrden{{ orden.id }}"
+                                          class="badge-status badge-{{ orden.estado }}">
+                                        <i class="fas fa-circle"></i>
+                                        <span>
+                                            {{ orden.get_estado_display }}
+                                        </span>
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if orden.esta_entregada %}
+                                        <span class="badge-status badge-entregada">
+                                            <i class="fas fa-check"></i>
+                                            Entregada
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-status badge-pendiente">
+                                            Pendiente
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end">
+                                    <div class="action-group"
+                                         id="accionesOrden{{ orden.id }}">
+
+                                        <button type="button"
+                                                class="btn btn-outline-primary btn-sm action-circle btnDetalleOrden"
+                                                title="Ver detalle"
+                                                data-url="{% url 'gestion_app:detalle_orden_gestion_ajax' orden.id %}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalDetalleOrden">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        {% if orden.estado != "anulada" %}
+
+                                            {% if not orden.autorizada %}
+                                                <button type="button"
+                                                        class="btn btn-outline-success btn-sm action-circle btnAutorizarOrden"
+                                                        title="Autorizar"
+                                                        data-id="{{ orden.id }}"
+                                                        data-numero="{{ orden.id|stringformat:'06d' }}"
+                                                        data-url="{% url 'gestion_app:autorizar_orden_gestion_ajax' orden.id %}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalAutorizarOrden">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            {% endif %}
+
+                                            <button type="button"
+                                                    class="btn btn-outline-dark btn-sm action-circle btnImprimirOrden"
+                                                    title="Imprimir"
+                                                    data-url="{% url 'gestion_app:imprimir_orden' orden.id %}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalImprimirOrden">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+
+                                            {% if not orden.esta_entregada %}
+                                                <button type="button"
+                                                        class="btn btn-outline-warning btn-sm action-circle btnTenenciaOrden"
+                                                        title="Cambiar tenencia"
+                                                        data-id="{{ orden.id }}"
+                                                        data-numero="{{ orden.id|stringformat:'06d' }}"
+                                                        data-medico-id="{{ orden.medico_tenencia_id|default:'' }}"
+                                                        data-url="{% url 'gestion_app:cambiar_tenencia_gestion_ajax' orden.id %}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalCambiarTenencia">
+                                                    <i class="fas fa-user-doctor"></i>
+                                                </button>
+
+                                                <button type="button"
+                                                        class="btn btn-outline-danger btn-sm action-circle btnAnularOrden"
+                                                        title="Anular"
+                                                        data-id="{{ orden.id }}"
+                                                        data-numero="{{ orden.id|stringformat:'06d' }}"
+                                                        data-url="{% url 'gestion_app:anular_orden_gestion_ajax' orden.id %}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalAnularOrden">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            {% endif %}
+
+                                        {% else %}
+                                            <button type="button"
+                                                    class="btn btn-outline-secondary btn-sm action-circle"
+                                                    title="Orden anulada"
+                                                    disabled>
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-wrap">
+                <div class="pagination-info">
+                    Página {{ page_obj.number }} de
+                    {{ page_obj.paginator.num_pages }}
+                </div>
+
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">
+                                    Primera
+                                </a>
+                            </li>
+
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                    Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ page_obj.number }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                    Siguiente
+                                </a>
+                            </li>
+
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.paginator.num_pages }}">
+                                    Última
+                                </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-folder-open fa-2x mb-2"></i>
+                <div>No se encontraron órdenes con los filtros indicados.</div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Modal detalle -->
+
+<div class="modal fade"
+     id="modalDetalleOrden"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-content-custom">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-eye text-primary"></i>
+                    Detalle de la orden
+                    <span id="detalleNumeroOrden"></span>
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="detalleOrdenLoading"
+                     class="loading-box">
+                    <span class="spinner-border spinner-border-sm"></span>
+                    Cargando información...
+                </div>
+
+                <div id="detalleOrdenContenido"
+                     class="d-none">
+
+                    <div class="detail-summary">
+                        <div class="detail-box">
+                            <div class="detail-label">Paciente</div>
+                            <div class="detail-value"
+                                 id="detallePaciente"></div>
+                            <div class="cell-secondary"
+                                 id="detalleDni"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Episodio / Preingreso</div>
+                            <div class="detail-value"
+                                 id="detalleEpisodio"></div>
+                            <div class="cell-secondary"
+                                 id="detallePreingreso"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Cobertura</div>
+                            <div class="detail-value"
+                                 id="detalleObraSocial"></div>
+                            <div class="cell-secondary"
+                                 id="detallePlan"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Estado</div>
+                            <div class="detail-value"
+                                 id="detalleEstado"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Fecha de orden</div>
+                            <div class="detail-value"
+                                 id="detalleFecha"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Médico de la orden</div>
+                            <div class="detail-value"
+                                 id="detalleMedico"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Tenencia</div>
+                            <div class="detail-value"
+                                 id="detalleTenencia"></div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Tipo</div>
+                            <div class="detail-value"
+                                 id="detalleTipo"></div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section-title">
+                        Prestaciones de la orden
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover modal-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Prestación</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th>Médico</th>
+                                    <th>Honorarios / Gastos</th>
+                                    <th>Tipo honorario</th>
+                                    <th>Fecha desde</th>
+                                    <th>Fecha hasta</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="detallePrestacionesBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="detail-section-title">
+                        Observaciones
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-value fw-normal"
+                             id="detalleObservaciones">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal autorizar -->
+
+<div class="modal fade"
+     id="modalAutorizarOrden"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formAutorizarOrden"
+              class="modal-content modal-content-custom">
+
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-check text-success"></i>
+                    Autorizar orden
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="alertaAutorizar"
+                     class="alert d-none"></div>
+
+                ¿Desea autorizar la orden
+                <strong id="numeroOrdenAutorizar"></strong>?
+
+                <div class="text-muted small mt-2">
+                    Se marcará la orden y todas sus prestaciones como autorizadas.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        id="btnConfirmarAutorizar"
+                        class="btn btn-success">
+                    <i class="fas fa-check"></i>
+                    Autorizar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal anular -->
+
+<div class="modal fade"
+     id="modalAnularOrden"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formAnularOrden"
+              class="modal-content modal-content-custom">
+
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-ban text-danger"></i>
+                    Anular orden
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="alertaAnular"
+                     class="alert d-none"></div>
+
+                <p>
+                    ¿Desea anular la orden
+                    <strong id="numeroOrdenAnular"></strong>?
+                </p>
+
+                <label for="motivoAnulacion"
+                       class="form-label fw-bold">
+                    Motivo de anulación
+                </label>
+
+                <textarea name="motivo_anulacion"
+                          id="motivoAnulacion"
+                          class="form-control"
+                          rows="4"
+                          required
+                          placeholder="Indique el motivo..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        id="btnConfirmarAnular"
+                        class="btn btn-danger">
+                    <i class="fas fa-ban"></i>
+                    Anular
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal tenencia -->
+
+<div class="modal fade"
+     id="modalCambiarTenencia"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formCambiarTenencia"
+              class="modal-content modal-content-custom">
+
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-user-doctor text-warning"></i>
+                    Cambiar tenencia
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="alertaTenencia"
+                     class="alert d-none"></div>
+
+                <p>
+                    Seleccione la tenencia para la orden
+                    <strong id="numeroOrdenTenencia"></strong>.
+                </p>
+
+                <label for="selectMedicoTenencia"
+                       class="form-label fw-bold">
+                    Médico de tenencia
+                </label>
+
+                <select name="medico_id"
+                        id="selectMedicoTenencia"
+                        class="form-select"
+                        required>
+                    <option value="">
+                        Seleccione un médico...
+                    </option>
+
+                    {% for medico in medicos %}
+                        <option value="{{ medico.id }}">
+                            {{ medico }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        id="btnConfirmarTenencia"
+                        class="btn btn-warning">
+                    <i class="fas fa-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal impresión -->
+
+<div class="modal fade"
+     id="modalImprimirOrden"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-custom">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-print text-primary"></i>
+                    Imprimir orden
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="checkDuplicadoImpresion">
+
+                    <label class="form-check-label fw-bold"
+                           for="checkDuplicadoImpresion">
+                        Imprimir con duplicado
+                    </label>
+                </div>
+
+                <div class="text-muted small mt-1">
+                    Por defecto se imprime solamente el original.
+                </div>
+
+                <hr>
+
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="checkFirmaMedicoOrden">
+
+                    <label class="form-check-label fw-bold"
+                           for="checkFirmaMedicoOrden">
+                        Utilizar firma del médico de la orden
+                    </label>
+                </div>
+
+                <div class="text-muted small mt-1">
+                    Por defecto se utiliza la firma del médico de cabecera.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        id="btnConfirmarImpresion">
+                    <i class="fas fa-print"></i>
+                    Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let ordenSeleccionadaId = null;
+        let urlAutorizarSeleccionada = "";
+        let urlAnularSeleccionada = "";
+        let urlTenenciaSeleccionada = "";
+        let urlImpresionSeleccionada = "";
+
+        function mostrarMensaje(mensaje, tipo = "success") {
+            const alerta = document.getElementById("alertaGeneral");
+
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+
+            window.setTimeout(function () {
+                alerta.className = "alert d-none mb-0";
+                alerta.textContent = "";
+            }, 4000);
+        }
+
+        function escaparHtml(valor) {
+            const div = document.createElement("div");
+            div.textContent = valor ?? "";
+            return div.innerHTML;
+        }
+
+        function mostrarErrorModal(elemento, mensaje) {
+            elemento.className = "alert alert-danger";
+            elemento.textContent = mensaje;
+        }
+
+        function limpiarAlertaModal(elemento) {
+            elemento.className = "alert d-none";
+            elemento.textContent = "";
+        }
+
+        function cambiarBotonCarga(boton, cargando, textoNormal, textoCarga) {
+            boton.disabled = cargando;
+
+            boton.innerHTML = cargando
+                ? `
+                    <span class="spinner-border spinner-border-sm"></span>
+                    ${textoCarga}
+                  `
+                : textoNormal;
+        }
+
+        document.querySelectorAll(".btnDetalleOrden").forEach(function (boton) {
+            boton.addEventListener("click", async function () {
+                const loading = document.getElementById("detalleOrdenLoading");
+                const contenido = document.getElementById("detalleOrdenContenido");
+                const body = document.getElementById("detallePrestacionesBody");
+
+                loading.classList.remove("d-none");
+                contenido.classList.add("d-none");
+                body.innerHTML = "";
+
+                try {
+                    const response = await fetch(this.dataset.url, {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        throw new Error(
+                            data.mensaje || "No se pudo obtener la orden."
+                        );
+                    }
+
+                    document.getElementById("detalleNumeroOrden").textContent =
+                        `N.º ${data.orden.numero}`;
+
+                    document.getElementById("detallePaciente").textContent =
+                        data.paciente.nombre_completo;
+
+                    document.getElementById("detalleDni").textContent =
+                        `DNI ${data.paciente.dni}`;
+
+                    document.getElementById("detalleEpisodio").textContent =
+                        `Episodio ${data.preingreso.episodio}`;
+
+                    document.getElementById("detallePreingreso").textContent =
+                        `Preingreso ${data.preingreso.numero}`;
+
+                    document.getElementById("detalleObraSocial").textContent =
+                        data.preingreso.obra_social;
+
+                    document.getElementById("detallePlan").textContent =
+                        `Plan ${data.preingreso.plan}`;
+
+                    document.getElementById("detalleEstado").textContent =
+                        data.orden.estado_display;
+
+                    document.getElementById("detalleFecha").textContent =
+                        data.orden.fecha;
+
+                    document.getElementById("detalleMedico").textContent =
+                        data.orden.medico;
+
+                    document.getElementById("detalleTenencia").textContent =
+                        data.orden.medico_tenencia;
+
+                    document.getElementById("detalleTipo").textContent =
+                        data.orden.tipo;
+
+                    document.getElementById("detalleObservaciones").textContent =
+                        data.orden.observaciones || "Sin observaciones.";
+
+                    if (data.detalles.length === 0) {
+                        body.innerHTML = `
+                            <tr>
+                                <td colspan="9" class="text-center text-muted">
+                                    La orden no posee prestaciones.
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        data.detalles.forEach(function (detalle) {
+                            body.insertAdjacentHTML("beforeend", `
+                                <tr>
+                                    <td>${escaparHtml(detalle.codigo)}</td>
+                                    <td>${escaparHtml(detalle.prestacion)}</td>
+                                    <td class="text-center">${detalle.cantidad}</td>
+                                    <td>${escaparHtml(detalle.medico)}</td>
+                                    <td>${escaparHtml(detalle.honorarios_gastos)}</td>
+                                    <td>${escaparHtml(detalle.tipo_honorario)}</td>
+                                    <td>${escaparHtml(detalle.fecha_desde)}</td>
+                                    <td>${escaparHtml(detalle.fecha_hasta)}</td>
+                                    <td>
+                                        ${
+                                            detalle.autorizada
+                                                ? '<span class="badge-status badge-autorizada">Autorizada</span>'
+                                                : '<span class="badge-status badge-pendiente">Pendiente</span>'
+                                        }
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    }
+
+                    loading.classList.add("d-none");
+                    contenido.classList.remove("d-none");
+
+                } catch (error) {
+                    loading.innerHTML = `
+                        <div class="alert alert-danger mb-0">
+                            ${escaparHtml(error.message)}
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        const formAutorizar = document.getElementById("formAutorizarOrden");
+        const alertaAutorizar = document.getElementById("alertaAutorizar");
+        const btnConfirmarAutorizar = document.getElementById(
+            "btnConfirmarAutorizar"
+        );
+
+        document.querySelectorAll(".btnAutorizarOrden").forEach(function (boton) {
+            boton.addEventListener("click", function () {
+                ordenSeleccionadaId = this.dataset.id;
+                urlAutorizarSeleccionada = this.dataset.url;
+
+                document.getElementById("numeroOrdenAutorizar").textContent =
+                    this.dataset.numero;
+
+                limpiarAlertaModal(alertaAutorizar);
+            });
+        });
+
+        formAutorizar.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(formAutorizar);
+
+            cambiarBotonCarga(
+                btnConfirmarAutorizar,
+                true,
+                '<i class="fas fa-check"></i> Autorizar',
+                "Autorizando..."
+            );
+
+            limpiarAlertaModal(alertaAutorizar);
+
+            try {
+                const response = await fetch(urlAutorizarSeleccionada, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.ok) {
+                    throw new Error(
+                        data.mensaje || "No se pudo autorizar la orden."
+                    );
+                }
+
+                const estado = document.getElementById(
+                    `estadoOrden${ordenSeleccionadaId}`
+                );
+
+                estado.className = "badge-status badge-autorizada";
+                estado.innerHTML = `
+                    <i class="fas fa-circle"></i>
+                    <span>Autorizada</span>
+                `;
+
+                const botonAutorizar = document.querySelector(
+                    `.btnAutorizarOrden[data-id="${ordenSeleccionadaId}"]`
+                );
+
+                if (botonAutorizar) {
+                    botonAutorizar.remove();
+                }
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById("modalAutorizarOrden")
+                )?.hide();
+
+                mostrarMensaje(data.mensaje);
+
+            } catch (error) {
+                mostrarErrorModal(
+                    alertaAutorizar,
+                    error.message
+                );
+            } finally {
+                cambiarBotonCarga(
+                    btnConfirmarAutorizar,
+                    false,
+                    '<i class="fas fa-check"></i> Autorizar',
+                    "Autorizando..."
+                );
+            }
+        });
+
+        const formAnular = document.getElementById("formAnularOrden");
+        const alertaAnular = document.getElementById("alertaAnular");
+        const btnConfirmarAnular = document.getElementById(
+            "btnConfirmarAnular"
+        );
+
+        document.querySelectorAll(".btnAnularOrden").forEach(function (boton) {
+            boton.addEventListener("click", function () {
+                ordenSeleccionadaId = this.dataset.id;
+                urlAnularSeleccionada = this.dataset.url;
+
+                document.getElementById("numeroOrdenAnular").textContent =
+                    this.dataset.numero;
+
+                document.getElementById("motivoAnulacion").value = "";
+                limpiarAlertaModal(alertaAnular);
+            });
+        });
+
+        formAnular.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(formAnular);
+
+            cambiarBotonCarga(
+                btnConfirmarAnular,
+                true,
+                '<i class="fas fa-ban"></i> Anular',
+                "Anulando..."
+            );
+
+            limpiarAlertaModal(alertaAnular);
+
+            try {
+                const response = await fetch(urlAnularSeleccionada, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.ok) {
+                    throw new Error(
+                        data.mensaje || "No se pudo anular la orden."
+                    );
+                }
+
+                const estado = document.getElementById(
+                    `estadoOrden${ordenSeleccionadaId}`
+                );
+
+                estado.className = "badge-status badge-anulada";
+                estado.innerHTML = `
+                    <i class="fas fa-circle"></i>
+                    <span>Anulada</span>
+                `;
+
+                const acciones = document.getElementById(
+                    `accionesOrden${ordenSeleccionadaId}`
+                );
+
+                const botonDetalle = acciones.querySelector(
+                    ".btnDetalleOrden"
+                );
+
+                acciones.innerHTML = "";
+
+                if (botonDetalle) {
+                    acciones.appendChild(botonDetalle);
+                }
+
+                acciones.insertAdjacentHTML("beforeend", `
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm action-circle"
+                            title="Orden anulada"
+                            disabled>
+                        <i class="fas fa-ban"></i>
+                    </button>
+                `);
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById("modalAnularOrden")
+                )?.hide();
+
+                mostrarMensaje(data.mensaje);
+
+            } catch (error) {
+                mostrarErrorModal(
+                    alertaAnular,
+                    error.message
+                );
+            } finally {
+                cambiarBotonCarga(
+                    btnConfirmarAnular,
+                    false,
+                    '<i class="fas fa-ban"></i> Anular',
+                    "Anulando..."
+                );
+            }
+        });
+
+        const formTenencia = document.getElementById("formCambiarTenencia");
+        const alertaTenencia = document.getElementById("alertaTenencia");
+        const btnConfirmarTenencia = document.getElementById(
+            "btnConfirmarTenencia"
+        );
+
+        document.querySelectorAll(".btnTenenciaOrden").forEach(function (boton) {
+            boton.addEventListener("click", function () {
+                ordenSeleccionadaId = this.dataset.id;
+                urlTenenciaSeleccionada = this.dataset.url;
+
+                document.getElementById("numeroOrdenTenencia").textContent =
+                    this.dataset.numero;
+
+                document.getElementById("selectMedicoTenencia").value =
+                    this.dataset.medicoId || "";
+
+                limpiarAlertaModal(alertaTenencia);
+            });
+        });
+
+        formTenencia.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(formTenencia);
+
+            cambiarBotonCarga(
+                btnConfirmarTenencia,
+                true,
+                '<i class="fas fa-save"></i> Guardar',
+                "Guardando..."
+            );
+
+            limpiarAlertaModal(alertaTenencia);
+
+            try {
+                const response = await fetch(urlTenenciaSeleccionada, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.ok) {
+                    throw new Error(
+                        data.mensaje || "No se pudo cambiar la tenencia."
+                    );
+                }
+
+                document.getElementById(
+                    `tenenciaOrden${ordenSeleccionadaId}`
+                ).textContent = data.orden.medico_tenencia;
+
+                const botonTenencia = document.querySelector(
+                    `.btnTenenciaOrden[data-id="${ordenSeleccionadaId}"]`
+                );
+
+                if (botonTenencia) {
+                    botonTenencia.dataset.medicoId =
+                        data.orden.medico_tenencia_id;
+                }
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById("modalCambiarTenencia")
+                )?.hide();
+
+                mostrarMensaje(data.mensaje);
+
+            } catch (error) {
+                mostrarErrorModal(
+                    alertaTenencia,
+                    error.message
+                );
+            } finally {
+                cambiarBotonCarga(
+                    btnConfirmarTenencia,
+                    false,
+                    '<i class="fas fa-save"></i> Guardar',
+                    "Guardando..."
+                );
+            }
+        });
+
+        const checkDuplicado = document.getElementById(
+            "checkDuplicadoImpresion"
+        );
+
+        const checkFirmaMedicoOrden = document.getElementById(
+            "checkFirmaMedicoOrden"
+        );
+
+        document.querySelectorAll(".btnImprimirOrden").forEach(function (boton) {
+            boton.addEventListener("click", function () {
+                urlImpresionSeleccionada = this.dataset.url;
+                checkDuplicado.checked = false;
+                checkFirmaMedicoOrden.checked = false;
+            });
+        });
+
+        document.getElementById(
+            "btnConfirmarImpresion"
+        ).addEventListener("click", function () {
+            if (!urlImpresionSeleccionada) {
+                return;
+            }
+
+            const parametros = new URLSearchParams({
+                duplicado: checkDuplicado.checked ? "1" : "0",
+                firma_medico_orden: (
+                    checkFirmaMedicoOrden.checked ? "1" : "0"
+                )
+            });
+
+            bootstrap.Modal.getInstance(
+                document.getElementById("modalImprimirOrden")
+            )?.hide();
+
+            window.location.href =
+                `${urlImpresionSeleccionada}?${parametros.toString()}`;
+        });
+    });
+</script>
+
+{% endblock %}

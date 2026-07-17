@@ -5,3 +5,4 @@ from .ordenes import *
 from .orden_acciones import *
 from .ajax import *
 from .planillas_entrega import *
+from .gestion_ordenes import *
