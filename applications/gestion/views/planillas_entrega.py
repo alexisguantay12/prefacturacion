@@ -161,7 +161,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.utils import timezone
-
+from django.db.models import Exists, OuterRef
 from applications.entidades.models import Medico
 from applications.gestion.models import OrdenAutorizacion, PlanillaEntrega, DetallePlanillaEntrega
 from datetime import date
@@ -172,46 +172,93 @@ def confeccionar_planilla_entrega(request):
     medico = None
     ordenes = []
 
-    medicos = Medico.objects.filter(
-        is_deleted=False
-    ).order_by("apellido", "nombre")
+    ordenes_pendientes_de_entrega = OrdenAutorizacion.objects.filter(
+        medico_tenencia_id=OuterRef("pk"),
+        is_deleted=False,
+        esta_entregada=False,
+    ).exclude(
+        estado="anulada"
+    )
+
+    medicos = (
+        Medico.objects
+        .filter(is_deleted=False)
+        .annotate(
+            tiene_ordenes_pendientes=Exists(
+                ordenes_pendientes_de_entrega
+            )
+        )
+        .filter(tiene_ordenes_pendientes=True)
+        .order_by("apellido", "nombre")
+    )
 
     if medico_id:
-        medico = Medico.objects.filter(id=medico_id).first()
+        medico = medicos.filter(id=medico_id).first()
 
-        ordenes = (
-            OrdenAutorizacion.objects
-            .select_related(
-                "preingreso",
-                "preingreso__paciente",
-                "preingreso__obra_social",
-                "medico_tenencia",
+        if medico:
+            ordenes = (
+                OrdenAutorizacion.objects
+                .select_related(
+                    "preingreso",
+                    "preingreso__paciente",
+                    "preingreso__obra_social",
+                    "medico_tenencia",
+                )
+                .filter(
+                    is_deleted=False,
+                    esta_entregada=False,
+                    medico_tenencia_id=medico_id,
+                )
+                .exclude(
+                    estado="anulada"
+                )
+                .order_by("fecha", "id")
             )
-            .filter(
-                is_deleted=False,
-                esta_entregada=False,
-                medico_tenencia_id=medico_id,
-            ) 
-            .order_by("fecha", "id")
-        )
 
     if request.method == "POST":
         accion = request.POST.get("accion")
         ordenes_ids = request.POST.getlist("ordenes")
-        observaciones = request.POST.get("observaciones", "").strip()
+        observaciones = request.POST.get(
+            "observaciones",
+            "",
+        ).strip()
         fecha_entrega = request.POST.get("fecha_entrega") or None
 
         if not medico_id:
-            messages.error(request, "Debe seleccionar un médico.")
-            return redirect("gestion_app:confeccionar_planilla_entrega")
+            messages.error(
+                request,
+                "Debe seleccionar un médico.",
+            )
+            return redirect(
+                "gestion_app:confeccionar_planilla_entrega"
+            )
+
+        if not medico:
+            messages.error(
+                request,
+                "El médico seleccionado no tiene órdenes pendientes de entrega.",
+            )
+            return redirect(
+                "gestion_app:confeccionar_planilla_entrega"
+            )
 
         if not ordenes_ids:
-            messages.error(request, "Debe seleccionar al menos una orden autorizada.")
-            return redirect(f"{request.path}?medico={medico_id}")
+            messages.error(
+                request,
+                "Debe seleccionar al menos una orden autorizada.",
+            )
+            return redirect(
+                f"{request.path}?medico={medico_id}"
+            )
 
         if accion not in ["pendiente", "entregar"]:
-            messages.error(request, "Acción inválida.")
-            return redirect(f"{request.path}?medico={medico_id}")
+            messages.error(
+                request,
+                "Acción inválida.",
+            )
+            return redirect(
+                f"{request.path}?medico={medico_id}"
+            )
 
         with transaction.atomic():
             ordenes_seleccionadas = (
@@ -230,15 +277,24 @@ def confeccionar_planilla_entrega(request):
             if ordenes_seleccionadas.count() != len(ordenes_ids):
                 messages.error(
                     request,
-                    "Hay órdenes seleccionadas que no están autorizadas o ya fueron incluidas en otra planilla."
+                    (
+                        "Hay órdenes seleccionadas que no están "
+                        "autorizadas o ya fueron incluidas en otra planilla."
+                    ),
                 )
-                return redirect(f"{request.path}?medico={medico_id}")
+                return redirect(
+                    f"{request.path}?medico={medico_id}"
+                )
 
             planilla = PlanillaEntrega.objects.create(
                 medico_id=medico_id,
-                fecha_entrega=fecha_entrega if accion == "entregar" else None,
+                fecha_entrega=(
+                    fecha_entrega
+                    if accion == "entregar"
+                    else None
+                ),
                 observaciones=observaciones,
-                entregada=True if accion == "entregar" else False,
+                entregada=accion == "entregar",
                 anulada=False,
                 user_made=request.user,
             )
@@ -255,7 +311,10 @@ def confeccionar_planilla_entrega(request):
             DetallePlanillaEntrega.objects.bulk_create(detalles)
 
             OrdenAutorizacion.objects.filter(
-                id__in=ordenes_seleccionadas.values_list("id", flat=True)
+                id__in=ordenes_seleccionadas.values_list(
+                    "id",
+                    flat=True,
+                )
             ).update(
                 esta_entregada=True,
                 fecha_entrega=timezone.now(),
@@ -263,13 +322,22 @@ def confeccionar_planilla_entrega(request):
             )
 
         if accion == "entregar":
-            return redirect("gestion_app:imprimir_planilla_entrega", planilla.id)
+            return redirect(
+                "gestion_app:imprimir_planilla_entrega",
+                planilla.id,
+            )
 
         messages.success(
             request,
-            "La planilla fue confeccionada y quedó pendiente de entrega física."
+            (
+                "La planilla fue confeccionada y quedó "
+                "pendiente de entrega física."
+            ),
         )
-        return redirect("gestion_app:lista_planillas_entrega")
+        return redirect(
+            "gestion_app:lista_planillas_entrega"
+        )
+
     context = {
         "medicos": medicos,
         "medico": medico,
@@ -278,4 +346,8 @@ def confeccionar_planilla_entrega(request):
         "fecha_hoy": date.today().isoformat(),
     }
 
-    return render(request, "gestion/entregas/confeccionar_planilla_entrega.html", context)
+    return render(
+        request,
+        "gestion/entregas/confeccionar_planilla_entrega.html",
+        context,
+    )

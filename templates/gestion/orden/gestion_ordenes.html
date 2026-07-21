@@ -43,18 +43,31 @@
         font-size: .78rem;
     }
 
-    .filters-card {
-        padding: .9rem 1rem;
-        margin-bottom: .7rem;
+   .filters-card {
+    padding: .65rem .8rem;
+    margin-bottom: .65rem;
+    }
+    .form-control::placeholder,
+    .form-select::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+        font-weight: 400;
+    }
+    .filters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .6rem;
+        margin-bottom: .5rem;
     }
 
     .filters-title {
         display: flex;
         align-items: center;
-        gap: .45rem;
-        margin-bottom: .75rem;
+        gap: .4rem;
+        margin: 0;
         color: #111827;
-        font-size: .9rem;
+        font-size: .84rem;
         font-weight: 900;
     }
 
@@ -64,33 +77,91 @@
 
     .filters-grid {
         display: grid;
-        grid-template-columns: repeat(5, minmax(150px, 1fr));
-        gap: .7rem;
+        grid-template-columns:
+            1fr
+            1fr
+            .75fr
+            .9fr
+            .9fr
+            1fr;
+        gap: .48rem .55rem;
+        align-items: end;
+    }
+
+    .filter-block {
+        min-width: 0;
     }
 
     .filter-block label {
         display: block;
-        margin-bottom: .22rem;
-        color: #526179;
-        font-size: .72rem;
+        margin-bottom: .16rem;
+        color: #64748b;
+        font-size: .66rem;
         font-weight: 900;
+        line-height: 1.1;
     }
 
     .filter-block .form-control,
     .filter-block .form-select {
-        min-height: 36px;
-        border-radius: 9px;
-        font-size: .8rem;
+        min-height: 32px;
+        height: 32px;
+        padding: .25rem .5rem;
+        border-radius: 8px;
+        font-size: .74rem;
     }
 
-    .filters-actions {
+    .filter-block .form-select {
+        padding-right: 1.8rem;
+    }
+
+    .filter-wide {
+        grid-column: span 2;
+    }
+
+    .filter-actions {
         display: flex;
+        align-items: end;
         justify-content: flex-end;
-        align-items: flex-end;
-        gap: .45rem;
-        margin-top: .75rem;
+        gap: .35rem;
+        min-width: 150px;
     }
 
+    .filter-actions .btn {
+        min-height: 32px;
+        padding: .3rem .58rem;
+        font-size: .72rem;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 1200px) {
+        .filters-grid {
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+        }
+
+        .filter-wide {
+            grid-column: span 1;
+        }
+    }
+
+    @media (max-width: 780px) {
+        .filters-grid {
+            grid-template-columns: repeat(2, minmax(140px, 1fr));
+        }
+
+        .filter-actions {
+            justify-content: stretch;
+        }
+
+        .filter-actions .btn {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
     .btn {
         border-radius: 10px;
         font-weight: 800;
@@ -370,123 +441,69 @@
     </div>
 
     <form method="get" class="filters-card">
-        <div class="filters-title">
-            <i class="fas fa-filter"></i>
-            Filtros de búsqueda
+
+        <div class="filters-header">
+            <div class="filters-title">
+                <i class="fas fa-filter"></i>
+                Filtros de búsqueda
+            </div>
+
+            {% if request.GET %}
+                <span class="text-muted" style="font-size:.68rem;">
+                    Filtros aplicados
+                </span>
+            {% endif %}
         </div>
 
         <div class="filters-grid">
 
             <div class="filter-block">
-                <label for="fechaDesde">Fecha desde</label>
+                <label for="fechaDesde">Desde</label>
                 <input type="date"
-                       name="fecha_desde"
-                       id="fechaDesde"
-                       class="form-control"
-                       value="{{ request.GET.fecha_desde }}">
+                    name="fecha_desde"
+                    id="fechaDesde"
+                    class="form-control"
+                    value="{{ request.GET.fecha_desde }}">
             </div>
 
             <div class="filter-block">
-                <label for="fechaHasta">Fecha hasta</label>
+                <label for="fechaHasta">Hasta</label>
                 <input type="date"
-                       name="fecha_hasta"
-                       id="fechaHasta"
-                       class="form-control"
-                       value="{{ request.GET.fecha_hasta }}">
+                    name="fecha_hasta"
+                    id="fechaHasta"
+                    class="form-control"
+                    value="{{ request.GET.fecha_hasta }}">
             </div>
 
             <div class="filter-block">
-                <label for="numeroOrden">N.º de orden</label>
+                <label for="numeroOrden">N.º orden</label>
                 <input type="number"
-                       min="1"
-                       name="numero_orden"
-                       id="numeroOrden"
-                       class="form-control"
-                       value="{{ request.GET.numero_orden }}"
-                       placeholder="Ej.: 401716">
+                    min="1"
+                    name="numero_orden"
+                    id="numeroOrden"
+                    class="form-control"
+                    value="{{ request.GET.numero_orden }}"
+                    placeholder="Orden">
             </div>
 
             <div class="filter-block">
                 <label for="episodio">Episodio</label>
                 <input type="text"
-                       name="episodio"
-                       id="episodio"
-                       class="form-control"
-                       value="{{ request.GET.episodio }}"
-                       placeholder="Número de episodio">
+                    name="episodio"
+                    id="episodio"
+                    class="form-control"
+                    value="{{ request.GET.episodio }}"
+                    placeholder="Episodio">
             </div>
 
             <div class="filter-block">
-                <label for="numeroPreingreso">N.º de preingreso</label>
+                <label for="numeroPreingreso">Preingreso</label>
                 <input type="text"
-                       name="numero_preingreso"
-                       id="numeroPreingreso"
-                       class="form-control"
-                       value="{{ request.GET.numero_preingreso }}"
-                       placeholder="Número de preingreso">
-            </div>
-
-            <div class="filter-block">
-                <label for="apellido">Apellido del paciente</label>
-                <input type="text"
-                       name="apellido"
-                       id="apellido"
-                       class="form-control"
-                       value="{{ request.GET.apellido }}"
-                       placeholder="Apellido">
-            </div>
-
-            <div class="filter-block">
-                <label for="nombre">Nombre del paciente</label>
-                <input type="text"
-                       name="nombre"
-                       id="nombre"
-                       class="form-control"
-                       value="{{ request.GET.nombre }}"
-                       placeholder="Nombre">
-            </div>
-
-            <div class="filter-block">
-                <label for="obraSocial">Obra social</label>
-                <select name="obra_social"
-                        id="obraSocial"
-                        class="form-select">
-                    <option value="">Todas</option>
-
-                    {% for obra_social in obras_sociales %}
-                        <option value="{{ obra_social.id }}"
-                            {% if request.GET.obra_social == obra_social.id|stringformat:"s" %}
-                                selected
-                            {% endif %}>
-                            {{ obra_social }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-block">
-                <label for="medicoTenencia">Tenencia</label>
-                <select name="medico_tenencia"
-                        id="medicoTenencia"
-                        class="form-select">
-                    <option value="">Todas las tenencias</option>
-
-                    <option value="sin_tenencia"
-                        {% if request.GET.medico_tenencia == "sin_tenencia" %}
-                            selected
-                        {% endif %}>
-                        Sin tenencia asignada
-                    </option>
-
-                    {% for medico in medicos %}
-                        <option value="{{ medico.id }}"
-                            {% if request.GET.medico_tenencia == medico.id|stringformat:"s" %}
-                                selected
-                            {% endif %}>
-                            {{ medico }}
-                        </option>
-                    {% endfor %}
-                </select>
+                    name="numero_preingreso"
+                    id="numeroPreingreso"
+                    class="form-control"
+                    value="{{ request.GET.numero_preingreso }}"
+                    placeholder="Preingreso">
             </div>
 
             <div class="filter-block">
@@ -494,6 +511,7 @@
                 <select name="estado"
                         id="estado"
                         class="form-select">
+
                     <option value="">Todos</option>
 
                     <option value="pendiente"
@@ -520,17 +538,83 @@
             </div>
 
             <div class="filter-block">
-                <label for="estadoEntrega">Estado de entrega</label>
+                <label for="apellido">Apellido</label>
+                <input type="text"
+                    name="apellido"
+                    id="apellido"
+                    class="form-control"
+                    value="{{ request.GET.apellido }}"
+                    placeholder="Apellido del paciente">
+            </div>
+
+            <div class="filter-block">
+                <label for="nombre">Nombre</label>
+                <input type="text"
+                    name="nombre"
+                    id="nombre"
+                    class="form-control"
+                    value="{{ request.GET.nombre }}"
+                    placeholder="Nombre del paciente">
+            </div>
+
+            <div class="filter-block filter-wide">
+                <label for="obraSocial">Obra social</label>
+                <select name="obra_social"
+                        id="obraSocial"
+                        class="form-select">
+
+                    <option value="">Todas las obras sociales</option>
+
+                    {% for obra_social in obras_sociales %}
+                        <option value="{{ obra_social.id }}"
+                            {% if request.GET.obra_social == obra_social.id|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+                            {{ obra_social }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-block filter-wide">
+                <label for="medicoTenencia">Tenencia</label>
+                <select name="medico_tenencia"
+                        id="medicoTenencia"
+                        class="form-select">
+
+                    <option value="">Todas las tenencias</option>
+
+                    <option value="sin_tenencia"
+                        {% if request.GET.medico_tenencia == "sin_tenencia" %}
+                            selected
+                        {% endif %}>
+                        Sin tenencia asignada
+                    </option>
+
+                    {% for medico in medicos %}
+                        <option value="{{ medico.id }}"
+                            {% if request.GET.medico_tenencia == medico.id|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+                            {{ medico }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-block">
+                <label for="estadoEntrega">Entrega</label>
                 <select name="estado_entrega"
                         id="estadoEntrega"
                         class="form-select">
+
                     <option value="">Todas</option>
 
                     <option value="no_entregadas"
                         {% if request.GET.estado_entrega == "no_entregadas" %}
                             selected
                         {% endif %}>
-                        Pendientes de entrega
+                        Pendientes
                     </option>
 
                     <option value="entregadas"
@@ -542,20 +626,21 @@
                 </select>
             </div>
 
-        </div>
+            <div class="filter-actions">
+                <a href="{% url 'gestion_app:gestion_ordenes' %}"
+                class="btn btn-outline-secondary"
+                title="Limpiar filtros">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </a>
 
-        <div class="filters-actions">
-            <a href="{% url 'gestion_app:gestion_ordenes' %}"
-               class="btn btn-outline-secondary btn-sm-custom">
-                <i class="fas fa-eraser"></i>
-                Limpiar
-            </a>
+                <button type="submit"
+                        class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+            </div>
 
-            <button type="submit"
-                    class="btn btn-primary btn-sm-custom">
-                <i class="fas fa-search"></i>
-                Buscar
-            </button>
         </div>
     </form>
 

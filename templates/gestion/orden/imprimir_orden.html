@@ -472,61 +472,73 @@
 
             <div class="firma-derecha">
 
-            {% if medico_firma and medico_firma.firma_nombre %}
+            {% if medico_firma %}
 
-                <img
-                    src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
-                    alt="Firma profesional"
-                    class="firma-img"
-                    onerror="
-                        if (!this.dataset.intentado) {
-                            this.dataset.intentado='1';
-                            this.src='{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
-                        } else {
-                            this.style.display='none';
-                            this.nextElementSibling.style.display='flex';
-                        }
-                    ">
+                {% if medico_firma.firma_nombre %}
 
-                <div class="sello-medico">
-                    <div class="nombre">
-                        Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
+                    <img
+                        src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
+                        alt="Firma profesional"
+                        class="firma-img"
+                        onerror="
+                            if (!this.dataset.intento) {
+                                this.dataset.intento = '1';
+                                this.src='{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
+                            } else {
+                                this.style.display='none';
+                                document.getElementById('sello-medico-{{ medico_firma.id }}').style.display='flex';
+                            }
+                        ">
+
+                    <div
+                        id="sello-medico-{{ medico_firma.id }}"
+                        class="sello-medico"
+                        style="display:none;">
+
+                        <div class="nombre">
+                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
+                        </div>
+
+                        {% if medico_firma.servicio %}
+                            <div class="servicio">
+                                {{ medico_firma.servicio.nombre }}
+                            </div>
+                        {% endif %}
+
+                        {% if medico_firma.matricula %}
+                            <div class="matricula">
+                                MP {{ medico_firma.matricula }}
+                            </div>
+                        {% endif %}
+
                     </div>
 
-                    {% if medico_firma.servicio %}
-                        <div class="servicio">
-                            {{ medico_firma.servicio.nombre }}
+                {% else %}
+
+                    <div class="sello-medico">
+
+                        <div class="nombre">
+                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
                         </div>
-                    {% endif %}
 
-                    {% if medico_firma.matricula %}
-                        <div class="matricula">
-                            MP {{ medico_firma.matricula }}
-                        </div>
-                    {% endif %}
-                </div>
+                        {% if medico_firma.servicio %}
+                            <div class="servicio">
+                                {{ medico_firma.servicio.nombre }}
+                            </div>
+                        {% endif %}
 
-            {% elif medico_firma %}
+                        {% if medico_firma.matricula %}
+                            <div class="matricula">
+                                MP {{ medico_firma.matricula }}
+                            </div>
+                        {% endif %}
 
-                <div class="sello-medico">
-                    <div class="nombre">
-                        Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
                     </div>
 
-                    {% if medico_firma.servicio %}
-                        <div class="servicio">
-                            {{ medico_firma.servicio.nombre }}
-                        </div>
-                    {% endif %}
-
-                    {% if medico_firma.matricula %}
-                        <div class="matricula">
-                            MP {{ medico_firma.matricula }}
-                        </div>
-                    {% endif %}
-                </div>
+                {% endif %}
 
             {% endif %}
+ 
 
             <div class="linea-firma"></div>
 
@@ -746,61 +758,73 @@
 
            <div class="firma-derecha">
 
-            {% if medico_firma and medico_firma.firma_nombre %}
+            {% if medico_firma %}
 
-                <img
-                    src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
-                    alt="Firma profesional"
-                    class="firma-img"
-                    onerror="
-                        if (!this.dataset.intentado) {
-                            this.dataset.intentado='1';
-                            this.src='{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
-                        } else {
-                            this.style.display='none';
-                            this.nextElementSibling.style.display='flex';
-                        }
-                    ">
+                {% if medico_firma.firma_nombre %}
 
-                <div class="sello-medico">
-                    <div class="nombre">
-                        Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
+                    <img
+                        src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
+                        alt="Firma profesional"
+                        class="firma-img"
+                        onerror="
+                            if (!this.dataset.intento) {
+                                this.dataset.intento = '1';
+                                this.src='{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
+                            } else {
+                                this.style.display='none';
+                                document.getElementById('sello-medico-{{ medico_firma.id }}').style.display='flex';
+                            }
+                        ">
+
+                    <div
+                        id="sello-medico-{{ medico_firma.id }}"
+                        class="sello-medico"
+                        style="display:none;">
+
+                        <div class="nombre">
+                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
+                        </div>
+
+                        {% if medico_firma.servicio %}
+                            <div class="servicio">
+                                {{ medico_firma.servicio.nombre }}
+                            </div>
+                        {% endif %}
+
+                        {% if medico_firma.matricula %}
+                            <div class="matricula">
+                                MP {{ medico_firma.matricula }}
+                            </div>
+                        {% endif %}
+
                     </div>
 
-                    {% if medico_firma.servicio %}
-                        <div class="servicio">
-                            {{ medico_firma.servicio.nombre }}
+                {% else %}
+
+                    <div class="sello-medico">
+
+                        <div class="nombre">
+                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
                         </div>
-                    {% endif %}
 
-                    {% if medico_firma.matricula %}
-                        <div class="matricula">
-                            MP {{ medico_firma.matricula }}
-                        </div>
-                    {% endif %}
-                </div>
+                        {% if medico_firma.servicio %}
+                            <div class="servicio">
+                                {{ medico_firma.servicio.nombre }}
+                            </div>
+                        {% endif %}
 
-            {% elif medico_firma %}
+                        {% if medico_firma.matricula %}
+                            <div class="matricula">
+                                MP {{ medico_firma.matricula }}
+                            </div>
+                        {% endif %}
 
-
-                <div class="sello-medico">
-                    <div class="nombre">
-                        Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
                     </div>
 
-                    {% if medico_firma.servicio %}
-                        <div class="servicio">
-                            {{ medico_firma.servicio.nombre }}
-                        </div>
-                    {% endif %}
+                {% endif %}
 
-                    {% if medico_firma.matricula %}
-                        <div class="matricula">
-                            MP {{ medico_firma.matricula }}
-                        </div>
-                    {% endif %}
-                </div>
             {% endif %}
+ 
 
             <div class="linea-firma"></div>
 

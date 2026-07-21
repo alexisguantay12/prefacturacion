@@ -325,7 +325,7 @@ def autorizar_orden_gestion_ajax(request, orden_id):
                     ),
                 }, status=400)
 
-            if orden.estado == "autorizada" or orden.autorizada:
+            if orden.estado == "autorizada":
                 return JsonResponse({
                     "ok": False,
                     "mensaje": (
@@ -333,7 +333,7 @@ def autorizar_orden_gestion_ajax(request, orden_id):
                     ),
                 }, status=400)
 
-            fecha_actual = timezone.localdate()
+            fecha_actual = timezone.now()
 
             orden.estado = "autorizada"
             orden.autorizada = True
@@ -415,7 +415,7 @@ def anular_orden_gestion_ajax(request, orden_id):
 
             orden.estado = "anulada"
             orden.autorizada = False
-            orden.fecha_anulacion = timezone.localdate()
+            orden.fecha_anulacion = timezone.now()
             orden.user_anulacion = request.user
             orden.observaciones = (
                 f"{orden.observaciones}\n"
@@ -505,7 +505,7 @@ def cambiar_tenencia_gestion_ajax(request, orden_id):
                 }, status=400)
 
             orden.medico_tenencia = medico
-            orden.fecha_tenencia = timezone.localdate()
+            orden.fecha_tenencia = timezone.now()
             orden.user_tenencia = request.user
 
             orden.save(
