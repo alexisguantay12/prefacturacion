@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1050px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 8px 22px rgba(15,23,42,0.06);
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(15,23,42,0.05);
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid #e5eaf1;
+        background: #fbfdff;
+        font-weight: 900;
+    }
+
+    .card-body-custom {
+        padding: 1.2rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 900;
+        color: #6b7280;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+    }
+
+    .info-value {
+        color: #1f2937;
+        font-weight: 700;
+    }
+
+    .code-box {
+        display: inline-block;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        border-radius: 9px;
+        padding: 0.3rem 0.55rem;
+        font-weight: 900;
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <div class="page-wrap">
+
+        <div class="page-header">
+
+            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                <div>
+
+                    <h2 class="page-title">
+
+                        <i class="fas fa-file-medical text-primary"></i>
+
+                        Detalle de prestación
+
+                    </h2>
+
+                    <div class="text-muted mt-1">
+
+                        {{ procedimiento.nombre }}
+                        /
+                        {{ plantilla.nombre }}
+
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2">
+
+                    <a href="{% url 'gestion_app:detalle_plantilla' plantilla.id %}"
+                       class="btn btn-outline-secondary btn-sm">
+
+                        <i class="fas fa-arrow-left"></i>
+                        Volver
+
+                    </a>
+
+                    <a href="{% url 'gestion_app:editar_detalle_plantilla' detalle.id %}"
+                       class="btn btn-outline-primary btn-sm">
+
+                        <i class="fas fa-edit"></i>
+                        Editar
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="card-header-custom">
+
+                <i class="fas fa-circle-info text-primary"></i>
+                Información del detalle
+
+            </div>
+
+            <div class="card-body-custom">
+
+                <div class="row g-4">
+
+
+                    <div class="col-md-3">
+
+                        <div class="info-label">
+                            Código
+                        </div>
+
+                        <div>
+                            <span class="code-box">
+                                {{ detalle.prestacion.codigo }}
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-9">
+
+                        <div class="info-label">
+                            Prestación
+                        </div>
+
+                        <div class="info-value">
+                            {{ detalle.prestacion.nombre }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <div class="info-label">
+                            Cantidad
+                        </div>
+
+                        <div class="info-value">
+                            {{ detalle.cantidad }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <div class="info-label">
+                            Orden
+                        </div>
+
+                        <div class="info-value">
+                            {{ detalle.orden }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <div class="info-label">
+                            Concepto
+                        </div>
+
+                        <div class="info-value">
+
+                            {{ detalle.get_honorarios_gastos_display }}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <div class="info-label">
+                            Nivel
+                        </div>
+
+                        <div class="info-value">
+
+                            {% if detalle.tipo_honorario %}
+
+                                {{ detalle.get_tipo_honorario_display }}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    No corresponde
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <div class="info-label">
+                            Estado
+                        </div>
+
+                        <div class="info-value">
+
+                            {% if detalle.activo %}
+
+                                <span class="badge bg-success">
+                                    Activo
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    Inactivo
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

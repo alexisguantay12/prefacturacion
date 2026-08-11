@@ -4,20 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Órdenes de Autorización{% endblock %}</title>
 
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <title>
+        {% block title %}
+            Sistema de Órdenes de Autorización
+        {% endblock %}
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="{% static 'img/logo_actual.jpg' %}"
+    >
+
+    <link
+        href="{% static 'css/bootstrap.min.css' %}"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/all.min.css' %}"
+    >
+
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
     {% block extra_css %}{% endblock %}
 
     <style>
         :root {
-            --azul-oscuro: #0f2747;
-            --azul-navbar: #102b4e;
-            --azul-activo: #38bdf8;
+            --azul-navbar: #0d2d52;
+            --azul-navbar-hover: #123a68;
+            --azul-activo: #00b1ff;
+            --azul-activo-claro: rgba(0, 177, 255, 0.10);
+
             --azul-boton: #2563eb;
+            --azul-boton-hover: #1d4ed8;
+
             --fondo: #f6f8fc;
             --texto: #0f1f3d;
             --muted: #64748b;
@@ -25,28 +49,13 @@
             --card: #ffffff;
         }
 
-        .brand-logo {
-            width: 54px;
-            height: 54px;
-            border-radius: 14px;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,.12);
-            flex-shrink: 0;
-        }
-
-        .brand-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-
         * {
             box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
         }
 
         body {
@@ -56,55 +65,175 @@
             color: var(--texto);
         }
 
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
         .top-navbar {
-            background: var(--azul-navbar);
-            min-height: 76px;
-            box-shadow: 0 4px 18px rgba(15, 39, 71, .18);
-            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+
+            min-height: 72px;
+            padding: 0 1.75rem;
+
+            background:
+                linear-gradient(
+                    110deg,
+                    #0b294c 0%,
+                    var(--azul-navbar) 55%,
+                    #0b294c 100%
+                );
+
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+            box-shadow:
+                0 4px 18px rgba(15, 39, 71, 0.18);
         }
 
+        .navbar-inner {
+            min-height: 72px;
+        }
+
+        /* =====================================================
+           MARCA
+        ===================================================== */
+
         .navbar-brand-custom {
+            position: relative;
+
             display: flex;
             align-items: center;
-            gap: .7rem;
+            gap: 0.75rem;
+
+            min-width: 218px;
+            padding-right: 1.65rem;
+            margin-right: 1rem;
+
             color: #ffffff;
             text-decoration: none;
-            font-weight: 700;
-            min-width: 230px;
+
+            flex-shrink: 0;
+        }
+
+        .navbar-brand-custom::after {
+            content: "";
+
+            position: absolute;
+            top: 16px;
+            right: 0;
+            bottom: 16px;
+
+            width: 1px;
+
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .navbar-brand-custom:hover {
+            color: #ffffff;
+        }
+
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 6px;
+
+            background: #ffffff;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 14px rgba(0, 0, 0, 0.18);
+
+            flex-shrink: 0;
+        }
+
+        .brand-logo img {
+            width: 100%;
+            height: 100%;
+
+            display: block;
+            object-fit: contain;
+
+            border-radius: 9px;
         }
 
         .brand-text {
-            line-height: 1.1;
+            line-height: 1.08;
         }
 
         .brand-title {
-            font-size: 1.25rem;
             display: block;
+
+            color: #ffffff;
+
+            font-size: 1.14rem;
+            font-weight: 750;
+            letter-spacing: -0.01em;
         }
+
+        /* =====================================================
+           MENÚ PRINCIPAL
+        ===================================================== */
 
         .nav-menu {
             display: flex;
-            align-items: center;
-            gap: .3rem;
+            align-items: stretch;
+
+            min-height: 72px;
+
+            gap: 0.1rem;
+        }
+
+        .nav-menu .nav-item {
+            display: flex;
+            align-items: stretch;
         }
 
         .nav-menu .nav-link {
-            color: #e5edf8;
-            padding: 1.65rem 1rem;
-            font-weight: 600;
-            font-size: .95rem;
-            border-bottom: 3px solid transparent;
-            transition: all .2s ease;
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            min-height: 72px;
+
+            padding: 0 0.95rem;
+
+            color: rgba(255, 255, 255, 0.88);
+
+            font-size: 0.92rem;
+            font-weight: 650;
+            white-space: nowrap;
+
+            border: none;
+            border-radius: 0;
+
+            transition:
+                color 0.2s ease,
+                background-color 0.2s ease;
         }
 
         .nav-menu .nav-link i {
-            margin-right: .45rem;
-            color: #b8c7db;
+            width: 18px;
+            margin-right: 0.48rem;
+
+            color: #b8c9dc;
+
+            font-size: 0.94rem;
+            text-align: center;
+
+            transition: color 0.2s ease;
         }
 
         .nav-menu .nav-link:hover {
             color: #ffffff;
-            background: rgba(255,255,255,.06);
+            background-color: rgba(255, 255, 255, 0.06);
         }
 
         .nav-menu .nav-link:hover i {
@@ -113,89 +242,228 @@
 
         .nav-menu .nav-link.active {
             color: #ffffff;
-            border-bottom-color: var(--azul-activo);
-            background: rgba(255,255,255,.05);
+            background-color: var(--azul-activo-claro);
         }
 
         .nav-menu .nav-link.active i {
             color: var(--azul-activo);
         }
 
-        .navbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-left: auto;
-        }
+        .nav-menu .nav-link.active::after {
+            content: "";
 
-        .notification-btn {
-            position: relative;
-            color: #ffffff;
-            font-size: 1.25rem;
-            text-decoration: none;
-        }
-
-        .notification-badge {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #14b8a6;
-            color: #ffffff;
-            font-size: .7rem;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            right: 13px;
+            bottom: 0;
+            left: 13px;
+
+            height: 3px;
+
+            background: var(--azul-activo);
+
+            border-radius: 4px 4px 0 0;
+
+            box-shadow:
+                0 -2px 8px rgba(0, 177, 255, 0.32);
         }
 
-        .user-menu {
-            color: #ffffff !important;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: .55rem;
+        .nav-menu .dropdown-toggle::after {
+            margin-left: 0.55rem;
+            vertical-align: middle;
+            opacity: 0.8;
         }
 
-        .user-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
+        /* =====================================================
+           MENÚ DESPLEGABLE
+        ===================================================== */
 
         .dropdown-menu {
-            border: none;
+            min-width: 235px;
+
+            padding: 0.55rem;
+
+            background: #ffffff;
+
+            border: 1px solid #e8edf4;
             border-radius: 14px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, .15);
-            padding: .5rem;
+
+            box-shadow:
+                0 16px 40px rgba(15, 23, 42, 0.16);
+
+            animation: dropdownAppear 0.16s ease-out;
         }
 
-        .dropdown-item {
-            border-radius: 10px;
-            padding: .65rem .85rem;
-            font-weight: 500;
-            color: #1e293b;
-        }
+        @keyframes dropdownAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
 
-        .dropdown-item:hover {
-            background: #f1f5f9;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .dropdown-header {
+            padding: 0.5rem 0.75rem;
+
             color: #64748b;
-            font-size: .72rem;
-            font-weight: 700;
-            letter-spacing: .05em;
+
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
         }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+
+            min-height: 42px;
+            padding: 0.65rem 0.8rem;
+
+            color: #24364d;
+
+            font-size: 0.9rem;
+            font-weight: 550;
+
+            border-radius: 9px;
+
+            transition:
+                color 0.18s ease,
+                background-color 0.18s ease;
+        }
+
+        .dropdown-item i {
+            width: 19px;
+            margin-right: 0.65rem;
+
+            color: #718399;
+
+            text-align: center;
+        }
+
+        .dropdown-item:hover {
+            color: #0f2f55;
+            background: #f1f7fb;
+        }
+
+        .dropdown-item:hover i {
+            color: var(--azul-activo);
+        }
+
+        .dropdown-item.active,
+        .dropdown-item:active {
+            color: #087fae;
+            background: rgba(0, 177, 255, 0.11);
+        }
+
+        .dropdown-item.active i {
+            color: var(--azul-activo);
+        }
+
+        .dropdown-divider {
+            margin: 0.45rem 0;
+            border-color: #edf1f6;
+        }
+
+        /* =====================================================
+           USUARIO
+        ===================================================== */
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+
+            gap: 1rem;
+            margin-left: auto;
+            padding-left: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+
+            gap: 0.65rem;
+            padding: 0.4rem 0.5rem;
+
+            color: #ffffff !important;
+            text-decoration: none;
+
+            font-size: 0.92rem;
+            font-weight: 650;
+
+            border-radius: 12px;
+
+            transition: background-color 0.2s ease;
+        }
+
+        .user-menu:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .user-menu::after {
+            margin-left: 0.2rem;
+            opacity: 0.8;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: #028fcf;
+            background:
+                linear-gradient(
+                    145deg,
+                    #ffffff,
+                    #e6f7ff
+                );
+
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            border-radius: 50%;
+
+            font-size: 1.05rem;
+
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.14);
+        }
+
+        /* =====================================================
+           BOTÓN RESPONSIVE
+        ===================================================== */
+
+        .navbar-toggler {
+            width: 45px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: #ffffff;
+
+            border-radius: 10px;
+
+            transition: background-color 0.2s ease;
+        }
+
+        .navbar-toggler:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar-toggler:focus {
+            box-shadow:
+                0 0 0 3px rgba(0, 177, 255, 0.2);
+        }
+
+        /* =====================================================
+           CONTENIDO GENERAL
+        ===================================================== */
 
         .main-content {
             padding: 2rem 2.5rem;
@@ -207,24 +475,35 @@
         }
 
         .page-title {
+            margin-bottom: 0.35rem;
+
+            color: #0f1f3d;
+
             font-size: 1.75rem;
             font-weight: 800;
-            color: #0f1f3d;
-            margin-bottom: .35rem;
         }
 
         .page-subtitle {
-            color: #475569;
-            font-size: 1rem;
             margin-bottom: 0;
+
+            color: #475569;
+
+            font-size: 1rem;
         }
 
         .content-card {
             background: var(--card);
+
             border: 1px solid var(--borde);
             border-radius: 16px;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, .05);
+
+            box-shadow:
+                0 6px 18px rgba(15, 23, 42, 0.05);
         }
+
+        /* =====================================================
+           BOTONES Y FORMULARIOS
+        ===================================================== */
 
         .btn {
             border-radius: 9px;
@@ -237,95 +516,215 @@
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
-            border-color: #1d4ed8;
+            background: var(--azul-boton-hover);
+            border-color: var(--azul-boton-hover);
         }
 
         .form-control,
         .form-select {
-            border-radius: 9px;
-            border-color: #cbd5e1;
             min-height: 42px;
+
+            border-color: #cbd5e1;
+            border-radius: 9px;
         }
 
         .form-control:focus,
         .form-select:focus {
             border-color: var(--azul-boton);
-            box-shadow: 0 0 0 .18rem rgba(37, 99, 235, .15);
+
+            box-shadow:
+                0 0 0 0.18rem rgba(37, 99, 235, 0.15);
         }
+
+        /* =====================================================
+           TABLAS
+        ===================================================== */
 
         .table {
             margin-bottom: 0;
         }
 
         .table thead th {
-            background: #f1f5f9;
             color: #0f1f3d;
-            font-size: .78rem;
-            text-transform: uppercase;
-            letter-spacing: .03em;
+            background: #f1f5f9;
+
+            font-size: 0.78rem;
             font-weight: 800;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+
             border-bottom: 1px solid var(--borde);
         }
 
         .table tbody td {
             color: #0f1f3d;
+
             vertical-align: middle;
+
             border-bottom: 1px solid #eef2f7;
         }
 
+        /* =====================================================
+           BADGES
+        ===================================================== */
+
         .badge-soft-warning {
-            background: #fff3cd;
+            padding: 0.45rem 0.7rem;
+
             color: #b45309;
+            background: #fff3cd;
+
             border-radius: 999px;
-            padding: .45rem .7rem;
         }
 
         .badge-soft-primary {
-            background: #dbeafe;
+            padding: 0.45rem 0.7rem;
+
             color: #1d4ed8;
+            background: #dbeafe;
+
             border-radius: 999px;
-            padding: .45rem .7rem;
         }
 
         .badge-soft-success {
-            background: #d1fae5;
+            padding: 0.45rem 0.7rem;
+
             color: #047857;
+            background: #d1fae5;
+
             border-radius: 999px;
-            padding: .45rem .7rem;
         }
 
         .badge-soft-danger {
-            background: #fee2e2;
+            padding: 0.45rem 0.7rem;
+
             color: #dc2626;
+            background: #fee2e2;
+
             border-radius: 999px;
-            padding: .45rem .7rem;
         }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
 
         footer {
             padding: 1rem 2rem;
+
             color: #64748b;
+
+            font-size: 0.85rem;
             text-align: center;
-            font-size: .85rem;
         }
 
-        @media (max-width: 992px) {
-            .top-navbar {
-                padding: .7rem 1rem;
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1199px) {
+            .navbar-brand-custom {
+                min-width: auto;
+            }
+
+            .brand-text {
+                display: none;
+            }
+
+            .navbar-brand-custom {
+                padding-right: 1.25rem;
             }
 
             .nav-menu .nav-link {
-                padding: .75rem 1rem;
-                border-bottom: none;
+                padding-right: 0.75rem;
+                padding-left: 0.75rem;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .top-navbar {
+                min-height: auto;
+                padding: 0.7rem 1rem;
+            }
+
+            .navbar-inner {
+                min-height: auto;
+            }
+
+            .navbar-brand-custom {
+                margin-right: 0;
+                padding-right: 0;
+            }
+
+            .navbar-brand-custom::after {
+                display: none;
+            }
+
+            .brand-text {
+                display: block;
+            }
+
+            .navbar-collapse {
+                margin-top: 0.75rem;
+                padding-top: 0.65rem;
+
+                border-top: 1px solid rgba(255, 255, 255, 0.12);
+            }
+
+            .nav-menu {
+                display: block;
+
+                min-height: auto;
+            }
+
+            .nav-menu .nav-item {
+                display: block;
+            }
+
+            .nav-menu .nav-link {
+                min-height: 48px;
+                padding: 0.75rem 0.85rem;
+
+                border-radius: 10px;
+            }
+
+            .nav-menu .nav-link.active::after {
+                top: 10px;
+                right: auto;
+                bottom: 10px;
+                left: 0;
+
+                width: 3px;
+                height: auto;
+
+                border-radius: 0 4px 4px 0;
             }
 
             .navbar-actions {
                 margin-left: 0;
-                padding: 1rem 0;
+                padding: 0.75rem 0 0;
+            }
+
+            .user-menu {
+                width: 100%;
             }
 
             .main-content {
                 padding: 1.2rem;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .brand-logo {
+                width: 46px;
+                height: 46px;
+            }
+
+            .brand-title {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem 0.75rem;
             }
         }
     </style>
@@ -334,188 +733,448 @@
 <body>
 
 <nav class="navbar navbar-expand-lg top-navbar">
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0 navbar-inner">
 
-        <a class="navbar-brand-custom" href="{% url 'gestion_app:core' %}">
+        <a
+            class="navbar-brand-custom"
+            href="{% url 'gestion_app:core' %}"
+        >
             <div class="brand-logo">
-                <img src="{% static 'img/logo_actual.jpg' %}" alt="Logo Hospital">
+                <img
+                    src="{% static 'img/logo_actual.jpg' %}"
+                    alt="Logo Hospital Santa Clara"
+                >
             </div>
+
             <div class="brand-text">
                 <span class="brand-title">Santa Clara</span>
                 <span class="brand-title">Hospital</span>
             </div>
         </a>
 
-        <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarOrdenes">
-            <i class="fas fa-bars fs-3"></i>
+        <button
+            class="navbar-toggler border-0"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarPrincipal"
+            aria-controls="navbarPrincipal"
+            aria-expanded="false"
+            aria-label="Abrir menú"
+        >
+            <i class="fas fa-bars fs-4"></i>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarOrdenes">
+        <div
+            class="collapse navbar-collapse"
+            id="navbarPrincipal"
+        >
 
-            {% with url=request.resolver_match.url_name %}
-            <ul class="navbar-nav nav-menu">
- 
-                <li class="nav-item">
-                    <a class="nav-link {% if url == 'lista_preingresos' or url == 'agregar_preingreso' or url == 'detalle_preingreso' or url == 'editar_preingreso' or url == 'lista_ordenes_preingreso' or url == 'imprimir_preingreso' or url == 'agregar_orden_preingreso' or url == 'detalle_orden_preingreso' or url == 'imprimir_orden' %}active{% endif %}"
-                       href="{% url 'gestion_app:lista_preingresos' %}">
-                        <i class="fas fa-clipboard-list"></i> Preingresos
-                    </a>
-                </li>
+            {% with url=request.resolver_match.url_name namespace=request.resolver_match.namespace %}
 
-                <li class="nav-item">
-                    <a class="nav-link {% if url == 'lista_ingresos' or url == 'agregar_ingreso' or url == 'agregar_ingreso_programado' or url == 'editar_ingreso' or url == 'detalle_ingreso' or url == 'detalle_orden' %}active{% endif %}"
-                       href="{% url 'gestion_app:lista_ingresos' %}">
-                        <i class="fas fa-bed"></i> Ingresos
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle"
-                href="#"
-                id="navbarOrdenes"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
+                <ul class="navbar-nav nav-menu">
 
-                    <i class="fas fa-file-medical"></i>
-                    Órdenes
-                </a>
+                    <!-- ==========================================
+                         PREINGRESOS
+                    =========================================== -->
 
-                <ul class="dropdown-menu">
-
-                    <li>
-                        <a class="dropdown-item"
-                        href="{% url 'gestion_app:gestion_ordenes' %}">
-                            <i class="fas fa-list"></i>
-                            Gestión de Órdenes
+                    <li class="nav-item">
+                        <a
+                            class="nav-link
+                            {% if url == 'lista_preingresos' or url == 'agregar_preingreso' or url == 'detalle_preingreso' or url == 'editar_preingreso' or url == 'lista_ordenes_preingreso' or url == 'imprimir_preingreso' or url == 'agregar_orden_preingreso' or url == 'detalle_orden_preingreso' or url == 'imprimir_orden' %}
+                                active
+                            {% endif %}"
+                            href="{% url 'gestion_app:lista_preingresos' %}"
+                        >
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Preingresos</span>
                         </a>
                     </li>
 
-                    <li>
-                        <a class="dropdown-item"
-                        href="{% url 'gestion_app:lista_planillas_entrega' %}">
-                            <i class="fas fa-truck"></i>
-                            Entrega de Órdenes
+                    <!-- ==========================================
+                         INGRESOS
+                    =========================================== -->
+
+                    <li class="nav-item">
+                        <a
+                            class="nav-link
+                            {% if url == 'lista_ingresos' or url == 'agregar_ingreso' or url == 'agregar_ingreso_programado' or url == 'editar_ingreso' or url == 'detalle_ingreso' or url == 'detalle_orden' %}
+                                active
+                            {% endif %}"
+                            href="{% url 'gestion_app:lista_ingresos' %}"
+                        >
+                            <i class="fas fa-bed"></i>
+                            <span>Ingresos</span>
                         </a>
                     </li>
+
+                    <!-- ==========================================
+                         ÓRDENES
+                    =========================================== -->
+
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle
+                            {% if url == 'gestion_ordenes' or url == 'lista_planillas_entrega' %}
+                                active
+                            {% endif %}"
+                            href="#"
+                            id="menuOrdenes"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <i class="fas fa-file-medical"></i>
+                            <span>Órdenes</span>
+                        </a>
+
+                        <ul
+                            class="dropdown-menu"
+                            aria-labelledby="menuOrdenes"
+                        >
+                            <li>
+                                <h6 class="dropdown-header">
+                                    Gestión de órdenes
+                                </h6>
+                            </li>
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'gestion_ordenes' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'gestion_app:gestion_ordenes' %}"
+                                >
+                                    <i class="fas fa-list"></i>
+                                    Gestión de Órdenes
+                                </a>
+                            </li>
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'lista_planillas_entrega' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'gestion_app:lista_planillas_entrega' %}"
+                                >
+                                    <i class="fas fa-truck"></i>
+                                    Entrega de Órdenes
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- ==========================================
+                         CONFIGURACIÓN
+                         Todo entidades_app activa este menú
+                    =========================================== -->
+
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle
+                            {% if namespace == 'entidades_app' %}
+                                active
+                            {% endif %}"
+                            href="#"
+                            id="menuConfiguracion"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <i class="fas fa-users-cog"></i>
+                            <span>Configuración</span>
+                        </a>
+
+                        <ul
+                            class="dropdown-menu"
+                            aria-labelledby="menuConfiguracion"
+                        >
+                            <li>
+                                <h6 class="dropdown-header">
+                                    Entidades
+                                </h6>
+                            </li>
+
+                            <!-- Pacientes -->
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'listado_pacientes' or url == 'agregar_paciente' or url == 'editar_paciente' or url == 'eliminar_paciente' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'entidades_app:listado_pacientes' %}"
+                                >
+                                    <i class="fas fa-user-injured"></i>
+                                    Empadronamiento
+                                </a>
+                            </li>
+
+                            <!-- Médicos -->
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'listado_medicos' or url == 'agregar_medico' or url == 'editar_medico' or url == 'eliminar_medico' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'entidades_app:listado_medicos' %}"
+                                >
+                                    <i class="fas fa-user-md"></i>
+                                    Médicos
+                                </a>
+                            </li>
+
+                            <!-- Obras sociales -->
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'listado_obras_sociales' or url == 'agregar_obra_social' or url == 'editar_obra_social' or url == 'eliminar_obra_social' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'entidades_app:listado_obras_sociales' %}"
+                                >
+                                    <i class="fas fa-hospital-user"></i>
+                                    Obras sociales
+                                </a>
+                            </li>
+
+                            <!-- Planes -->
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'listado_planes' or url == 'agregar_plan' or url == 'editar_plan' or url == 'eliminar_plan' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'entidades_app:listado_planes' %}"
+                                >
+                                    <i class="fas fa-clipboard-check"></i>
+                                    Planes
+                                </a>
+                            </li>
+
+                            <!-- Servicios -->
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'listado_servicios' or url == 'agregar_servicio' or url == 'editar_servicio' or url == 'eliminar_servicio' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'entidades_app:listado_servicios' %}"
+                                >
+                                    <i class="fas fa-hospital"></i>
+                                    Servicios
+                                </a>
+                            </li>
+
+                            <!-- Prestaciones -->
+
+                            <li>
+                                <a
+                                    class="dropdown-item
+                                    {% if url == 'listado_prestaciones' or url == 'agregar_prestacion' or url == 'editar_prestacion' or url == 'eliminar_prestacion' %}
+                                        active
+                                    {% endif %}"
+                                    href="{% url 'entidades_app:listado_prestaciones' %}"
+                                >
+                                    <i class="fas fa-notes-medical"></i>
+                                    Prestaciones
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- ==========================================
+                         ADMINISTRADOR
+                    =========================================== -->
+
+                    {% if request.user.groups.first.name == "administrador" %}
+
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link dropdown-toggle"
+                                href="#"
+                                id="menuReportes"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reportes</span>
+                            </a>
+
+                            <ul
+                                class="dropdown-menu"
+                                aria-labelledby="menuReportes"
+                            >
+                                <li>
+                                    <h6 class="dropdown-header">
+                                        Reportes
+                                    </h6>
+                                </li>
+
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                    >
+                                        <i class="fas fa-clock"></i>
+                                        Pendientes
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                    >
+                                        <i class="fas fa-check-circle"></i>
+                                        Autorizadas
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                    >
+                                        <i class="fas fa-chart-pie"></i>
+                                        Indicadores
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link dropdown-toggle"
+                                href="#"
+                                id="menuAdministracion"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <i class="fas fa-cog"></i>
+                                <span>Administración</span>
+                            </a>
+
+                            <ul
+                                class="dropdown-menu"
+                                aria-labelledby="menuAdministracion"
+                            >
+                                <li>
+                                    <h6 class="dropdown-header">
+                                        Administración
+                                    </h6>
+                                </li>
+
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/usuarios/"
+                                    >
+                                        <i class="fas fa-users"></i>
+                                        Usuarios
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                    {% endif %}
 
                 </ul>
-            </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-users-cog"></i> Configuracion
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="{% url 'entidades_app:listado_pacientes' %}">
-                                <i class="fas fa-user-injured me-2 text-primary"></i> Empadronamiento
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'entidades_app:listado_medicos' %}">
-                                <i class="fas fa-user-md me-2 text-success"></i> Médicos
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'entidades_app:listado_obras_sociales' %}">
-                                <i class="fas fa-hospital-user me-2 text-info"></i> Obras sociales
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'entidades_app:listado_planes' %}">
-                                <i class="fas fa-hospital-user me-2 text-info"></i> Planes
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'entidades_app:listado_servicios' %}">
-                                <i class="fas fa-hospital-user me-2 text-info"></i> Servicios
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'entidades_app:listado_prestaciones' %}">
-                                <i class="fas fa-hospital-user me-2 text-info"></i> Prestaciones
-                            </a>
-                        </li>
-                    </ul>
-                </li> 
-                
-                {% if request.user.groups.first.name == "administrador" %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-chart-bar"></i> Reportes
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><h6 class="dropdown-header">Reportes</h6></li>
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-clock me-2 text-warning"></i> Pendientes
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-check-circle me-2 text-success"></i> Autorizadas
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-chart-pie me-2 text-primary"></i> Indicadores
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-cog"></i> Administración
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><h6 class="dropdown-header">Administración</h6></li>
-                        <li>
-                            <a class="dropdown-item" href="/usuarios/">
-                                <i class="fas fa-users me-2 text-primary"></i> Usuarios
-                            </a>
-                        </li>  
-                    </ul>
-                </li>
-                {% endif %}
-
-            </ul>
             {% endwith %}
 
-            <div class="navbar-actions"> 
+            <!-- ==============================================
+                 USUARIO
+            =============================================== -->
+
+            <div class="navbar-actions">
+
                 {% if request.user.is_authenticated %}
-                <div class="dropdown">
-                    <a class="user-menu dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <div class="user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <span>{{ request.user.username }}</span>
+
+                    <div class="dropdown">
+
+                        <a
+                            class="user-menu dropdown-toggle"
+                            href="#"
+                            id="menuUsuario"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+
+                            <span>{{ request.user.username }}</span>
+                        </a>
+
+                        <ul
+                            class="dropdown-menu dropdown-menu-end"
+                            aria-labelledby="menuUsuario"
+                        >
+                            <li>
+                                <h6 class="dropdown-header">
+                                    Usuario
+                                </h6>
+                            </li>
+
+                            <li>
+                                <a
+                                    class="dropdown-item"
+                                    href="{% url 'users_app:cambiar_contraseña' %}"
+                                >
+                                    <i class="fas fa-key"></i>
+                                    Cambiar contraseña
+                                </a>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <a
+                                    class="dropdown-item text-danger"
+                                    href="#"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#logoutModal"
+                                >
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                {% else %}
+
+                    <a
+                        href="#"
+                        class="btn btn-light btn-sm"
+                    >
+                        <i class="fas fa-sign-in-alt me-1"></i>
+                        Iniciar sesión
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Usuario</h6></li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'users_app:cambiar_contraseña' %}">
-                                <i class="fas fa-key me-2 text-primary"></i> Cambiar contraseña
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                {% else %}
-                <a href="#" class="btn btn-light btn-sm">
-                    <i class="fas fa-sign-in-alt me-1"></i> Iniciar sesión
-                </a>
                 {% endif %}
 
             </div>
+
         </div>
     </div>
 </nav>
+
+<!-- =========================================================
+     CONTENIDO
+========================================================== -->
 
 <main class="main-content">
     <div class="content-wrapper">
@@ -528,15 +1187,32 @@
     Sistema de Gestión de Órdenes de Autorización · Área de Sistemas
 </footer>
 
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+<!-- =========================================================
+     MODAL DE CIERRE DE SESIÓN
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="logoutModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
     <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content border-0 shadow rounded-4">
+
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-sign-out-alt text-danger me-2"></i>
                     Cerrar sesión
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
             </div>
 
             <div class="modal-body">
@@ -544,53 +1220,102 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    data-bs-dismiss="modal"
+                >
                     Cancelar
                 </button>
-                <a href="{% url 'users_app:logout' %}" class="btn btn-danger">
+
+                <a
+                    href="{% url 'users_app:logout' %}"
+                    class="btn btn-danger"
+                >
                     Sí, cerrar sesión
                 </a>
+
             </div>
+
         </div>
     </div>
 </div>
 
+<!-- =========================================================
+     MENSAJES
+========================================================== -->
+
 {% if messages %}
-<div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 1080;">
-    {% for message in messages %}
-        <div class="toast align-items-center border-0 shadow-sm mb-2"
-             role="alert"
-             aria-live="assertive"
-             aria-atomic="true"
-             data-bs-delay="2000">
 
-            <div class="toast-header">
-                {% if message.tags == "success" %}
-                    <i class="fas fa-check-circle text-success me-2"></i>
-                    <strong class="me-auto">Operación exitosa</strong>
-                {% elif message.tags == "error" %}
-                    <i class="fas fa-exclamation-circle text-danger me-2"></i>
-                    <strong class="me-auto">Atención</strong>
-                {% elif message.tags == "warning" %}
-                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                    <strong class="me-auto">Advertencia</strong>
-                {% else %}
-                    <i class="fas fa-info-circle text-primary me-2"></i>
-                    <strong class="me-auto">Información</strong>
-                {% endif %}
+    <div
+        class="toast-container position-fixed bottom-0 start-0 p-3"
+        style="z-index: 1080;"
+    >
 
-                <small>Ahora</small>
-                <button type="button"
+        {% for message in messages %}
+
+            <div
+                class="toast align-items-center border-0 shadow-sm mb-2"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+                data-bs-delay="2000"
+            >
+
+                <div class="toast-header">
+
+                    {% if message.tags == "success" %}
+
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong class="me-auto">
+                            Operación exitosa
+                        </strong>
+
+                    {% elif message.tags == "error" %}
+
+                        <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                        <strong class="me-auto">
+                            Atención
+                        </strong>
+
+                    {% elif message.tags == "warning" %}
+
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        <strong class="me-auto">
+                            Advertencia
+                        </strong>
+
+                    {% else %}
+
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        <strong class="me-auto">
+                            Información
+                        </strong>
+
+                    {% endif %}
+
+                    <small>Ahora</small>
+
+                    <button
+                        type="button"
                         class="btn-close ms-2 mb-1"
-                        data-bs-dismiss="toast"></button>
+                        data-bs-dismiss="toast"
+                        aria-label="Cerrar"
+                    ></button>
+
+                </div>
+
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+
             </div>
 
-            <div class="toast-body">
-                {{ message }}
-            </div>
-        </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+
+    </div>
+
 {% endif %}
 
 {% block extra_js %}{% endblock %}

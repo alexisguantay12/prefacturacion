@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .page-title i {
+        color: #0f4c81;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 0.88rem;
+        margin-top: 0.2rem;
+    }
+
+    .table-card {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    .table-card-header {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid #e5eaf1;
+        background: #fbfdff;
+        font-weight: 900;
+    }
+
+    .table thead th {
+        background: #f1f5f9;
+        color: #374151;
+        font-size: 0.78rem;
+        font-weight: 900;
+        white-space: nowrap;
+        padding: 0.8rem 0.75rem;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 0.78rem 0.75rem;
+    }
+
+    .badge-status {
+        border-radius: 999px;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.74rem;
+        font-weight: 900;
+    }
+
+    .badge-activo {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+
+    .badge-inactivo {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #d1d5db;
+    }
+
+    .actions-cell {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.35rem;
+    }
+
+    .btn-action {
+        border-radius: 9px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.55rem;
+        font-weight: 800;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: #6b7280;
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <div class="page-wrap">
+
+        <div class="page-header">
+
+            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                <div>
+
+                    <h2 class="page-title">
+                        <i class="fas fa-list-check"></i>
+                        Procedimientos programados
+                    </h2>
+
+                    <div class="page-subtitle">
+                        Configuración de procedimientos y plantillas de órdenes.
+                    </div>
+
+                </div>
+
+                <a href="{% url 'gestion_app:crear_procedimiento' %}"
+                   class="btn btn-primary">
+
+                    <i class="fas fa-plus-circle"></i>
+                    Nuevo procedimiento
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+
+                    <strong>{{ message }}</strong>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        <div class="table-card">
+
+            <div class="table-card-header">
+
+                <i class="fas fa-clipboard-list text-primary"></i>
+                Procedimientos configurados
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Procedimiento</th>
+                            <th>Descripción</th>
+                            <th>Plantillas</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for procedimiento in procedimientos %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        {{ procedimiento.nombre }}
+                                    </strong>
+                                </td>
+
+                                <td>
+
+                                    {% if procedimiento.descripcion %}
+
+                                        {{ procedimiento.descripcion|truncatechars:100 }}
+
+                                    {% else %}
+
+                                        <span class="text-muted">
+                                            Sin descripción
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    <span class="badge bg-primary">
+                                        {{ procedimiento.total_plantillas }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    {% if procedimiento.activo %}
+
+                                        <span class="badge-status badge-activo">
+                                            Activo
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge-status badge-inactivo">
+                                            Inactivo
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    <div class="actions-cell">
+
+                                        <a href="{% url 'gestion_app:detalle_procedimiento' procedimiento.id %}"
+                                           class="btn btn-sm btn-outline-primary btn-action"
+                                           title="Ver">
+
+                                            <i class="fas fa-eye"></i>
+
+                                        </a>
+
+                                        <a href="{% url 'gestion_app:editar_procedimiento' procedimiento.id %}"
+                                           class="btn btn-sm btn-outline-secondary btn-action"
+                                           title="Editar">
+
+                                            <i class="fas fa-edit"></i>
+
+                                        </a>
+
+                                        <a href="{% url 'gestion_app:eliminar_procedimiento' procedimiento.id %}"
+                                           class="btn btn-sm btn-outline-danger btn-action"
+                                           title="Eliminar">
+
+                                            <i class="fas fa-trash"></i>
+
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="5">
+
+                                    <div class="empty-state">
+
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+
+                                        <div class="fw-bold">
+                                            No hay procedimientos configurados.
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

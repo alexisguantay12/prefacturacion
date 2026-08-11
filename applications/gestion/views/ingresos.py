@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date,datetime
 import json
 
 from django.contrib import messages
@@ -195,8 +195,10 @@ def agregar_ingreso(request):
         "servicios": servicios,
     })
 
+
 @login_required
 def detalle_ingreso(request, preingreso_id):
+    
     preingreso = get_object_or_404(
         Preingreso.objects.select_related(
             "paciente",
@@ -205,33 +207,93 @@ def detalle_ingreso(request, preingreso_id):
             "medico",
             "servicio",
         ),
-        id=preingreso_id
+        id=preingreso_id,
     )
-
-    ordenes = (
+    if preingreso.estado=='pendiente':
+            return redirect("gestion_app:detalle_preingreso", preingreso_id=preingreso.id)
+    ordenes = list(
         OrdenAutorizacion.objects
         .filter(preingreso=preingreso)
-        .select_related("medico")
-        .annotate(cantidad_prestaciones=Count("detalles"))
+        .select_related(
+            "medico",
+            "medico_tenencia",
+        )
+        .annotate(
+            cantidad_prestaciones=Count(
+                "detalles",
+                filter=Q(
+                    detalles__deleted_at__isnull=True
+                ),
+                distinct=True,
+            )
+        )
         .order_by("-created_at", "-id")
     )
 
-    medicos = Medico.objects.all().order_by("apellido", "nombre")
+    hoy = date.today()
 
-    return render(request, "gestion/ingreso/detalle_ingreso.html", {
-        "preingreso": preingreso,
-        "ordenes": ordenes,
-        "medicos": medicos,
-    })
+    for orden in ordenes:
+        orden.puede_editar = False
+        orden.puede_editar_codigos = False
+        orden.dias_transcurridos = None
+
+        fecha_orden = orden.fecha
+
+        if not fecha_orden:
+            continue
+
+        # Si es DateTimeField, convertimos directamente a fecha.
+        if isinstance(fecha_orden, datetime):
+            fecha_orden = fecha_orden.date()
+
+        dias_transcurridos = (hoy - fecha_orden).days
+
+        orden.dias_transcurridos = dias_transcurridos
+
+        orden.puede_editar = (
+            orden.estado != "anulada"
+            and 0 <= dias_transcurridos <= 45
+        )
+
+        orden.puede_editar_codigos = (
+            orden.puede_editar
+            and dias_transcurridos <= 14
+            and not orden.autorizada
+        )
+
+    medicos = Medico.objects.all().order_by(
+        "apellido",
+        "nombre",
+    )
+
+    return render(
+        request,
+        "gestion/ingreso/detalle_ingreso.html",
+        {
+            "preingreso": preingreso,
+            "ordenes": ordenes,
+            "medicos": medicos,
+        },
+    )
 
 
 @login_required
 def editar_ingreso(request, ingreso_id):
-    ingreso = get_object_or_404(
-        Preingreso,
-        id=ingreso_id,
-        estado="ingresado"
-    )
+    ingreso = Preingreso.objects.filter(id=ingreso_id).first()
+
+    if not ingreso:
+        messages.error(request, "El ingreso solicitado no existe.")
+        return redirect("gestion_app:lista_ingresos")
+
+    if ingreso.estado != "ingresado":
+        messages.warning(
+            request,
+            "El registro no se encuentra en estado ingresado y no puede editarse."
+        )
+        return redirect(
+            "gestion_app:detalle_ingreso",
+            preingreso_id=ingreso.id
+        )
 
     obras_sociales = ObraSocial.objects.all().order_by("nombre")
     medicos = Medico.objects.all().order_by("apellido", "nombre")

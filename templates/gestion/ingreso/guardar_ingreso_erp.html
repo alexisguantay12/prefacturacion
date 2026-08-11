@@ -1,0 +1,1461 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15,76,129,0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #0f4c81;
+        margin-right: 0.45rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.92rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .section-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .section-body {
+        padding: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.9rem;
+        padding: 0.62rem 0.8rem;
+        background: #ffffff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1d7fbf;
+        box-shadow: 0 0 0 0.18rem rgba(29,127,191,0.18);
+    }
+
+    .readonly-erp {
+        background: #f4f7fb !important;
+        cursor: not-allowed;
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .erp-summary {
+        background: #f8fbff;
+        border: 1px dashed #9cb6d5;
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+        z-index: 10;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-database"></i>
+                    Crear ingreso desde ERP
+                </h2>
+
+                <p>
+                    Busque el episodio activo en INNOVA y complete
+                    únicamente los datos requeridos.
+                </p>
+            </div>
+
+            <a href="{% url 'gestion_app:lista_ingresos' %}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Volver al listado
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}
+                        alert-dismissible fade show">
+                <strong>{{ message }}</strong>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div id="erpError"
+         class="alert alert-danger d-none">
+    </div>
+
+    <div class="form-card" id="bloqueBusqueda">
+        <div class="section-title">
+            <span class="section-number">1</span>
+            Buscar episodio en INNOVA
+        </div>
+
+        <div class="section-body">
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-8">
+                    <label class="form-label">
+                        Documento del paciente
+                        <span class="required-mark">*</span>
+                    </label>
+
+                    <input type="text"
+                           id="documentoBusqueda"
+                           class="form-control"
+                           autocomplete="off"
+                           placeholder="Ingrese el DNI sin puntos">
+                </div>
+
+                <div class="col-md-4 d-grid">
+                    <button type="button"
+                            class="btn btn-primary"
+                            id="btnBuscarEpisodio">
+                        <i class="fas fa-search"></i>
+                        Buscar episodio
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <form method="post"
+          id="formIngresoErp"
+          class="d-none">
+
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="dni"
+               id="dni">
+
+        <input type="hidden"
+               name="episodio"
+               id="episodio">
+
+        <div class="form-card">
+            <div class="section-title">
+                <span class="section-number">2</span>
+                Datos recuperados de INNOVA
+            </div>
+
+            <div class="section-body">
+
+                <div class="erp-summary mb-3">
+                    <i class="fas fa-circle-check text-success"></i>
+                    Episodio encontrado y validado en INNOVA.
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Nombre y apellido
+                        </label>
+
+                        <input type="text"
+                               id="pacienteNombre"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+
+                        <input type="text"
+                               id="pacienteDni"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Fecha de nacimiento
+                        </label>
+
+                        <input type="date"
+                               id="fechaNacimiento"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Teléfono
+                        </label>
+
+                        <input type="text"
+                               name="telefono"
+                               id="telefono"
+                               class="form-control"
+                               placeholder="Teléfono del paciente">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Episodio
+                        </label>
+
+                        <input type="text"
+                               id="episodioVisual"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Fecha de ingreso
+                        </label>
+
+                        <input type="date"
+                               id="fechaIngreso"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Matrícula del médico
+                        </label>
+
+                        <input type="text"
+                               id="medicoMatricula"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Médico
+                        </label>
+
+                        <input type="text"
+                               id="medicoNombre"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">
+                            Diagnóstico
+                        </label>
+
+                        <textarea id="diagnostico"
+                                  class="form-control readonly-erp"
+                                  rows="2"
+                                  readonly></textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <span class="section-number">3</span>
+                Cobertura y servicio
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Obra social
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <select name="obra_social"
+                                id="idObraSocial"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                Seleccione una obra social
+                            </option>
+
+                            {% for obra_social in obras_sociales %}
+                                <option value="{{ obra_social.id }}">
+                                    {{ obra_social.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Plan
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <select name="plan"
+                                id="idPlan"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                Seleccione un plan
+                            </option>
+
+                            {% for plan in planes %}
+                                <option value="{{ plan.id }}"
+                                        data-obra-social-id="{{ plan.obra_social_id }}">
+                                    {{ plan.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Número de afiliado
+                        </label>
+
+                        <input type="text"
+                               id="numeroAfiliado"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Servicio
+                        </label>
+
+                        <select name="servicio"
+                                class="form-select">
+
+                            <option value="">
+                                Seleccione un servicio
+                            </option>
+
+                            {% for servicio in servicios %}
+                                <option value="{{ servicio.id }}">
+                                    {{ servicio.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <span class="section-number">4</span>
+                Contacto responsable
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Nombre y apellido
+                        </label>
+
+                        <input type="text"
+                               id="contactoNombre"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">DNI</label>
+
+                        <input type="text"
+                               id="contactoDni"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Parentesco
+                        </label>
+
+                        <input type="text"
+                               id="contactoParentesco"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Teléfono
+                        </label>
+
+                        <input type="text"
+                               id="contactoTelefono"
+                               class="form-control readonly-erp"
+                               readonly>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <span class="section-number">5</span>
+                Observaciones
+            </div>
+
+            <div class="section-body">
+                <textarea name="observaciones"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Observaciones adicionales"></textarea>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="btnNuevaBusqueda">
+                <i class="fas fa-rotate-left"></i>
+                Buscar otro episodio
+            </button>
+
+            <button type="submit"
+                    class="btn btn-primary px-4"
+                    id="btnGuardarIngreso">
+                <i class="fas fa-save"></i>
+                Crear ingreso
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+<div class="modal fade"
+     id="modalConfirmarEpisodio"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-clipboard-check text-primary"></i>
+                    Confirmar episodio
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="alert alert-light border mb-3">
+                    Verifique que este sea el episodio que desea importar.
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        <div class="text-muted small">Paciente</div>
+                        <div class="fw-bold" id="confirmPaciente">-</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="text-muted small">DNI</div>
+                        <div class="fw-bold" id="confirmDni">-</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="text-muted small">Episodio</div>
+                        <div class="fw-bold" id="confirmEpisodio">-</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="text-muted small">Fecha de ingreso</div>
+                        <div class="fw-bold" id="confirmFechaIngreso">-</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="text-muted small">Médico</div>
+                        <div class="fw-bold" id="confirmMedico">-</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    No, buscar otro
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        id="btnConfirmarEpisodio">
+                    <i class="fas fa-check"></i>
+                    Sí, usar este episodio
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade"
+     id="modalMensajeErp"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMensajeTitulo">
+                    Aviso
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="modalMensajeTexto"></div>
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal">
+                    Aceptar
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const buscarIngresoUrl =
+        "{% url 'gestion_app:buscar_ingreso_erp' %}";
+
+    const listaIngresosUrl =
+        "{% url 'gestion_app:lista_ingresos' %}";
+
+    const documentoBusqueda =
+        document.getElementById("documentoBusqueda");
+
+    const btnBuscarEpisodio =
+        document.getElementById("btnBuscarEpisodio");
+
+    const formIngresoErp =
+        document.getElementById("formIngresoErp");
+
+    const bloqueBusqueda =
+        document.getElementById("bloqueBusqueda");
+
+    const btnNuevaBusqueda =
+        document.getElementById("btnNuevaBusqueda");
+
+    const btnGuardarIngreso =
+        document.getElementById("btnGuardarIngreso");
+
+    const btnConfirmarEpisodio =
+        document.getElementById("btnConfirmarEpisodio");
+
+    const modalConfirmarEpisodioElement =
+        document.getElementById("modalConfirmarEpisodio");
+
+    const modalMensajeElement =
+        document.getElementById("modalMensajeErp");
+
+
+    // ---------------------------------------------------------
+    // ESTADO
+    // ---------------------------------------------------------
+
+    let episodioPendiente = null;
+    let buscandoEpisodio = false;
+    let ingresoEnviado = false;
+
+
+    // ---------------------------------------------------------
+    // UTILIDADES
+    // ---------------------------------------------------------
+
+    function valorOTexto(valor) {
+        if (
+            valor === null ||
+            valor === undefined
+        ) {
+            return "";
+        }
+
+        return String(valor).trim();
+    }
+
+
+    function formatearFecha(fecha) {
+        if (!fecha) {
+            return "-";
+        }
+
+        const partes = String(fecha).split("-");
+
+        if (partes.length !== 3) {
+            return fecha;
+        }
+
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+
+    function nombreCompleto(apellido, nombre) {
+        apellido = valorOTexto(apellido);
+        nombre = valorOTexto(nombre);
+
+        if (apellido && nombre) {
+            return `${apellido}, ${nombre}`;
+        }
+
+        return apellido || nombre || "-";
+    }
+
+
+    // ---------------------------------------------------------
+    // MODAL DE MENSAJES
+    // ---------------------------------------------------------
+
+    function mostrarModalMensaje(
+        mensaje,
+        titulo = "Aviso",
+        redirectUrl = null
+    ) {
+        const tituloElement =
+            document.getElementById("modalMensajeTitulo");
+
+        const textoElement =
+            document.getElementById("modalMensajeTexto");
+
+        tituloElement.innerText = titulo;
+        textoElement.innerText = mensaje;
+
+        /*
+         * Si existía un redirect anterior, lo limpiamos.
+         */
+        modalMensajeElement.dataset.redirectUrl =
+            redirectUrl || "";
+
+        const modal = bootstrap.Modal.getOrCreateInstance(
+            modalMensajeElement
+        );
+
+        modal.show();
+    }
+
+
+    modalMensajeElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
+            const redirectUrl =
+                modalMensajeElement.dataset.redirectUrl;
+
+            modalMensajeElement.dataset.redirectUrl = "";
+
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            }
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // MODAL DE CONFIRMACIÓN DEL EPISODIO
+    // ---------------------------------------------------------
+
+    function mostrarConfirmacionEpisodio(datos) {
+        document.getElementById(
+            "confirmPaciente"
+        ).innerText = nombreCompleto(
+            datos.apellido,
+            datos.nombre
+        );
+
+        document.getElementById(
+            "confirmDni"
+        ).innerText =
+            valorOTexto(datos.dni) || "-";
+
+        document.getElementById(
+            "confirmEpisodio"
+        ).innerText =
+            valorOTexto(datos.episodio) || "-";
+
+        document.getElementById(
+            "confirmFechaIngreso"
+        ).innerText =
+            formatearFecha(datos.fecha_ingreso);
+
+        document.getElementById(
+            "confirmMedico"
+        ).innerText = nombreCompleto(
+            datos.medico_apellido,
+            datos.medico_nombre
+        );
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalConfirmarEpisodioElement
+            );
+
+        modal.show();
+    }
+
+
+    // ---------------------------------------------------------
+    // BUSCAR EPISODIO EN INNOVA
+    // ---------------------------------------------------------
+
+    async function buscarEpisodio() {
+        if (buscandoEpisodio) {
+            return;
+        }
+
+        const documento =
+            documentoBusqueda.value.trim();
+
+        if (!documento) {
+            mostrarModalMensaje(
+                "Debe ingresar el documento del paciente.",
+                "Documento requerido"
+            );
+
+            documentoBusqueda.focus();
+            return;
+        }
+
+        buscandoEpisodio = true;
+        episodioPendiente = null;
+
+        btnBuscarEpisodio.disabled = true;
+
+        const textoOriginal =
+            btnBuscarEpisodio.innerHTML;
+
+        btnBuscarEpisodio.innerHTML = `
+            <i class="fas fa-spinner fa-spin"></i>
+            Consultando INNOVA...
+        `;
+
+        try {
+            const params = new URLSearchParams({
+                documento: documento
+            });
+
+            const response = await fetch(
+                `${buscarIngresoUrl}?${params.toString()}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With":
+                            "XMLHttpRequest"
+                    }
+                }
+            );
+
+            let data;
+
+            try {
+                data = await response.json();
+            } catch {
+                throw new Error(
+                    "El servidor devolvió una respuesta inválida."
+                );
+            }
+
+            if (!response.ok || !data.ok) {
+                mostrarModalMensaje(
+                    data.error ||
+                    "No se pudo consultar el episodio.",
+                    "No se puede continuar",
+                    data.redirect_url || null
+                );
+
+                return;
+            }
+
+            episodioPendiente = data.datos;
+
+            /*
+             * MUY IMPORTANTE:
+             * Todavía NO llamamos cargarFormulario().
+             *
+             * Primero el admisionista debe confirmar
+             * visualmente el episodio.
+             */
+            mostrarConfirmacionEpisodio(
+                episodioPendiente
+            );
+
+        } catch (error) {
+            console.error(
+                "Error buscando episodio:",
+                error
+            );
+
+            mostrarModalMensaje(
+                error.message ||
+                "Ocurrió un error al consultar INNOVA.",
+                "Error de conexión"
+            );
+
+        } finally {
+            buscandoEpisodio = false;
+
+            btnBuscarEpisodio.disabled = false;
+
+            btnBuscarEpisodio.innerHTML =
+                textoOriginal;
+        }
+    }
+
+
+    // ---------------------------------------------------------
+    // CONFIRMAR EPISODIO
+    // ---------------------------------------------------------
+
+    btnConfirmarEpisodio.addEventListener(
+        "click",
+        function () {
+            if (!episodioPendiente) {
+                mostrarModalMensaje(
+                    "No existe ningún episodio pendiente de confirmación.",
+                    "No se puede continuar"
+                );
+
+                return;
+            }
+
+            const datosConfirmados =
+                episodioPendiente;
+
+            const modal =
+                bootstrap.Modal.getInstance(
+                    modalConfirmarEpisodioElement
+                );
+
+            if (modal) {
+                modal.hide();
+            }
+
+            /*
+             * Recién ahora se cargan todos los edits.
+             */
+            cargarFormulario(
+                datosConfirmados
+            );
+
+            episodioPendiente = null;
+        }
+    );
+
+
+    /*
+     * Si cierra/cancela el modal sin confirmar,
+     * descartamos los datos encontrados.
+     */
+    modalConfirmarEpisodioElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
+            episodioPendiente = null;
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // CARGAR FORMULARIO
+    // ---------------------------------------------------------
+
+    function cargarFormulario(datos) {
+
+        // Datos ocultos que después recibirá el POST.
+        document.getElementById(
+            "dni"
+        ).value =
+            valorOTexto(datos.dni);
+
+        document.getElementById(
+            "episodio"
+        ).value =
+            valorOTexto(datos.episodio);
+
+
+        // -----------------------------------------------------
+        // PACIENTE
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "pacienteNombre"
+        ).value = nombreCompleto(
+            datos.apellido,
+            datos.nombre
+        );
+
+        document.getElementById(
+            "pacienteDni"
+        ).value =
+            valorOTexto(datos.dni);
+
+        document.getElementById(
+            "fechaNacimiento"
+        ).value =
+            valorOTexto(
+                datos.fecha_nacimiento
+            );
+
+        /*
+         * Único dato del paciente editable.
+         */
+        document.getElementById(
+            "telefono"
+        ).value =
+            valorOTexto(datos.telefono);
+
+
+        // -----------------------------------------------------
+        // INGRESO
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "episodioVisual"
+        ).value =
+            valorOTexto(datos.episodio);
+
+        document.getElementById(
+            "fechaIngreso"
+        ).value =
+            valorOTexto(datos.fecha_ingreso);
+
+        document.getElementById(
+            "diagnostico"
+        ).value =
+            valorOTexto(datos.diagnostico);
+
+
+        // -----------------------------------------------------
+        // COBERTURA
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "numeroAfiliado"
+        ).value =
+            valorOTexto(
+                datos.numero_afiliado
+            );
+
+
+        // -----------------------------------------------------
+        // MÉDICO
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "medicoMatricula"
+        ).value =
+            valorOTexto(
+                datos.medico_matricula
+            );
+
+        document.getElementById(
+            "medicoNombre"
+        ).value = nombreCompleto(
+            datos.medico_apellido,
+            datos.medico_nombre
+        );
+
+
+        // -----------------------------------------------------
+        // CONTACTO RESPONSABLE
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "contactoNombre"
+        ).value =
+            valorOTexto(
+                datos.contacto_nombre
+            );
+
+        document.getElementById(
+            "contactoDni"
+        ).value =
+            valorOTexto(
+                datos.contacto_dni
+            );
+
+        document.getElementById(
+            "contactoTelefono"
+        ).value =
+            valorOTexto(
+                datos.contacto_telefono
+            );
+
+        document.getElementById(
+            "contactoParentesco"
+        ).value =
+            valorOTexto(
+                datos.contacto_parentesco
+            );
+
+
+        // -----------------------------------------------------
+        // MOSTRAR FORMULARIO
+        // -----------------------------------------------------
+
+        bloqueBusqueda.classList.add(
+            "d-none"
+        );
+
+        formIngresoErp.classList.remove(
+            "d-none"
+        );
+
+        /*
+         * Reiniciamos cobertura porque debe ser
+         * elegida manualmente por admisión.
+         */
+        const obraSocial =
+            document.getElementById(
+                "idObraSocial"
+            );
+
+        const plan =
+            document.getElementById(
+                "idPlan"
+            );
+
+        if (obraSocial) {
+            obraSocial.value = "";
+        }
+
+        if (plan) {
+            plan.value = "";
+            filtrarPlanes();
+        }
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        /*
+         * El primer campo realmente editable
+         * del paciente.
+         */
+        const telefono =
+            document.getElementById(
+                "telefono"
+            );
+
+        if (telefono) {
+            setTimeout(
+                () => telefono.focus(),
+                300
+            );
+        }
+    }
+
+
+    // ---------------------------------------------------------
+    // NUEVA BÚSQUEDA
+    // ---------------------------------------------------------
+
+    btnNuevaBusqueda.addEventListener(
+        "click",
+        function () {
+            episodioPendiente = null;
+            ingresoEnviado = false;
+
+            formIngresoErp.reset();
+
+            formIngresoErp.classList.add(
+                "d-none"
+            );
+
+            bloqueBusqueda.classList.remove(
+                "d-none"
+            );
+
+            /*
+             * Limpiar campos ocultos.
+             */
+            document.getElementById(
+                "dni"
+            ).value = "";
+
+            document.getElementById(
+                "episodio"
+            ).value = "";
+
+            documentoBusqueda.value = "";
+
+            btnGuardarIngreso.disabled = false;
+
+            btnGuardarIngreso.innerHTML = `
+                <i class="fas fa-save"></i>
+                Crear ingreso
+            `;
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            setTimeout(
+                () => documentoBusqueda.focus(),
+                300
+            );
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // BUSCAR CON BOTÓN
+    // ---------------------------------------------------------
+
+    btnBuscarEpisodio.addEventListener(
+        "click",
+        buscarEpisodio
+    );
+
+
+    // ---------------------------------------------------------
+    // BUSCAR PRESIONANDO ENTER
+    // ---------------------------------------------------------
+
+    documentoBusqueda.addEventListener(
+        "keydown",
+        function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                buscarEpisodio();
+            }
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // FILTRAR PLANES SEGÚN OBRA SOCIAL
+    // ---------------------------------------------------------
+
+    const selectObraSocial =
+        document.getElementById(
+            "idObraSocial"
+        );
+
+    const selectPlan =
+        document.getElementById(
+            "idPlan"
+        );
+
+    /*
+     * Guardamos una copia de todas
+     * las opciones originales.
+     */
+    const opcionesPlanes =
+        selectPlan
+            ? Array.from(
+                selectPlan.options
+            )
+            : [];
+
+
+    function filtrarPlanes() {
+        if (
+            !selectObraSocial ||
+            !selectPlan
+        ) {
+            return;
+        }
+
+        const obraSocialId =
+            selectObraSocial.value;
+
+        selectPlan.value = "";
+
+        opcionesPlanes.forEach(
+            function (option) {
+
+                /*
+                 * "Seleccione un plan"
+                 */
+                if (!option.value) {
+                    option.hidden = false;
+                    option.disabled = false;
+                    return;
+                }
+
+                const planObraSocialId =
+                    option.dataset.obraSocialId;
+
+                const corresponde =
+                    obraSocialId &&
+                    planObraSocialId ===
+                    obraSocialId;
+
+                option.hidden =
+                    !corresponde;
+
+                option.disabled =
+                    !corresponde;
+            }
+        );
+
+        /*
+         * Si todavía no seleccionaron
+         * OS, el plan queda deshabilitado.
+         */
+        selectPlan.disabled =
+            !obraSocialId;
+    }
+
+
+    if (selectObraSocial) {
+        selectObraSocial.addEventListener(
+            "change",
+            filtrarPlanes
+        );
+    }
+
+
+    // ---------------------------------------------------------
+    // VALIDACIÓN ANTES DE ENVIAR
+    // ---------------------------------------------------------
+
+    formIngresoErp.addEventListener(
+        "submit",
+        function (event) {
+
+            if (ingresoEnviado) {
+                event.preventDefault();
+                return;
+            }
+
+            const dni =
+                document.getElementById(
+                    "dni"
+                ).value.trim();
+
+            const episodio =
+                document.getElementById(
+                    "episodio"
+                ).value.trim();
+
+            if (!dni || !episodio) {
+                event.preventDefault();
+
+                mostrarModalMensaje(
+                    "Debe seleccionar y confirmar un episodio de INNOVA antes de guardar.",
+                    "Episodio requerido"
+                );
+
+                return;
+            }
+
+            /*
+             * Validación HTML:
+             * obra social, plan, etc.
+             */
+            if (!formIngresoErp.checkValidity()) {
+                event.preventDefault();
+
+                formIngresoErp.reportValidity();
+                return;
+            }
+
+            ingresoEnviado = true;
+
+            btnGuardarIngreso.disabled = true;
+
+            btnGuardarIngreso.innerHTML = `
+                <i class="fas fa-spinner fa-spin"></i>
+                Guardando ingreso...
+            `;
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // INICIALIZACIÓN
+    // ---------------------------------------------------------
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            filtrarPlanes();
+
+            /*
+             * Al entrar a la pantalla la búsqueda
+             * es lo único visible.
+             */
+            formIngresoErp.classList.add(
+                "d-none"
+            );
+
+            bloqueBusqueda.classList.remove(
+                "d-none"
+            );
+
+            documentoBusqueda.focus();
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // BACK DEL NAVEGADOR
+    // ---------------------------------------------------------
+
+    window.addEventListener(
+        "pageshow",
+        function (event) {
+            const navEntries =
+                performance.getEntriesByType(
+                    "navigation"
+                );
+
+            const navType =
+                navEntries.length
+                    ? navEntries[0].type
+                    : "";
+
+            const vinoPorBackForward =
+                event.persisted ||
+                navType === "back_forward";
+
+            if (vinoPorBackForward) {
+                /*
+                 * Evitamos que el navegador restaure
+                 * un episodio viejo desde cache.
+                 */
+                episodioPendiente = null;
+                ingresoEnviado = false;
+
+                formIngresoErp.reset();
+
+                formIngresoErp.classList.add(
+                    "d-none"
+                );
+
+                bloqueBusqueda.classList.remove(
+                    "d-none"
+                );
+
+                documentoBusqueda.value = "";
+
+                filtrarPlanes();
+            }
+        }
+    );
+</script>
+
+{% endblock %}

@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from applications.gestion.models import PlanillaEntrega
-
+from django.db import transaction
 
 @login_required
 def lista_planillas_entrega(request):
@@ -57,18 +57,13 @@ def lista_planillas_entrega(request):
 
 @login_required
 @require_POST
+@transaction.atomic
 def anular_planilla_entrega(request, planilla_id):
     planilla = get_object_or_404(
-        PlanillaEntrega,
+        PlanillaEntrega.objects.select_for_update(),
         id=planilla_id,
         is_deleted=False
     )
-
-    if planilla.entregada:
-        return JsonResponse({
-            "ok": False,
-            "message": "No se puede anular una planilla ya entregada."
-        }, status=400)
 
     if planilla.anulada:
         return JsonResponse({
@@ -76,22 +71,56 @@ def anular_planilla_entrega(request, planilla_id):
             "message": "La planilla ya se encuentra anulada."
         }, status=400)
 
+    fecha_anulacion = timezone.now()
+
+    # Obtener las órdenes asociadas a la planilla
+    ordenes_ids = planilla.detalles.values_list(
+        "orden_id",
+        flat=True
+    )
+
+    # Bloquear las órdenes hasta finalizar la transacción
+    ordenes = OrdenAutorizacion.objects.filter(
+        id__in=ordenes_ids,
+        deleted_at__isnull=True,
+    )
+
+    list(ordenes.select_for_update().values_list("id", flat=True))
+
+    # Revertir los datos de entrega de todas las órdenes
+    cantidad_ordenes = ordenes.update(
+        esta_entregada=False,
+        fecha_entrega=None,
+        user_entrega=None 
+    )
+
+    # Anular la planilla
     planilla.anulada = True
-    planilla.fecha_anulacion = timezone.now()
+    planilla.fecha_anulacion = fecha_anulacion
+    planilla.user_anulacion = request.user
     planilla.user_updated = request.user
-    planilla.save()
+
+    planilla.save(update_fields=[
+        "anulada",
+        "fecha_anulacion",
+        "user_anulacion",
+        "user_updated",
+    ])
 
     return JsonResponse({
         "ok": True,
-        "message": "La confección fue anulada correctamente."
+        "message": (
+            "La planilla fue anulada correctamente. "
+            f"Se revirtieron {cantidad_ordenes} órdenes."
+        )
     })
-
 
 @login_required
 @require_POST
+@transaction.atomic
 def entregar_planilla_entrega(request, planilla_id):
     planilla = get_object_or_404(
-        PlanillaEntrega,
+        PlanillaEntrega.objects.select_for_update(),
         id=planilla_id,
         is_deleted=False
     )
@@ -108,22 +137,55 @@ def entregar_planilla_entrega(request, planilla_id):
             "message": "La planilla ya fue entregada."
         }, status=400)
 
+    fecha_entrega = timezone.now()
+
+    # Actualizar la planilla
     planilla.entregada = True
-
-    if not planilla.fecha_entrega:
-        planilla.fecha_entrega = timezone.now()
-
+    planilla.fecha_entrega = planilla.fecha_entrega or fecha_entrega
     planilla.user_updated = request.user
-    planilla.save()
+    planilla.user_entrega = request.user
+
+    planilla.save(update_fields=[
+        "entregada",
+        "fecha_entrega",
+        "user_updated",
+        "user_entrega",
+    ])
+
+    # Obtener los IDs de las órdenes incluidas en la planilla
+    ordenes_ids = planilla.detalles.values_list(
+        "orden_id",
+        flat=True
+    )
+
+    # Actualizar todas las órdenes mediante una única consulta
+    cantidad_ordenes = (
+        OrdenAutorizacion.objects
+        .filter(
+            id__in=ordenes_ids,
+            deleted_at__isnull=True,
+        )
+        .exclude(estado="anulada")
+        .update(
+            esta_entregada=True,
+            fecha_entrega=fecha_entrega,
+            user_entrega=request.user, 
+        )
+    )
 
     return JsonResponse({
         "ok": True,
-        "message": "La planilla fue marcada como entregada.",
+        "message": (
+            "La planilla fue marcada como entregada. "
+            f"Se actualizaron {cantidad_ordenes} órdenes."
+        ),
         "print_url": request.build_absolute_uri(
-            redirect("gestion_app:imprimir_planilla_entrega", planilla.id).url
+            redirect(
+                "gestion_app:imprimir_planilla_entrega",
+                planilla.id
+            ).url
         )
     })
-
 
 @login_required
 def imprimir_planilla_entrega(request, planilla_id):
@@ -152,6 +214,49 @@ def imprimir_planilla_entrega(request, planilla_id):
 
 
 
+@login_required
+def detalle_planilla_entrega(request, planilla_id):
+    planilla = get_object_or_404(
+        PlanillaEntrega.objects.select_related(
+            "medico",
+            "user_entrega",
+            "user_anulacion",
+        ),
+        id=planilla_id,
+        is_deleted=False,
+    )
+
+    detalles = (
+        DetallePlanillaEntrega.objects
+        .filter(
+            planilla_entrega=planilla,
+        )
+        .select_related(
+            "orden",
+            "orden__preingreso",
+            "orden__preingreso__paciente",
+            "orden__medico",
+            "orden__medico_tenencia",
+            "user_made",
+        )
+        .prefetch_related(
+            "orden__detalles__prestacion",
+        )
+        .order_by("orden__id")
+    )
+
+    context = {
+        "planilla": planilla,
+        "detalles": detalles,
+        "total_ordenes": detalles.count(),
+    }
+
+    return render(
+        request,
+        "gestion/entregas/detalle_planilla_entrega.html",
+        context,
+    )
+
 
 
 
@@ -174,7 +279,7 @@ def confeccionar_planilla_entrega(request):
 
     ordenes_pendientes_de_entrega = OrdenAutorizacion.objects.filter(
         medico_tenencia_id=OuterRef("pk"),
-        is_deleted=False,
+        deleted_at__isnull=True,
         esta_entregada=False,
     ).exclude(
         estado="anulada"
@@ -266,7 +371,7 @@ def confeccionar_planilla_entrega(request):
                 .select_for_update()
                 .filter(
                     id__in=ordenes_ids,
-                    is_deleted=False,
+                    deleted_at__isnull=True,
                     medico_tenencia_id=medico_id,
                     esta_entregada=False,
                     autorizada=True,
@@ -293,6 +398,11 @@ def confeccionar_planilla_entrega(request):
                     if accion == "entregar"
                     else None
                 ),
+                user_entrega=(
+                    request.user
+                    if accion == "entregar"
+                    else None
+                ),                                
                 observaciones=observaciones,
                 entregada=accion == "entregar",
                 anulada=False,

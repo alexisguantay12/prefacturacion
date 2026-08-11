@@ -464,6 +464,7 @@ def cambiar_tenencia_gestion_ajax(request, orden_id):
         "medico_id",
         "",
     ).strip()
+    
 
     if not medico_id:
         return JsonResponse({

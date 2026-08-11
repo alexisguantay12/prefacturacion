@@ -21,7 +21,8 @@
     }
 
     .print-container {
-        max-width: 1120px;
+        width: 210mm;
+        max-width: 100%;
         margin: 0 auto;
         padding: 18px;
         font-family: Arial, Helvetica, sans-serif;
@@ -58,7 +59,7 @@
     }
 
     /* =========================================================
-       HOJA
+       HOJA EN PANTALLA
        ========================================================= */
 
     .print-sheet {
@@ -266,7 +267,7 @@
     .table-print th,
     .table-print td {
         border: 1px solid var(--sc-borde);
-        padding: 4px 4px;
+        padding: 4px;
         vertical-align: middle;
         line-height: 1.15;
     }
@@ -290,27 +291,31 @@
     }
 
     .col-fecha {
-        width: 9%;
+    width: 8%;
     }
 
     .col-orden {
-        width: 8%;
+        width: 7%;
     }
 
     .col-ingreso {
-        width: 10%;
+        width: 9%;
     }
 
     .col-codigo {
-        width: 12%;
+        width: 10%;
+    }
+
+    .col-cantidad {
+        width: 8%;
     }
 
     .col-paciente {
-        width: 27%;
+        width: 25%;
     }
 
     .col-obra-social {
-        width: 34%;
+        width: 33%;
     }
 
     .text-center {
@@ -383,7 +388,7 @@
     }
 
     /* =========================================================
-       PIE
+       PIE DE PÁGINA
        ========================================================= */
 
     .system-footer {
@@ -406,13 +411,16 @@
     }
 
     /* =========================================================
-       IMPRESIÓN
+       IMPRESIÓN A4
+       Margen real de 0,5 cm en cada lado
        ========================================================= */
-
     @media print {
         html,
         body {
-            width: 210mm;
+            width: auto !important;
+            height: auto !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -427,9 +435,11 @@
         nav,
         header:not(.hospital-header),
         aside,
+        footer,
         .navbar,
         .sidebar,
         .main-sidebar,
+        .main-footer,
         .content-header {
             display: none !important;
         }
@@ -437,31 +447,137 @@
         .container-fluid,
         .container,
         .content-wrapper,
+        .wrapper,
+        .app-wrapper,
         main {
             width: 100% !important;
             max-width: none !important;
+            height: auto !important;
+            min-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
         }
 
         .print-container {
-            width: 100%;
-            max-width: none;
-            margin: 0;
-            padding: 0;
+            width: 100% !important;
+            max-width: none !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .print-sheet {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0;
-            padding: 10mm 10mm 14mm;
-            box-shadow: none;
+            position: relative;
+            width: 100% !important;
+
+            /* Dejamos 2 mm de seguridad para evitar una segunda hoja */
+            min-height: 285mm !important;
+            height: auto !important;
+
+            margin: 0 !important;
+            padding: 0 0 10mm !important;
+            box-shadow: none !important;
+            overflow: visible !important;
         }
 
         .hospital-header {
+            min-height: 50px;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
             break-inside: avoid;
             page-break-inside: avoid;
+        }
+
+        .hospital-logo {
+            width: 43px;
+            height: 43px;
+            border-radius: 10px;
+            box-shadow: none;
+        }
+
+        .hospital-logo img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .hospital-name {
+            font-size: 0.93rem;
+        }
+
+        .hospital-module-title {
+            font-size: 0.65rem;
+        }
+
+        .hospital-module-subtitle {
+            font-size: 0.58rem;
+        }
+
+        .document-header {
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .document-title {
+            font-size: 0.98rem;
+            letter-spacing: 0.015em;
+        }
+
+        .document-subtitle {
+            margin-top: 2px;
+            font-size: 0.61rem;
+        }
+
+        .planilla-box {
+            min-width: 105px;
+        }
+
+        .planilla-label {
+            font-size: 0.53rem;
+        }
+
+        .planilla-number {
+            font-size: 0.9rem;
+        }
+
+        .info-grid {
+            margin-bottom: 5px;
+        }
+
+        .info-item {
+            min-height: 37px;
+            padding: 4px 6px;
+        }
+
+        .info-label {
+            margin-bottom: 2px;
+            font-size: 0.51rem;
+        }
+
+        .info-value {
+            font-size: 0.66rem;
+        }
+
+        .observaciones-box {
+            margin-bottom: 5px;
+            padding: 4px 6px;
+            font-size: 0.61rem;
+        }
+
+        .table-print {
+            width: 100%;
+            font-size: 0.56rem;
+        }
+
+        .table-print th,
+        .table-print td {
+            padding: 3px;
+            line-height: 1.1;
+            overflow-wrap: anywhere;
+        }
+
+        .table-print th {
+            font-size: 0.51rem;
         }
 
         .document-header,
@@ -475,18 +591,56 @@
             display: table-header-group;
         }
 
-        .table-print tfoot {
-            display: table-footer-group;
+        .table-print tbody tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .document-summary {
+            margin-top: 5px;
+        }
+
+        .summary-box {
+            min-width: 170px;
+        }
+
+        .summary-row {
+            padding: 4px 6px;
+            font-size: 0.59rem;
+        }
+
+        .signature-section {
+            gap: 45px;
+            margin-top: 90px;
+            padding: 0 8px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .signature-line {
+            margin-bottom: 4px;
+        }
+
+        .signature-title {
+            font-size: 0.62rem;
+        }
+
+        .signature-description {
+            font-size: 0.54rem;
         }
 
         .system-footer {
-            right: 10mm;
-            left: 10mm;
+            display: grid !important;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            padding-top: 4px;
+            font-size: 0.5rem;
         }
 
         @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 5mm;
         }
     }
 </style>
@@ -494,6 +648,7 @@
 <div class="print-container">
 
     <div class="print-actions no-print">
+
         <button
             type="button"
             onclick="window.print()"
@@ -510,14 +665,17 @@
             <i class="fas fa-arrow-left"></i>
             Volver
         </a>
+
     </div>
 
     <main class="print-sheet">
 
         <div class="hospital-header">
+
             <div class="hospital-brand">
 
                 <div class="hospital-logo">
+
                     <img
                         src="{% static 'img/logo-santa-clara.png' %}"
                         alt="Santa Clara Hospital"
@@ -533,6 +691,7 @@
                     >
                         SC+
                     </span>
+
                 </div>
 
                 <div class="hospital-name">
@@ -543,6 +702,7 @@
             </div>
 
             <div class="hospital-module">
+
                 <div class="hospital-module-title">
                     Gestión de Órdenes
                 </div>
@@ -550,11 +710,15 @@
                 <div class="hospital-module-subtitle">
                     Entrega de documentación
                 </div>
+
             </div>
+
         </div>
 
         <div class="document-header">
+
             <div>
+
                 <h1 class="document-title">
                     Planilla de entrega de honorarios
                 </h1>
@@ -562,9 +726,11 @@
                 <div class="document-subtitle">
                     Detalle de órdenes entregadas al profesional
                 </div>
+
             </div>
 
             <div class="planilla-box">
+
                 <div class="planilla-label">
                     Número de planilla
                 </div>
@@ -572,12 +738,15 @@
                 <div class="planilla-number">
                     N.º {{ planilla.id }}
                 </div>
+
             </div>
+
         </div>
 
         <div class="info-grid">
 
             <div class="info-item">
+
                 <div class="info-label">
                     Médico / profesional
                 </div>
@@ -586,9 +755,11 @@
                     {{ planilla.medico.apellido|upper }},
                     {{ planilla.medico.nombre|title }}
                 </div>
+
             </div>
 
             <div class="info-item">
+
                 <div class="info-label">
                     Matrícula
                 </div>
@@ -596,28 +767,35 @@
                 <div class="info-value">
                     {{ planilla.medico.matricula|default:"—" }}
                 </div>
+
             </div>
 
             <div class="info-item">
+
                 <div class="info-label">
                     Fecha de entrega
                 </div>
 
                 <div class="info-value">
+
                     {% if planilla.fecha_entrega %}
                         {{ planilla.fecha_entrega|date:"d/m/Y" }}
                     {% else %}
                         Pendiente
                     {% endif %}
+
                 </div>
+
             </div>
 
             <div class="info-item">
+
                 <div class="info-label">
                     Estado
                 </div>
 
                 <div class="info-value">
+
                     {% if planilla.anulada %}
                         Anulada
                     {% elif planilla.entregada %}
@@ -625,22 +803,29 @@
                     {% else %}
                         Pendiente
                     {% endif %}
+
                 </div>
+
             </div>
 
         </div>
 
         {% if planilla.observaciones %}
+
             <div class="observaciones-box">
+
                 <span class="observaciones-label">
                     Observaciones:
                 </span>
 
                 {{ planilla.observaciones }}
+
             </div>
+
         {% endif %}
 
         <div class="table-wrapper">
+
             <table class="table-print">
 
                 <thead>
@@ -650,15 +835,19 @@
                         </th>
 
                         <th class="col-orden">
-                            N.º orden
+                            Orden
                         </th>
 
                         <th class="col-ingreso">
-                            N.º ingreso
+                            Episodio
                         </th>
 
                         <th class="col-codigo">
                             Código
+                        </th>
+
+                        <th class="col-cantidad">
+                            Cantidad
                         </th>
 
                         <th class="col-paciente">
@@ -672,8 +861,11 @@
                 </thead>
 
                 <tbody>
+
                     {% for d in detalles %}
+
                         {% for det in d.orden.detalles.all %}
+
                             <tr>
                                 <td class="text-center text-nowrap">
                                     {% if d.orden.fecha %}
@@ -701,6 +893,10 @@
                                     {{ det.prestacion.codigo|default:"—" }}
                                 </td>
 
+                                <td class="text-center">
+                                    {{ det.cantidad|default:"1" }}
+                                </td>
+
                                 <td>
                                     {{ d.orden.preingreso.paciente.apellido|upper }},
                                     {{ d.orden.preingreso.paciente.nombre|title }}
@@ -710,7 +906,9 @@
                                     {{ d.orden.preingreso.obra_social|default:"—" }}
                                 </td>
                             </tr>
+
                         {% empty %}
+
                             <tr>
                                 <td class="text-center text-nowrap">
                                     {% if d.orden.fecha %}
@@ -738,6 +936,10 @@
                                     —
                                 </td>
 
+                                <td class="text-center">
+                                    —
+                                </td>
+
                                 <td>
                                     {{ d.orden.preingreso.paciente.apellido|upper }},
                                     {{ d.orden.preingreso.paciente.nombre|title }}
@@ -747,32 +949,49 @@
                                     {{ d.orden.preingreso.obra_social|default:"—" }}
                                 </td>
                             </tr>
+
                         {% endfor %}
 
                     {% empty %}
+
                         <tr class="empty-row">
-                            <td colspan="6">
+                            <td colspan="7">
                                 Sin órdenes asociadas a la planilla.
                             </td>
                         </tr>
+
                     {% endfor %}
+
                 </tbody>
 
             </table>
+
         </div>
 
         <div class="document-summary">
+
             <div class="summary-box">
+
                 <div class="summary-row">
-                    <span>Cantidad de órdenes</span>
-                    <strong>{{ detalles|length }}</strong>
+
+                    <span>
+                        Cantidad de órdenes
+                    </span>
+
+                    <strong>
+                        {{ detalles|length }}
+                    </strong>
+
                 </div>
+
             </div>
+
         </div>
 
         <div class="signature-section">
 
             <div class="signature-box">
+
                 <div class="signature-line"></div>
 
                 <div class="signature-title">
@@ -780,15 +999,27 @@
                 </div>
 
                 <div class="signature-description">
-                    {% if planilla.user_made %}
+
+                    {% if planilla.user_entrega %}
+
+                        {{ planilla.user_entrega.get_full_name|default:planilla.user_entrega.username }}
+
+                    {% elif planilla.user_made %}
+
                         {{ planilla.user_made.get_full_name|default:planilla.user_made.username }}
+
                     {% else %}
+
                         Usuario del sistema
+
                     {% endif %}
+
                 </div>
+
             </div>
 
             <div class="signature-box">
+
                 <div class="signature-line"></div>
 
                 <div class="signature-title">
@@ -796,13 +1027,16 @@
                 </div>
 
                 <div class="signature-description">
-                    Matrícula {{ planilla.medico.matricula|default:"—" }}
+                    Matrícula
+                    {{ planilla.medico.matricula|default:"—" }}
                 </div>
+
             </div>
 
         </div>
 
         <div class="system-footer">
+
             <div>
                 Impreso el {{ fecha_impresion|date:"d/m/Y" }}
                 a las {{ fecha_impresion|date:"H:i" }}
@@ -811,9 +1045,11 @@
             <div class="system-footer-right">
                 Sistema de Gestión de Órdenes · Área de Sistemas
             </div>
+
         </div>
 
     </main>
+
 </div>
 
 <script>

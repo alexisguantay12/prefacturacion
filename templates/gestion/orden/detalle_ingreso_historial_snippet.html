@@ -1,0 +1,206 @@
+{# BOTÓN LÁPIZ Y BOTÓN HISTORIAL DENTRO DE LA FILA DE CADA ORDEN #}
+
+{% if orden.puede_editar %}
+    <a href="{% url 'gestion_app:editar_orden_ingreso' orden.id %}"
+       class="btn btn-outline-warning btn-sm action-circle"
+       title="Editar orden">
+        <i class="fas fa-pen"></i>
+    </a>
+{% endif %}
+
+<button type="button"
+        class="btn btn-outline-dark btn-sm action-circle btnVerHistorialOrden"
+        title="Ver historial de versiones"
+        data-url="{% url 'gestion_app:historial_orden_ajax' orden.id %}"
+        data-orden-id="{{ orden.id }}"
+        data-bs-toggle="modal"
+        data-bs-target="#modalHistorialOrden">
+    <i class="fas fa-clock-rotate-left"></i>
+</button>
+
+
+{# MODAL: agregar una sola vez al final de detalle_ingreso.html #}
+
+<div class="modal fade" id="modalHistorialOrden" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow">
+
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-clock-rotate-left text-primary"></i>
+                        Historial de la orden
+                    </h5>
+                    <div class="text-muted small" id="historialOrdenSubtitulo"></div>
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="historialOrdenLoading"
+                     class="text-center py-5">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                    <div class="mt-2 text-muted">Cargando versiones...</div>
+                </div>
+
+                <div id="historialOrdenError"
+                     class="alert alert-danger d-none"></div>
+
+                <div id="historialOrdenContenido"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{# JAVASCRIPT: agregar al script de detalle_ingreso.html #}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const modalHistorial = document.getElementById("modalHistorialOrden");
+    const loading = document.getElementById("historialOrdenLoading");
+    const errorBox = document.getElementById("historialOrdenError");
+    const contenido = document.getElementById("historialOrdenContenido");
+    const subtitulo = document.getElementById("historialOrdenSubtitulo");
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return "";
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function renderVersion(version) {
+        const detalles = version.detalles || [];
+
+        const filas = detalles.length
+            ? detalles.map(detalle => `
+                <tr>
+                    <td><strong>${escapeHtml(detalle.codigo)}</strong></td>
+                    <td>${escapeHtml(detalle.nombre)}</td>
+                    <td class="text-center">${escapeHtml(detalle.cantidad)}</td>
+                    <td>${escapeHtml(detalle.honorarios_gastos)}</td>
+                    <td>${escapeHtml(detalle.tipo_honorario)}</td>
+                    <td>${escapeHtml(detalle.fecha_desde)}</td>
+                    <td>${escapeHtml(detalle.fecha_hasta)}</td>
+                </tr>
+            `).join("")
+            : `
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Esta versión no tiene detalles.
+                    </td>
+                </tr>
+            `;
+
+        return `
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
+                        <div>
+                            <strong>Versión ${escapeHtml(version.numero_version)}</strong>
+                            <span class="badge bg-secondary ms-2">
+                                ${escapeHtml(version.motivo)}
+                            </span>
+                        </div>
+
+                        <div class="text-muted small">
+                            ${escapeHtml(version.fecha_actualizacion)}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="small text-muted">Usuario</div>
+                            <strong>${escapeHtml(version.usuario)}</strong>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="small text-muted">Médico anterior</div>
+                            <strong>${escapeHtml(version.medico)}</strong>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="small text-muted">Observaciones</div>
+                            <span>${escapeHtml(version.observaciones || "-")}</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive border rounded-3">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Prestación</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th>Concepto</th>
+                                    <th>Nivel</th>
+                                    <th>Desde</th>
+                                    <th>Hasta</th>
+                                </tr>
+                            </thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    modalHistorial.addEventListener("show.bs.modal", function (event) {
+        const boton = event.relatedTarget;
+        const url = boton.dataset.url;
+        const ordenId = boton.dataset.ordenId;
+
+        subtitulo.textContent = `Orden N.º ${ordenId}`;
+        loading.classList.remove("d-none");
+        errorBox.classList.add("d-none");
+        errorBox.textContent = "";
+        contenido.innerHTML = "";
+
+        fetch(url, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("No se pudo consultar el historial.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            loading.classList.add("d-none");
+
+            if (!data.versiones || data.versiones.length === 0) {
+                contenido.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-clock-rotate-left fa-2x mb-3"></i>
+                        <div>Esta orden todavía no tiene versiones anteriores.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            contenido.innerHTML = data.versiones
+                .map(renderVersion)
+                .join("");
+        })
+        .catch(error => {
+            loading.classList.add("d-none");
+            errorBox.textContent = error.message;
+            errorBox.classList.remove("d-none");
+        });
+    });
+});
+</script>

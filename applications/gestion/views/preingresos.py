@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date,datetime
 import json
 
 from django.contrib import messages
@@ -187,18 +187,72 @@ def detalle_preingreso(request, preingreso_id):
             "medico",
             "servicio",
         ),
-        id=preingreso_id
+        id=preingreso_id,
     )
 
-    medicos = Medico.objects.all().order_by("apellido", "nombre")
-    ordenes = OrdenAutorizacion.objects.filter(preingreso=preingreso).order_by("-created_at", "-id")
+    medicos = Medico.objects.all().order_by(
+        "apellido",
+        "nombre",
+    )
 
-    return render(request, "gestion/preingreso/detalle_preingreso.html", {
-        "preingreso": preingreso,
-        "ordenes": ordenes,
-        "medicos": medicos,
-    })
+    ordenes = list(
+        OrdenAutorizacion.objects
+        .filter(preingreso=preingreso)
+        .select_related(
+            "medico",
+            "medico_tenencia",
+        )
+        .annotate(
+            cantidad_prestaciones=Count(
+                "detalles",
+                filter=Q(
+                    detalles__deleted_at__isnull=True
+                ),
+                distinct=True,
+            )
+        )
+        .order_by("-created_at", "-id")
+    )
 
+    hoy = date.today()
+
+    for orden in ordenes:
+        orden.puede_editar = False
+        orden.puede_editar_codigos = False
+        orden.dias_transcurridos = None
+
+        fecha_orden = orden.fecha
+
+        if not fecha_orden:
+            continue
+
+        if isinstance(fecha_orden, datetime):
+            fecha_orden = fecha_orden.date()
+
+        dias_transcurridos = (hoy - fecha_orden).days
+
+        orden.dias_transcurridos = dias_transcurridos
+
+        orden.puede_editar = (
+            orden.estado != "anulada"
+            and 0 <= dias_transcurridos <= 45
+        )
+
+        orden.puede_editar_codigos = (
+            orden.puede_editar
+            and dias_transcurridos <= 14
+            and not orden.autorizada
+        )
+
+    return render(
+        request,
+        "gestion/preingreso/detalle_preingreso.html",
+        {
+            "preingreso": preingreso,
+            "ordenes": ordenes,
+            "medicos": medicos,
+        },
+    )
 
 @login_required
 def editar_preingreso(request, preingreso_id):

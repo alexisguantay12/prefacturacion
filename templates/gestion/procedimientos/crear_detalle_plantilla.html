@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15,76,129,0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.55rem;
+        color: #111827;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.9rem;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+    }
+
+    .section-body {
+        padding: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        min-height: 42px;
+    }
+
+    .help-text {
+        font-size: 0.76rem;
+        color: #6b7280;
+        margin-top: 0.3rem;
+    }
+
+    .actions-bar {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .template-info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 14px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        color: #1e40af;
+        font-size: 0.86rem;
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <div class="page-wrap">
+
+        <div class="form-hero">
+
+            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                <div>
+
+                    <h2>
+                        <i class="fas fa-plus-circle text-primary"></i>
+                        Agregar prestación
+                    </h2>
+
+                    <p>
+                        Plantilla:
+                        <strong>{{ plantilla.nombre }}</strong>
+                    </p>
+
+                </div>
+
+                <a href="{% url 'gestion_app:detalle_plantilla' plantilla.id %}"
+                   class="btn btn-outline-secondary">
+
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+
+                    <strong>{{ message }}</strong>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        <div class="template-info">
+
+            <i class="fas fa-circle-info me-1"></i>
+
+            Procedimiento:
+            <strong>{{ procedimiento.nombre }}</strong>
+
+            &nbsp;•&nbsp;
+
+            Plantilla:
+            <strong>{{ plantilla.nombre }}</strong>
+
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="form-card">
+
+                <div class="section-title">
+
+                    <i class="fas fa-list-check text-primary"></i>
+                    Datos de la prestación
+
+                </div>
+
+                <div class="section-body">
+
+                    <div class="row g-3">
+
+
+                        <!-- PRESTACION -->
+                        <div class="col-md-12">
+
+                            <label class="form-label">
+                                Prestación / código
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="prestacion"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    Seleccionar prestación...
+                                </option>
+
+                                {% for prestacion in prestaciones %}
+
+                                    <option value="{{ prestacion.id }}"
+                                        {% if prestacion_seleccionada|stringformat:"s" == prestacion.id|stringformat:"s" %}
+                                            selected
+                                        {% endif %}>
+
+                                        {{ prestacion.codigo }} - {{ prestacion.nombre }}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CONCEPTO -->
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Concepto
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="honorarios_gastos"
+                                    id="honorariosGastos"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    Seleccionar...
+                                </option>
+
+                                {% for valor, etiqueta in honorarios_gastos_choices %}
+
+                                    <option value="{{ valor }}"
+                                        {% if honorarios_gastos == valor %}
+                                            selected
+                                        {% endif %}>
+
+                                        {{ etiqueta }}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- NIVEL -->
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Nivel
+                            </label>
+
+                            <select name="tipo_honorario"
+                                    id="tipoHonorario"
+                                    class="form-select">
+
+                                <option value="">
+                                    Sin nivel
+                                </option>
+
+                                {% for valor, etiqueta in tipos_honorario_choices %}
+
+                                    <option value="{{ valor }}"
+                                        {% if tipo_honorario == valor %}
+                                            selected
+                                        {% endif %}>
+
+                                        {{ etiqueta }}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            <div class="help-text">
+                                Obligatorio cuando el concepto sea Honorarios.
+                            </div>
+
+                        </div>
+
+
+                        <!-- CANTIDAD -->
+                        <div class="col-md-2">
+
+                            <label class="form-label">
+                                Cantidad
+                            </label>
+
+                            <input type="number"
+                                   name="cantidad"
+                                   class="form-control"
+                                   min="1"
+                                   value="{{ cantidad|default:'1' }}"
+                                   required>
+
+                        </div>
+
+
+                        <!-- ORDEN -->
+                        <div class="col-md-2">
+
+                            <label class="form-label">
+                                Orden
+                            </label>
+
+                            <input type="number"
+                                   name="orden"
+                                   class="form-control"
+                                   min="1"
+                                   value="{{ orden|default:siguiente_orden }}">
+
+                        </div>
+
+
+                        <!-- ACTIVO -->
+                        <div class="col-md-12">
+
+                            <div class="form-check">
+
+                                <input type="checkbox"
+                                       name="activo"
+                                       id="activo"
+                                       class="form-check-input"
+                                       {% if activo or activo is None %}checked{% endif %}>
+
+                                <label for="activo"
+                                       class="form-check-label fw-bold">
+
+                                    Detalle activo
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="actions-bar">
+
+                <a href="{% url 'gestion_app:detalle_plantilla' plantilla.id %}"
+                   class="btn btn-outline-secondary">
+
+                    Cancelar
+
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary px-4">
+
+                    <i class="fas fa-save"></i>
+                    Agregar prestación
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const concepto = document.getElementById("honorariosGastos");
+    const nivel = document.getElementById("tipoHonorario");
+
+    function actualizarNivel() {
+
+        if (concepto.value === "gastos") {
+
+            nivel.value = "";
+            nivel.disabled = true;
+
+        } else {
+
+            nivel.disabled = false;
+
+        }
+
+        if (concepto.value === "honorarios") {
+
+            nivel.required = true;
+
+        } else {
+
+            nivel.required = false;
+
+        }
+    }
+
+    concepto.addEventListener(
+        "change",
+        actualizarNivel
+    );
+
+    actualizarNivel();
+
+});
+</script>
+
+{% endblock %}

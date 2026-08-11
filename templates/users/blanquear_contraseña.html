@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Blanquear contraseña
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .password-reset-container {
+        width: 100%;
+        max-width: 650px;
+        margin: 2rem auto;
+    }
+
+    .password-reset-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        box-shadow: 0 12px 35px rgba(15, 39, 71, 0.08);
+    }
+
+    .password-reset-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem 1.75rem;
+        color: #ffffff;
+        background: linear-gradient(
+            135deg,
+            #0d2d52,
+            #123a68
+        );
+    }
+
+    .password-reset-header-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #ffffff;
+        background: rgba(0, 177, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 14px;
+        font-size: 1.3rem;
+    }
+
+    .password-reset-header h1 {
+        margin: 0 0 0.25rem;
+        font-size: 1.4rem;
+        font-weight: 750;
+    }
+
+    .password-reset-header p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 0.9rem;
+    }
+
+    .password-reset-body {
+        padding: 1.75rem;
+    }
+
+    .selected-user {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e5edf4;
+        border-radius: 13px;
+    }
+
+    .selected-user-avatar {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #008dcc;
+        background: #e3f7ff;
+        border-radius: 50%;
+        font-size: 1.2rem;
+    }
+
+    .selected-user-name {
+        display: block;
+        color: #102b4e;
+        font-weight: 750;
+    }
+
+    .selected-user-username {
+        color: #64748b;
+        font-size: 0.87rem;
+    }
+
+    .password-label {
+        margin-bottom: 0.5rem;
+        color: #24364d;
+        font-weight: 700;
+    }
+
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .password-input-wrapper input {
+        width: 100%;
+        min-height: 48px;
+        padding: 0.75rem 3rem 0.75rem 0.9rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 11px;
+        outline: none;
+    }
+
+    .password-input-wrapper input:focus {
+        border-color: #00b1ff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 177, 255, 0.13);
+    }
+
+    .show-password-button {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        padding: 4px;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        transform: translateY(-50%);
+    }
+
+    .show-password-button:hover {
+        color: #008dcc;
+    }
+
+    .password-hint {
+        margin-top: 0.45rem;
+        color: #718096;
+        font-size: 0.8rem;
+    }
+
+    .security-warning {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.4rem;
+        padding: 1rem;
+        color: #805b10;
+        background: #fff9e8;
+        border: 1px solid #f4df9f;
+        border-radius: 11px;
+        font-size: 0.85rem;
+    }
+
+    .password-reset-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        padding: 1.25rem 1.75rem;
+        background: #f8fafc;
+        border-top: 1px solid #edf1f5;
+    }
+
+    .btn-cancel {
+        color: #475569;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+    }
+
+    .btn-cancel:hover {
+        color: #24364d;
+        background: #f1f5f9;
+    }
+
+    .btn-reset {
+        color: #ffffff;
+        background: linear-gradient(
+            135deg,
+            #00b1ff,
+            #008dcc
+        );
+        border: none;
+        box-shadow: 0 7px 16px rgba(0, 177, 255, 0.22);
+    }
+
+    .btn-reset:hover {
+        color: #ffffff;
+        background: linear-gradient(
+            135deg,
+            #00a5ed,
+            #0075aa
+        );
+    }
+
+    @media (max-width: 575px) {
+        .password-reset-body,
+        .password-reset-header,
+        .password-reset-footer {
+            padding-right: 1.1rem;
+            padding-left: 1.1rem;
+        }
+
+        .password-reset-footer {
+            flex-direction: column-reverse;
+        }
+
+        .password-reset-footer .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="password-reset-container">
+
+    <div class="password-reset-card">
+
+        <div class="password-reset-header">
+
+            <div class="password-reset-header-icon">
+                <i class="fas fa-key"></i>
+            </div>
+
+            <div>
+                <h1>Blanquear contraseña</h1>
+
+                <p>
+                    Asigná una contraseña nueva al usuario seleccionado.
+                </p>
+            </div>
+
+        </div>
+
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+
+            <div class="password-reset-body">
+
+                <div class="selected-user">
+
+                    <div class="selected-user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <div>
+                        <span class="selected-user-name">
+                            {% if usuario_objetivo.get_full_name %}
+                                {{ usuario_objetivo.get_full_name }}
+                            {% else %}
+                                {{ usuario_objetivo.username }}
+                            {% endif %}
+                        </span>
+
+                        <span class="selected-user-username">
+                            Usuario: {{ usuario_objetivo.username }}
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label
+                        for="nueva_contraseña"
+                        class="password-label"
+                    >
+                        Nueva contraseña
+                    </label>
+
+                    <div class="password-input-wrapper">
+
+                        <input
+                            type="password"
+                            name="nueva_contraseña"
+                            id="nueva_contraseña"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="show-password-button"
+                            data-target="nueva_contraseña"
+                            aria-label="Mostrar contraseña"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+
+                    </div>
+
+                    <div class="password-hint">
+                        Debe contener al menos 8 caracteres.
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <label
+                        for="confirmar_contraseña"
+                        class="password-label"
+                    >
+                        Confirmar contraseña
+                    </label>
+
+                    <div class="password-input-wrapper">
+
+                        <input
+                            type="password"
+                            name="confirmar_contraseña"
+                            id="confirmar_contraseña"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="show-password-button"
+                            data-target="confirmar_contraseña"
+                            aria-label="Mostrar contraseña"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="security-warning">
+                    <i class="fas fa-shield-alt mt-1"></i>
+
+                    <span>
+                        La contraseña anterior dejará de funcionar
+                        inmediatamente después de confirmar el cambio.
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="password-reset-footer">
+
+                <a
+                    href="{% url 'users_app:lista_usuarios' %}"
+                    class="btn btn-cancel"
+                >
+                    <i class="fas fa-times me-1"></i>
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-reset"
+                    onclick="return confirm(
+                        '¿Confirma el blanqueo de contraseña de este usuario?'
+                    );"
+                >
+                    <i class="fas fa-key me-1"></i>
+                    Actualizar contraseña
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(
+            ".show-password-button"
+        );
+
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const input = document.getElementById(
+                    button.dataset.target
+                );
+
+                const icon = button.querySelector("i");
+
+                if (!input) {
+                    return;
+                }
+
+                const isVisible = input.type === "text";
+
+                input.type = isVisible
+                    ? "password"
+                    : "text";
+
+                icon.classList.toggle(
+                    "fa-eye",
+                    isVisible
+                );
+
+                icon.classList.toggle(
+                    "fa-eye-slash",
+                    !isVisible
+                );
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -17,7 +17,7 @@
               <th>Usuario</th>
               <th>Email</th>
               <th>Rol</th>
-              <th>Local</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -27,11 +27,13 @@
                 <td>{{ usuario.email }}</td>
                 <td>{{ usuario.groups.first.name|default:"Sin rol" }}</td>
                 <td>
-                  {% if usuario.local %}
-                    {{ usuario.local.nombre }}
-                  {% else %}
-                    <span class="text-muted">Sin local</span>
-                  {% endif %}
+                  <a
+                    href="{% url 'users_app:blanquear_contraseña' usuario.id %}"
+                    class="btn btn-sm btn-outline-warning"
+                    title="Blanquear contraseña"
+                >
+                    <i class="fas fa-key"></i>
+                </a>
                 </td>
               </tr>
             {% empty %}

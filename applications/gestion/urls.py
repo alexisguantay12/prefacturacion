@@ -102,4 +102,136 @@ urlpatterns = [
         name="cambiar_tenencia_gestion_ajax",
     ),
 
+    path(
+        "ordenes/<int:orden_id>/editar/",
+        views.editar_orden_ingreso,
+        name="editar_orden_ingreso",
+    ),
+    path(
+        "ordenes/<int:orden_id>/historial/",
+        views.historial_orden_ajax,
+        name="historial_orden_ajax",
+    ),
+    path(
+        "entregas/planillas/<int:planilla_id>/detalle/",
+        views.detalle_planilla_entrega,
+        name="detalle_planilla_entrega",
+    ),
+
+    path(
+        "ingresos/erp/nuevo/",
+        views.guardar_ingreso_erp,
+        name="guardar_ingreso_erp",
+    ),
+
+    path(
+        "ingresos/erp/buscar/",
+        views.buscar_ingreso_erp,
+        name="buscar_ingreso_erp",
+    ),
+
+
+      # =====================================================
+    # PROCEDIMIENTOS
+    # =====================================================
+
+    path(
+        "procedimientos/",
+        views.lista_procedimientos,
+        name="lista_procedimientos",
+    ),
+
+    path(
+        "procedimientos/nuevo/",
+        views.crear_procedimiento,
+        name="crear_procedimiento",
+    ),
+
+    path(
+        "procedimientos/<int:procedimiento_id>/",
+        views.detalle_procedimiento,
+        name="detalle_procedimiento",
+    ),
+
+    path(
+        "procedimientos/<int:procedimiento_id>/editar/",
+        views.editar_procedimiento,
+        name="editar_procedimiento",
+    ),
+
+    path(
+        "procedimientos/<int:procedimiento_id>/eliminar/",
+        views.eliminar_procedimiento,
+        name="eliminar_procedimiento",
+    ),
+
+
+    # =====================================================
+    # PLANTILLAS DE PROCEDIMIENTOS
+    # =====================================================
+
+    path(
+        "procedimientos/<int:procedimiento_id>/plantillas/nueva/",
+        views.crear_plantilla,
+        name="crear_plantilla",
+    ),
+
+    path(
+        "procedimientos/plantillas/<int:plantilla_id>/",
+        views.detalle_plantilla,
+        name="detalle_plantilla",
+    ),
+
+    path(
+        "procedimientos/plantillas/<int:plantilla_id>/editar/",
+        views.editar_plantilla,
+        name="editar_plantilla",
+    ),
+
+    path(
+        "procedimientos/plantillas/<int:plantilla_id>/eliminar/",
+        views.eliminar_plantilla,
+        name="eliminar_plantilla",
+    ),
+    # =========================================================
+    # DETALLES / PRESTACIONES DE LAS PLANTILLAS
+    # =========================================================
+
+    path(
+        "procedimientos/plantillas/<int:plantilla_id>/detalles/nuevo/",
+        views.crear_detalle_plantilla,
+        name="crear_detalle_plantilla",
+    ),
+
+    path(
+        "procedimientos/plantillas/detalles/<int:detalle_id>/",
+        views.detalle_detalle_plantilla,
+        name="detalle_detalle_plantilla",
+    ),
+
+    path(
+        "procedimientos/plantillas/detalles/<int:detalle_id>/editar/",
+        views.editar_detalle_plantilla,
+        name="editar_detalle_plantilla",
+    ),
+
+    path(
+        "procedimientos/plantillas/detalles/<int:detalle_id>/eliminar/",
+        views.eliminar_detalle_plantilla,
+        name="eliminar_detalle_plantilla",
+    ),
+
+    path(
+    "preingresos/<int:preingreso_id>/procedimientos/ajax/",
+    views.procedimientos_preingreso_ajax,
+    name="procedimientos_preingreso_ajax",
+    ),
+
+    path(
+        "preingresos/<int:preingreso_id>/procedimientos/generar/ajax/",
+        views.generar_ordenes_procedimiento_ajax,
+        name="generar_ordenes_procedimiento_ajax",
+    ),
+
+
 ]

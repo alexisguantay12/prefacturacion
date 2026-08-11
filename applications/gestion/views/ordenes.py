@@ -19,8 +19,7 @@ def detalle_orden(request, orden_id):
             "preingreso__plan",
         ),
         pk=orden_id
-    )
-
+    ) 
     detalles = (
         orden.detalles
         .select_related("prestacion", "medico")

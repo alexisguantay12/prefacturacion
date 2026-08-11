@@ -11,4 +11,11 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('cambiar_contraseña/', views.cambiar_contraseña, name='cambiar_contraseña'),
+    path(
+        "usuarios/<int:usuario_id>/blanquear-contrasena/",
+        views.blanquear_contraseña,
+        name="blanquear_contraseña"
+    ),
+
+
 ]

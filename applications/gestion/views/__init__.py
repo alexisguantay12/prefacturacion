@@ -6,3 +6,6 @@ from .orden_acciones import *
 from .ajax import *
 from .planillas_entrega import *
 from .gestion_ordenes import *
+from .ingreso_innova import * 
+from .procedimientos import *
+from .carga_ordenes_plantilla import *

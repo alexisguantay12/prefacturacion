@@ -1,106 +1,424 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Iniciar sesión - Presupuesto</title>
-    <link rel="icon" type="image/png" href="{% static 'fotos/logo-santa-clara.jpg' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Iniciar sesión - Sistema de Ordenes</title>
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="{% static 'fotos/logo-santa-clara.jpg' %}"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet"
+    >
+
     <style>
+        :root {
+            --institucional: #00b1ff;
+            --institucional-oscuro: #008dcc;
+            --institucional-muy-oscuro: #0075aa;
+            --institucional-claro: #55caff;
+
+            --texto-principal: #26333a;
+            --texto-secundario: #718089;
+
+            --error-texto: #a94442;
+            --error-fondo: #fff0f0;
+            --error-borde: #f1c9c8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
+            padding: 24px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
             font-family: 'Open Sans', sans-serif;
-            background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(0, 177, 255, 0.10),
+                    transparent 38%
+                ),
+                radial-gradient(
+                    circle at bottom right,
+                    rgba(0, 177, 255, 0.07),
+                    transparent 40%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fdff,
+                    #ffffff
+                );
         }
 
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 40px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+
+            width: 100%;
+            max-width: 500px;
+
+            padding: 55px 52px 46px;
+
+            overflow: hidden;
+
+            background: rgba(255, 255, 255, 0.99);
+
+            border: 1px solid rgba(0, 177, 255, 0.08);
+            border-radius: 26px;
+
+            box-shadow:
+                0 28px 65px rgba(0, 109, 160, 0.12),
+                0 10px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .login-container::before {
+            content: "";
+
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 7px;
+
+            background: linear-gradient(
+                90deg,
+                var(--institucional-oscuro),
+                var(--institucional),
+                var(--institucional-claro)
+            );
+        }
+
+        .login-container::after {
+            content: "";
+
+            position: absolute;
+            top: -100px;
+            right: -100px;
+
+            width: 200px;
+            height: 200px;
+
+            background: rgba(0, 177, 255, 0.045);
+            border-radius: 50%;
+
+            pointer-events: none;
+        }
+
+        .logo-container {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+            justify-content: center;
+
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+
+            object-fit: cover;
+
+            background-color: #ffffff;
+
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 0 3px rgba(0, 177, 255, 0.20),
+                0 10px 22px rgba(0, 109, 160, 0.14);
         }
 
         h2 {
+            position: relative;
+            z-index: 1;
+
+            margin: 0;
+
             font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            color: #444;
+            font-size: 35px;
+            color: var(--texto-principal);
             text-align: center;
-            margin-bottom: 30px;
+        }
+
+        .subtitle {
+            position: relative;
+            z-index: 1;
+
+            margin: 10px 0 35px;
+
+            color: var(--texto-secundario);
+            font-size: 15px;
+            text-align: center;
+        }
+
+        form {
+            position: relative;
+            z-index: 1;
         }
 
         label {
-            font-weight: bold;
             display: block;
-            margin-bottom: 8px;
-            color: #555;
+
+            margin-bottom: 9px;
+
+            color: #41535c;
+            font-size: 15px;
+            font-weight: 700;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            transition: border 0.3s ease;
+            min-height: 52px;
+
+            padding: 15px 17px;
+            margin-bottom: 23px;
+
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            color: var(--texto-principal);
+
+            background-color: #fbfdfe;
+
+            border: 1px solid #dce9ee;
+            border-radius: 12px;
+
+            outline: none;
+
+            transition:
+                border-color 0.25s ease,
+                background-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.25s ease;
+        }
+
+        input:hover {
+            border-color: #b4d7e5;
         }
 
         input:focus {
-            border-color: #c4a24f;
-            outline: none;
+            background-color: #ffffff;
+            border-color: var(--institucional);
+
+            box-shadow:
+                0 0 0 4px rgba(0, 177, 255, 0.12);
+
+            transform: translateY(-1px);
         }
 
         button {
             width: 100%;
-            padding: 14px;
-            background-color: #3128df;
+            min-height: 54px;
+
+            padding: 16px;
+            margin-top: 5px;
+
+            color: #ffffff;
+
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+
+            background: linear-gradient(
+                135deg,
+                var(--institucional),
+                var(--institucional-oscuro)
+            );
+
             border: none;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
+            border-radius: 12px;
+
             cursor: pointer;
-            transition: background 0.3s ease;
+
+            box-shadow:
+                0 10px 22px rgba(0, 177, 255, 0.24);
+
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease,
+                background 0.25s ease;
         }
 
         button:hover {
-            background-color: #b09145;
+            background: linear-gradient(
+                135deg,
+                #00a5ed,
+                var(--institucional-muy-oscuro)
+            );
+
+            box-shadow:
+                0 14px 28px rgba(0, 177, 255, 0.31);
+
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:focus-visible {
+            outline: 3px solid rgba(0, 177, 255, 0.22);
+            outline-offset: 3px;
         }
 
         .error {
-            color: #a94442;
-            background-color: #f2dede;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            text-align: center;
+            position: relative;
+            z-index: 1;
+
+            margin-bottom: 24px;
+            padding: 12px 15px;
+
+            color: var(--error-texto);
+            background-color: var(--error-fondo);
+
+            border: 1px solid var(--error-borde);
+            border-radius: 10px;
+
             font-size: 14px;
+            text-align: center;
+        }
+
+        .error p {
+            margin: 0;
+        }
+
+        .footer-text {
+            position: relative;
+            z-index: 1;
+
+            margin: 28px 0 0;
+
+            color: #a6b4ba;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            .login-container {
+                max-width: 100%;
+                padding: 42px 28px 36px;
+                border-radius: 20px;
+            }
+
+            h2 {
+                font-size: 29px;
+            }
+
+            .logo {
+                width: 82px;
+                height: 82px;
+            }
+
+            .subtitle {
+                margin-bottom: 30px;
+            }
         }
     </style>
 </head>
+
 <body>
-<div class="login-container">
-    <h2>Iniciar Sesión</h2>
 
-    {% if form.non_field_errors %}
-        <div class="error">
-            {% for error in form.non_field_errors %}
-                <p><i class="fas fa-times-circle"></i> {{ error }}</p>
-            {% endfor %}
-        </div> 
-    {% endif %}
+    <div class="login-container">
 
-    <form method="post">
-        {% csrf_token %}
-        <label for="{{ form.username.id_for_label }}">Usuario</label>
-        {{ form.username }}
+        <div class="logo-container">
+            <img
+                src="{% static 'fotos/logo-santa-clara.jpg' %}"
+                alt="Logo del Hospital Privado Santa Clara de Asís"
+                class="logo"
+            >
+        </div>
 
-        <label for="{{ form.password.id_for_label }}">Contraseña</label>
-        {{ form.password }}
+        <h2>Iniciar Sesión</h2>
 
-        <button type="submit">Ingresar</button>
-    </form>
-</div>
+        <p class="subtitle">
+            Sistema de Ordenes
+        </p>
+
+        {% if form.non_field_errors %}
+            <div class="error">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+
+            <label for="{{ form.username.id_for_label }}">
+                Usuario
+            </label>
+
+            {{ form.username }}
+
+            <label for="{{ form.password.id_for_label }}">
+                Contraseña
+            </label>
+
+            {{ form.password }}
+
+            <button type="submit">
+                Ingresar
+            </button>
+        </form>
+
+        <p class="footer-text">
+            Hospital Privado Santa Clara de Asís
+        </p>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const usernameInput = document.getElementById(
+                "{{ form.username.id_for_label }}"
+            );
+
+            const passwordInput = document.getElementById(
+                "{{ form.password.id_for_label }}"
+            );
+
+            if (usernameInput) {
+                usernameInput.value = "";
+                usernameInput.setAttribute("autocomplete", "off");
+            }
+
+            if (passwordInput) {
+                passwordInput.value = "";
+                passwordInput.setAttribute(
+                    "autocomplete",
+                    "new-password"
+                );
+            }
+        });
+    </script>
+
 </body>
 </html>

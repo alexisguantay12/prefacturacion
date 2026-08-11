@@ -254,7 +254,7 @@ class OrdenAutorizacion(BaseAbstractWithUser):
     autorizada = models.BooleanField(default=False, null=True, blank=True)
 
 
-
+    
     user_anulacion = models.ForeignKey(
         'users.User',
         on_delete=models.SET_NULL,
@@ -373,12 +373,27 @@ class PlanillaEntrega(BaseAbstractWithUser):
         "entidades.Medico",
         on_delete=models.PROTECT,
         related_name="planillas_entrega"
-    )
+    ) 
+    
     entregada = models.BooleanField(default=False)
     fecha_entrega = models.DateField(blank=True,null=True)
+    user_entrega= models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="user_entrega"
+    )
     observaciones = models.CharField(max_length=500, blank=True, null=True)
     anulada = models.BooleanField(default=False)
     fecha_anulacion = models.DateTimeField(blank=True, null=True)
+    user_anulacion= models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name="user_anulacion"
+    )
 
 
 class DetallePlanillaEntrega(BaseAbstractWithUser):
@@ -392,3 +407,212 @@ class DetallePlanillaEntrega(BaseAbstractWithUser):
         on_delete=models.PROTECT,
         related_name="detalles_entrega"
     )
+
+
+
+
+class HistoricoOrden(models.Model):
+    MOTIVOS = [
+        ("edicion", "Edición"),
+        ("anulacion", "Anulación"),
+        ("autorizacion", "Autorización"),
+    ]
+
+    orden = models.ForeignKey(
+        OrdenAutorizacion,
+        on_delete=models.CASCADE,
+        related_name="historial",
+    ) 
+
+    fecha_actualizacion = models.DateTimeField(auto_now_add=True)
+
+    usuario = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ordenes_historicas",
+    )
+
+    motivo = models.CharField(
+        max_length=30,
+        choices=MOTIVOS,
+        default="edicion",
+    )
+  
+    medico = models.ForeignKey(
+        "entidades.Medico",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    ) 
+
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+    ) 
+
+    def __str__(self):
+        return (
+            f"Orden {self.orden_id} "
+            f"- versión {self.numero_version}"
+        )
+
+
+class HistoricoDetalleOrden(models.Model):
+    historico_orden = models.ForeignKey(
+        HistoricoOrden,
+        on_delete=models.CASCADE,
+        related_name="detalles",
+    ) 
+    prestacion_codigo = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    prestacion_nombre = models.CharField(
+        max_length=300,
+        blank=True,
+        null=True,
+    )
+    
+    cantidad = models.PositiveIntegerField(default=1)
+
+    honorarios_gastos = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+
+    tipo_honorario = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+
+    fecha_desde = models.DateField(
+        blank=True,
+        null=True,
+    )
+
+    fecha_hasta = models.DateField(
+        blank=True,
+        null=True,
+    )
+
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return (
+            f"Detalle histórico de orden "
+            f"{self.historico_orden.orden_id}"
+        )
+
+
+
+
+
+
+
+class ProcedimientoProgramado(BaseAbstractWithUser):
+    nombre = models.CharField(max_length=150)
+
+    descripcion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    activo = models.BooleanField(
+        default=True
+    )
+
+    def __str__(self):
+        return self.nombre
+
+
+class PlantillaOrdenProcedimiento(BaseAbstractWithUser):
+    procedimiento = models.ForeignKey(
+        "ProcedimientoProgramado",
+        on_delete=models.CASCADE,
+        related_name="ordenes_plantilla"
+    )
+
+    nombre = models.CharField(
+        max_length=150
+    )
+
+    observaciones = models.CharField(
+        max_length=250,
+        blank=True,
+        null=True
+    )
+
+    orden = models.PositiveIntegerField(
+        default=1
+    )
+
+    activo = models.BooleanField(
+        default=True
+    )
+
+    class Meta:
+        ordering = ["orden", "id"]
+
+    def __str__(self):
+        return f"{self.procedimiento.nombre} - {self.nombre}"
+
+
+class PlantillaDetalleOrden(BaseAbstractWithUser):
+    plantilla_orden = models.ForeignKey(
+        "PlantillaOrdenProcedimiento",
+        on_delete=models.CASCADE,
+        related_name="detalles"
+    )
+
+    prestacion = models.ForeignKey(
+        "entidades.Prestacion",
+        on_delete=models.PROTECT,
+        related_name="plantillas_detalle_orden"
+    )
+
+    cantidad = models.PositiveIntegerField(
+        default=1
+    )
+
+    honorarios_gastos = models.CharField(
+        max_length=30,
+        choices=DetalleOrden.HONORARIOS_GASTOS
+    )
+
+    tipo_honorario = models.CharField(
+        max_length=40,
+        choices=DetalleOrden.TIPOS_HONORARIO,
+        blank=True,
+        null=True
+    )
+
+    orden = models.PositiveIntegerField(
+        default=1
+    )
+
+    activo = models.BooleanField(
+        default=True
+    )
+
+    class Meta:
+        ordering = ["orden", "id"]
+
+    def __str__(self):
+        return (
+            f"{self.plantilla_orden} - "
+            f"{self.prestacion.codigo} - "
+            f"{self.prestacion.nombre}"
+        )

@@ -103,27 +103,27 @@ def get_secret(secret_name, secrets=secret):
 
 motor_db = get_secret('DB_MOTOR')
 
-if motor_db == 'postgresql':
+if motor_db == "postgresql":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': get_secret('DB_NAME'),
-            'USER': get_secret('DB_USER'),
-            'PASSWORD': get_secret('DB_PASSWORD'),
-            'HOST': 'localhost',
-            'PORT': '5432',
-        },    
-        'externa_readonly': {
-            'ENGINE': 'mssql',
-            'NAME': 'HCE',
-            'USER': 'UsrSantaClaraRead',
-            'PASSWORD': '5@nt@k1@r@',
-            'HOST': '192.168.180.254',  # o el hostname
-            'PORT': '1433',
-            'OPTIONS': {
-                'driver': 'ODBC Driver 17 for SQL Server',
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": get_secret("DB_NAME"),
+            "USER": get_secret("DB_USER"),
+            "PASSWORD": get_secret("DB_PASSWORD"),
+            "HOST": "localhost",
+            "PORT": "5432",
+        },
+        "innova": {
+            "ENGINE": "mssql",
+            "NAME": "HCE",
+            "USER": "UsrSantaClaraRead",
+            "PASSWORD": "5@nt@k1@r@",
+            "HOST": "192.168.180.254",
+            "PORT": "1433",
+            "OPTIONS": {
+                "driver": "ODBC Driver 17 for SQL Server",
             },
-        }
+        },
     }
 elif motor_db == 'mysql':
     DATABASES = {

@@ -1,0 +1,1510 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .page-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    .form-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 10px 28px rgba(15, 76, 129, 0.14);
+        border: 1px solid #d6dce5;
+    }
+
+    .form-hero h2 {
+        margin: 0;
+        font-weight: 900;
+        font-size: 1.65rem;
+        color: #111827;
+    }
+
+    .form-hero h2 i {
+        color: #d97706;
+        margin-right: 0.45rem;
+    }
+
+    .form-hero p {
+        margin: 0.35rem 0 0;
+        color: #526179;
+        font-size: 0.92rem;
+    }
+
+    .summary-card,
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #d6dce5;
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .summary-card {
+        padding: 1.1rem;
+        background: linear-gradient(135deg, #fffaf0 0%, #ffffff 100%);
+    }
+
+    .patient-main {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .patient-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: #fff1d6;
+        color: #d97706;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.45rem;
+        border: 1px solid #fed7aa;
+        flex-shrink: 0;
+    }
+
+    .patient-name {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #111827;
+    }
+
+    .patient-subtitle {
+        color: #526179;
+        font-size: 0.88rem;
+    }
+
+    .section-title {
+        background: #fbfdff;
+        border-bottom: 1px solid #dbe3ef;
+        padding: 0.85rem 1.15rem;
+        font-weight: 900;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .section-title-left {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .section-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #d97706;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .section-body {
+        padding: 1.15rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        border: 1px solid #cfd8e3;
+        font-size: 0.9rem;
+        padding: 0.62rem 0.8rem;
+        background: #ffffff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #d97706;
+        box-shadow: 0 0 0 0.18rem rgba(217, 119, 6, 0.16);
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 800;
+    }
+
+    .btn-sm-custom {
+        padding: 0.52rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .actions-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(8px);
+        border: 1px solid #d6dce5;
+        border-radius: 16px;
+        padding: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+        margin-top: 1rem;
+        z-index: 10;
+    }
+
+    .required-mark {
+        color: #dc2626;
+    }
+
+    .mini-help {
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    .episode-badge {
+        display: inline-block;
+        margin-left: .6rem;
+        padding: .18rem .65rem;
+        background: #587bb0;
+        color: #fff;
+        border-radius: 999px;
+        font-size: .74rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .order-badge {
+        display: inline-block;
+        padding: .24rem .7rem;
+        background: #fff7ed;
+        color: #9a3412;
+        border: 1px solid #fed7aa;
+        border-radius: 999px;
+        font-size: .76rem;
+        font-weight: 900;
+    }
+
+    .detalle-table {
+        min-width: 900px;
+    }
+
+    .detalle-table thead th {
+        font-size: 0.76rem;
+        color: #374151;
+        font-weight: 900;
+        white-space: nowrap;
+        background: #f8f9fa;
+        vertical-align: middle;
+    }
+
+    .detalle-table tbody td {
+        font-size: 0.82rem;
+        vertical-align: middle;
+        padding: 0.35rem;
+    }
+
+    .detalle-table .form-control,
+    .detalle-table .form-select {
+        min-height: 34px;
+        border-radius: 9px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.45rem;
+    }
+
+    .detalle-table .input-group .btn {
+        border-radius: 9px;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .modal-confirmacion {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-confirmacion .modal-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-confirmacion .modal-title {
+        font-weight: 900;
+        color: #1f2937;
+    }
+
+    .modal-xl {
+        max-width: 1080px;
+    }
+
+    .prestacion-table thead th {
+        font-size: 0.8rem;
+        color: #374151;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .prestacion-table tbody td {
+        font-size: 0.86rem;
+        vertical-align: middle;
+    }
+
+    .empty-row {
+        padding: 2rem !important;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    .row-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #fff7ed;
+        color: #c2410c;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.78rem;
+    }
+
+    .readonly-box {
+        border-radius: 12px;
+        border: 1px solid #d6dce5;
+        background: #f8fafc;
+        padding: 0.65rem 0.8rem;
+        color: #475569;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="page-wrap">
+
+    <div class="form-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <h2>
+                    <i class="fas fa-pen-to-square"></i>
+                    Editar Orden de Autorización
+                </h2>
+
+                <p>
+                    Se guardará una versión histórica del estado anterior cuando confirme cambios.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <span class="order-badge">
+                    Orden N.º {{ orden.id }}
+                </span>
+                {%if orden.preingreso.estado == 'pendiente'%}
+                <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}"
+                   class="btn btn-outline-secondary btn-sm-custom">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Preingreso
+                </a>
+                {%else%}
+                 <a href="{% url 'gestion_app:detalle_ingreso' preingreso.id %}"
+                   class="btn btn-outline-secondary btn-sm-custom">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al ingreso
+                </a>   
+                {%endif%}
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="patient-main">
+            <div class="patient-avatar">
+                <i class="fas fa-user-injured"></i>
+            </div>
+
+            <div>
+                <div class="patient-name">
+                    {{ preingreso.paciente.apellido }},
+                    {{ preingreso.paciente.nombre }}
+                </div>
+
+                <div class="patient-subtitle">
+                    DNI {{ preingreso.paciente.dni|default:"-" }}
+
+                    {% if preingreso.obra_social %}
+                        · {{ preingreso.obra_social.nombre }}
+                    {% endif %}
+
+                    {% if preingreso.plan %}
+                        · Plan {{ preingreso.plan.nombre }}
+                    {% endif %}
+
+                    {% if preingreso.numero %}
+                        <span class="episode-badge">
+                            Número ingreso: {{ preingreso.numero }}
+                        </span>
+                    {% endif %}
+
+                    {% if preingreso.episodio %}
+                        <span class="episode-badge">
+                            Episodio {{ preingreso.episodio }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if puede_editar_codigos %}
+        <div class="alert alert-success border-0 shadow-sm">
+            <i class="fas fa-circle-check"></i>
+            La orden tiene {{ dias_transcurridos }} día{{ dias_transcurridos|pluralize }}.
+            Puede modificar el médico, las observaciones y las prestaciones.
+        </div>
+    {% else %}
+        <div class="alert alert-warning border-0 shadow-sm">
+            <i class="fas fa-lock"></i>
+            {{ motivo_bloqueo_codigos }}
+            Puede modificar únicamente el médico y las observaciones.
+        </div>
+    {% endif %}
+
+    <form method="post" id="formOrden">
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="detalles_json"
+               id="detalles_json">
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">1</span>
+                    Datos de la orden
+                </div>
+            </div>
+
+            <div class="section-body">
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha de confección</label>
+
+                        <div class="readonly-box">
+                            <i class="fas fa-calendar-day me-2"></i>
+                            {{ orden.fecha|date:"d/m/Y" }}
+                        </div>
+
+                        <div class="mini-help mt-1">
+                            La fecha no puede modificarse porque determina los plazos de edición.
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">
+                            Médico <span class="required-mark">*</span>
+                        </label>
+
+                        <select name="medico"
+                                class="form-select"
+                                required>
+                            <option value="">Seleccione médico...</option>
+
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}"
+                                    {% if orden.medico_id == medico.id %}selected{% endif %}>
+                                    {{ medico.apellido }}, {{ medico.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div class="mini-help mt-1">
+                            Cambia el médico de la orden y de sus detalles. No modifica la tenencia.
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">
+                            Observaciones de la orden
+                        </label>
+
+                        <textarea name="observaciones"
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="Observaciones generales de la orden...">{{ orden.observaciones|default_if_none:"" }}</textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <span class="section-number">2</span>
+                    Detalles de la orden
+                </div>
+
+                {% if puede_editar_codigos %}
+                    <button type="button"
+                            class="btn btn-warning btn-sm-custom"
+                            id="btnAgregarFilaDetalle">
+                        <i class="fas fa-plus-circle"></i>
+                        Agregar fila
+                    </button>
+                {% endif %}
+            </div>
+
+            <div class="section-body">
+                <div id="detalleError"
+                     class="alert alert-danger d-none mb-3"></div>
+
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-sm align-middle mb-0 detalle-table"
+                           id="tablaDetallesOrden">
+
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width:42px;">#</th>
+                                <th style="width:170px;">Código</th>
+                                <th style="width:260px;">Prestación</th>
+                                <th class="text-center" style="width:75px;">Cant.</th>
+                                <th style="width:135px;">Concepto</th>
+                                <th style="width:145px;">Nivel</th>
+                                <th style="width:125px;">Desde</th>
+                                <th style="width:125px;">Hasta</th>
+
+                                {% if puede_editar_codigos %}
+                                    <th class="text-end" style="width:55px;"></th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+
+                        <tbody id="detallesBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="mini-help mt-2">
+                    {% if puede_editar_codigos %}
+                        Los detalles actuales pueden reemplazarse, agregarse o eliminarse.
+                        Al guardar, se conservará una copia histórica de la versión anterior.
+                    {% else %}
+                        Los detalles se muestran únicamente para consulta.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            {%if orden.preingreso.estado == 'pendiente'%}
+            <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </a>
+            {%else%}
+            <a href="{% url 'gestion_app:detalle_ingreso' preingreso.id %}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </a>
+            {%endif%}
+            <button type="button"
+                    class="btn btn-warning px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalConfirmarGuardado">
+                <i class="fas fa-save"></i>
+                Guardar cambios
+            </button>
+        </div>
+
+    </form>
+</div>
+
+
+{% if puede_editar_codigos %}
+<div class="modal fade"
+     id="modalBuscarPrestacion"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search text-primary"></i>
+                    Buscar prestación
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-10">
+                        <input type="text"
+                               id="buscarPrestacionInput"
+                               class="form-control"
+                               placeholder="Buscar por código o nombre...">
+
+                        <div class="mini-help mt-1">
+                            Ingrese al menos 2 caracteres. Se mostrarán 15 resultados por vez.
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-grid align-self-start">
+                        <button type="button"
+                                class="btn btn-primary"
+                                id="btnBuscarPrestacion">
+                            <i class="fas fa-search"></i>
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="prestacionesResultadoInfo"
+                     class="text-muted small mb-2">
+                    Realice una búsqueda para comenzar.
+                </div>
+
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-sm align-middle mb-0 prestacion-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:160px;">Código</th>
+                                <th>Prestación</th>
+                                <th class="text-end" style="width:130px;">Acción</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="prestacionesResultadoBody">
+                            <tr>
+                                <td colspan="3" class="empty-row">
+                                    <i class="fas fa-magnifying-glass"></i>
+                                    Busque una prestación por código o nombre.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-grid mt-3">
+                    <button type="button"
+                            id="btnCargarMasPrestaciones"
+                            class="btn btn-outline-primary d-none">
+                        <i class="fas fa-chevron-down"></i>
+                        Cargar 15 más
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+<div class="modal fade"
+     id="modalConfirmarGuardado"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-triangle-exclamation text-warning"></i>
+                    Confirmar modificación
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Se guardará una versión histórica del estado actual y luego se aplicarán los cambios.
+                ¿Desea continuar?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-warning"
+                        id="btnConfirmarGuardado">
+                    <i class="fas fa-save"></i>
+                    Sí, guardar cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{{ detalles_iniciales|json_script:"detalles-iniciales-data" }}
+
+<script>
+    const puedeEditarCodigos = {{ puede_editar_codigos|yesno:"true,false" }};
+    const detallesIniciales = JSON.parse(
+        document.getElementById("detalles-iniciales-data").textContent
+    );
+
+    let prestacionPage = 1;
+    let prestacionQuery = "";
+    let prestacionHasNext = false;
+    let filaActualPrestacion = null;
+
+    const buscarPrestacionesUrl =
+        "{% url 'gestion_app:buscar_prestaciones_ajax' %}";
+
+    const buscarPrestacionCodigoUrl =
+        "{% url 'gestion_app:buscar_prestacion_por_codigo_ajax' %}";
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function actualizarNumeracionFilas() {
+        document
+            .querySelectorAll("#detallesBody tr.fila-detalle")
+            .forEach((tr, index) => {
+                const number = tr.querySelector(".row-number");
+
+                if (number) {
+                    number.textContent = index + 1;
+                }
+            });
+    }
+
+    function opcionesSelect(opciones, valorActual) {
+        return opciones
+            .map(opcion => `
+                <option value="${escapeHtml(opcion.value)}"
+                    ${String(opcion.value) === String(valorActual) ? "selected" : ""}>
+                    ${escapeHtml(opcion.label)}
+                </option>
+            `)
+            .join("");
+    }
+
+    const opcionesHonorarios = [
+        { value: "", label: "Seleccione..." },
+        {% for value, label in honorarios_gastos %}
+            {
+                value: "{{ value|escapejs }}",
+                label: "{{ label|escapejs }}"
+            },
+        {% endfor %}
+    ];
+
+    const opcionesTipoHonorario = [
+        { value: "", label: "Seleccione..." },
+        {% for value, label in tipos_honorario %}
+            {
+                value: "{{ value|escapejs }}",
+                label: "{{ label|escapejs }}"
+            },
+        {% endfor %}
+    ];
+
+    function crearFilaDetalle(detalle = {}) {
+        const readonly = !puedeEditarCodigos;
+        const tr = document.createElement("tr");
+
+        tr.className = "fila-detalle";
+
+        tr.innerHTML = `
+            <td class="text-center">
+                <span class="row-number"></span>
+                <input type="hidden"
+                       class="detalle_prestacion_id"
+                       value="${escapeHtml(detalle.prestacion_id || "")}">
+            </td>
+
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="text"
+                           class="form-control detalle_prestacion_codigo"
+                           placeholder="Código"
+                           autocomplete="off"
+                           value="${escapeHtml(detalle.prestacion_codigo || "")}"
+                           ${readonly ? "readonly" : ""}>
+
+                    ${readonly ? "" : `
+                        <button type="button"
+                                class="btn btn-outline-primary btnBuscarPrestacionFila"
+                                title="Buscar prestación"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalBuscarPrestacion">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    `}
+                </div>
+            </td>
+
+            <td>
+                <input type="text"
+                       class="form-control detalle_prestacion_nombre"
+                       placeholder="Prestación"
+                       autocomplete="off"
+                       value="${escapeHtml(detalle.prestacion_nombre || "")}"
+                       readonly>
+            </td>
+
+            <td>
+                <input type="number"
+                       class="form-control text-center detalle_cantidad"
+                       value="${escapeHtml(detalle.cantidad || 1)}"
+                       min="1"
+                       ${readonly ? "readonly" : ""}>
+            </td>
+
+            <td>
+                <select class="form-select detalle_honorarios_gastos"
+                        ${readonly ? "disabled" : ""}>
+                    ${opcionesSelect(
+                        opcionesHonorarios,
+                        detalle.honorarios_gastos || ""
+                    )}
+                </select>
+            </td>
+
+            <td>
+                <select class="form-select detalle_tipo_honorario"
+                        ${readonly ? "disabled" : ""}>
+                    ${opcionesSelect(
+                        opcionesTipoHonorario,
+                        detalle.tipo_honorario || ""
+                    )}
+                </select>
+            </td>
+
+            <td>
+                <input type="date"
+                       class="form-control detalle_fecha_desde"
+                       value="${escapeHtml(detalle.fecha_desde || "")}"
+                       ${readonly ? "readonly" : ""}>
+            </td>
+
+            <td>
+                <input type="date"
+                       class="form-control detalle_fecha_hasta"
+                       value="${escapeHtml(detalle.fecha_hasta || "")}"
+                       ${readonly ? "readonly" : ""}>
+            </td>
+
+            ${readonly ? "" : `
+                <td class="text-end">
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm eliminarFilaDetalle"
+                            title="Eliminar fila">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `}
+        `;
+
+        return tr;
+    }
+
+    function cargarDetallesIniciales() {
+        const tbody = document.getElementById("detallesBody");
+        tbody.innerHTML = "";
+
+        if (detallesIniciales.length === 0) {
+            tbody.appendChild(crearFilaDetalle());
+        } else {
+            detallesIniciales.forEach(detalle => {
+                tbody.appendChild(crearFilaDetalle(detalle));
+            });
+        }
+
+        actualizarNumeracionFilas();
+    }
+
+    function limpiarFilaDetalle(fila) {
+        fila.querySelector(".detalle_prestacion_id").value = "";
+        fila.querySelector(".detalle_prestacion_codigo").value = "";
+        fila.querySelector(".detalle_prestacion_nombre").value = "";
+        fila.querySelector(".detalle_cantidad").value = 1;
+        fila.querySelector(".detalle_honorarios_gastos").value = "";
+        fila.querySelector(".detalle_tipo_honorario").value = "";
+        fila.querySelector(".detalle_fecha_desde").value = "";
+        fila.querySelector(".detalle_fecha_hasta").value = "";
+    }
+
+    function agregarFilaDetalle() {
+        const tbody = document.getElementById("detallesBody");
+        const filas = tbody.querySelectorAll("tr.fila-detalle");
+        const primeraFila = filas.length ? filas[0] : null;
+
+        const fechaDesdePrimera = primeraFila
+            ? primeraFila.querySelector(".detalle_fecha_desde").value
+            : "";
+
+        const fechaHastaPrimera = primeraFila
+            ? primeraFila.querySelector(".detalle_fecha_hasta").value
+            : "";
+        const gastosPrimera = primeraFila
+            ? primeraFila.querySelector(".detalle_honorarios_gastos")?.value || ""
+            : "";
+        const nuevaFila = crearFilaDetalle({
+            cantidad: 1,
+            honorarios_gastos: gastosPrimera,
+            fecha_desde: (
+                fechaDesdePrimera && fechaHastaPrimera
+                    ? fechaDesdePrimera
+                    : ""
+            ),
+            fecha_hasta: (
+                fechaDesdePrimera && fechaHastaPrimera
+                    ? fechaHastaPrimera
+                    : ""
+            )
+        });
+
+        tbody.appendChild(nuevaFila);
+        actualizarNumeracionFilas();
+
+        nuevaFila
+            .querySelector(".detalle_prestacion_codigo")
+            .focus();
+    }
+
+    function eliminarFilaDetalle(fila) {
+        const tbody = document.getElementById("detallesBody");
+        const filas = tbody.querySelectorAll("tr.fila-detalle");
+
+        if (filas.length > 1) {
+            fila.remove();
+        } else {
+            limpiarFilaDetalle(fila);
+        }
+
+        actualizarNumeracionFilas();
+    }
+
+    function seleccionarPrestacion(prestacion) {
+        if (!filaActualPrestacion) {
+            return;
+        }
+
+        filaActualPrestacion
+            .querySelector(".detalle_prestacion_id")
+            .value = prestacion.id || "";
+
+        filaActualPrestacion
+            .querySelector(".detalle_prestacion_codigo")
+            .value = prestacion.codigo || "";
+
+        filaActualPrestacion
+            .querySelector(".detalle_prestacion_nombre")
+            .value = prestacion.nombre || "";
+
+        const cantidad = filaActualPrestacion
+            .querySelector(".detalle_cantidad");
+
+        if (!cantidad.value || parseInt(cantidad.value) <= 0) {
+            cantidad.value = 1;
+        }
+
+        const modalBuscar = bootstrap.Modal.getInstance(
+            document.getElementById("modalBuscarPrestacion")
+        );
+
+        if (modalBuscar) {
+            modalBuscar.hide();
+        }
+
+        cantidad.focus();
+    }
+
+    function marcarCodigoNoEncontrado(input) {
+        input.classList.add("is-invalid");
+        input.title =
+            "No se encontró una prestación exacta para este código.";
+    }
+
+    function limpiarMarcaCodigo(input) {
+        input.classList.remove("is-invalid");
+        input.title = "";
+    }
+
+    function completarPrestacionEnFila(fila, prestacion) {
+        fila.querySelector(".detalle_prestacion_id").value =
+            prestacion.id || "";
+
+        fila.querySelector(".detalle_prestacion_codigo").value =
+            prestacion.codigo || "";
+
+        fila.querySelector(".detalle_prestacion_nombre").value =
+            prestacion.nombre || "";
+
+        limpiarMarcaCodigo(
+            fila.querySelector(".detalle_prestacion_codigo")
+        );
+    }
+
+    function buscarPrestacionPorCodigoFila(fila) {
+        if (!puedeEditarCodigos) {
+            return;
+        }
+
+        const inputCodigo = fila.querySelector(
+            ".detalle_prestacion_codigo"
+        );
+
+        const codigo = inputCodigo.value.trim();
+
+        if (!codigo) {
+            fila.querySelector(".detalle_prestacion_id").value = "";
+            fila.querySelector(".detalle_prestacion_nombre").value = "";
+            limpiarMarcaCodigo(inputCodigo);
+            return;
+        }
+
+        fetch(
+            `${buscarPrestacionCodigoUrl}?codigo=${encodeURIComponent(codigo)}`
+        )
+        .then(response => response.json())
+        .then(data => {
+            if (data.found) {
+                completarPrestacionEnFila(fila, {
+                    id: data.id,
+                    codigo: data.codigo,
+                    nombre: data.nombre
+                });
+            } else {
+                fila.querySelector(".detalle_prestacion_id").value = "";
+                fila.querySelector(".detalle_prestacion_nombre").value = "";
+                marcarCodigoNoEncontrado(inputCodigo);
+            }
+        })
+        .catch(() => {
+            fila.querySelector(".detalle_prestacion_id").value = "";
+            fila.querySelector(".detalle_prestacion_nombre").value = "";
+            marcarCodigoNoEncontrado(inputCodigo);
+        });
+    }
+
+    function renderPrestaciones(prestaciones, append = false) {
+        const tbody = document.getElementById(
+            "prestacionesResultadoBody"
+        );
+
+        if (!append) {
+            tbody.innerHTML = "";
+        }
+
+        if (prestaciones.length === 0 && !append) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="empty-row">
+                        <i class="fas fa-circle-info"></i>
+                        No se encontraron prestaciones.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        prestaciones.forEach(prestacion => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>
+                    <strong>${escapeHtml(prestacion.codigo || "-")}</strong>
+                </td>
+
+                <td>
+                    <strong>${escapeHtml(prestacion.nombre || "-")}</strong>
+                    <div class="mini-help">
+                        ${escapeHtml(prestacion.descripcion || "")}
+                    </div>
+                </td>
+
+                <td class="text-end">
+                    <button type="button"
+                            class="btn btn-sm btn-primary">
+                        <i class="fas fa-check"></i>
+                        Seleccionar
+                    </button>
+                </td>
+            `;
+
+            tr.querySelector("button")
+                .addEventListener("click", function () {
+                    seleccionarPrestacion(prestacion);
+                });
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function buscarPrestaciones(reset = true) {
+        const input = document.getElementById(
+            "buscarPrestacionInput"
+        );
+
+        const info = document.getElementById(
+            "prestacionesResultadoInfo"
+        );
+
+        const btnMas = document.getElementById(
+            "btnCargarMasPrestaciones"
+        );
+
+        const tbody = document.getElementById(
+            "prestacionesResultadoBody"
+        );
+
+        if (reset) {
+            prestacionPage = 1;
+            prestacionQuery = input.value.trim();
+        }
+
+        if (prestacionQuery.length < 2) {
+            info.innerText =
+                "Ingrese al menos 2 caracteres para buscar.";
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="empty-row">
+                        <i class="fas fa-magnifying-glass"></i>
+                        Busque una prestación por código o nombre.
+                    </td>
+                </tr>
+            `;
+
+            btnMas.classList.add("d-none");
+            return;
+        }
+
+        info.innerText = "Buscando prestaciones...";
+
+        if (reset) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="empty-row">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Buscando...
+                    </td>
+                </tr>
+            `;
+        }
+
+        fetch(
+            `${buscarPrestacionesUrl}?q=${encodeURIComponent(prestacionQuery)}&page=${prestacionPage}`
+        )
+        .then(response => response.json())
+        .then(data => {
+            renderPrestaciones(data.results || [], !reset);
+
+            prestacionHasNext = data.has_next;
+
+            btnMas.classList.toggle(
+                "d-none",
+                !prestacionHasNext
+            );
+
+            info.innerText = (
+                (data.results || []).length === 0 && reset
+                    ? "No se encontraron prestaciones."
+                    : "Resultados encontrados."
+            );
+        })
+        .catch(() => {
+            info.innerText =
+                "Ocurrió un error al buscar prestaciones.";
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3"
+                        class="empty-row text-danger">
+                        No se pudo realizar la búsqueda.
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function filaTieneDatos(fila) {
+        const prestacionId = fila
+            .querySelector(".detalle_prestacion_id")
+            .value
+            .trim();
+
+        const codigo = fila
+            .querySelector(".detalle_prestacion_codigo")
+            .value
+            .trim();
+
+        const nombre = fila
+            .querySelector(".detalle_prestacion_nombre")
+            .value
+            .trim();
+
+        return Boolean(prestacionId || codigo || nombre);
+    }
+
+    function armarDetallesDesdeTabla() {
+        const detalles = [];
+        const errores = [];
+
+        document
+            .querySelectorAll("#detallesBody tr.fila-detalle")
+            .forEach((fila, index) => {
+                if (!filaTieneDatos(fila)) {
+                    return;
+                }
+
+                const prestacionId = fila
+                    .querySelector(".detalle_prestacion_id")
+                    .value
+                    .trim();
+
+                const cantidad = fila
+                    .querySelector(".detalle_cantidad")
+                    .value || 1;
+
+                const conceptoSelect = fila.querySelector(
+                    ".detalle_honorarios_gastos"
+                );
+
+                const nivelSelect = fila.querySelector(
+                    ".detalle_tipo_honorario"
+                );
+
+                if (!prestacionId) {
+                    errores.push(
+                        `Fila ${index + 1}: debe seleccionar una prestación válida.`
+                    );
+                }
+
+                if (!cantidad || parseInt(cantidad) <= 0) {
+                    errores.push(
+                        `Fila ${index + 1}: la cantidad debe ser mayor a cero.`
+                    );
+                }
+
+                detalles.push({
+                    prestacion_id: prestacionId,
+                    cantidad: cantidad,
+                    honorarios_gastos: conceptoSelect.value,
+                    tipo_honorario: nivelSelect.value,
+                    fecha_desde: fila
+                        .querySelector(".detalle_fecha_desde")
+                        .value,
+                    fecha_hasta: fila
+                        .querySelector(".detalle_fecha_hasta")
+                        .value,
+                    observaciones: ""
+                });
+            });
+
+        return { detalles, errores };
+    }
+
+    function mostrarErrorDetalle(mensaje) {
+        const errorBox = document.getElementById("detalleError");
+
+        errorBox.innerHTML = mensaje;
+        errorBox.classList.remove("d-none");
+
+        errorBox.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+
+    function limpiarErrorDetalle() {
+        const errorBox = document.getElementById("detalleError");
+
+        errorBox.innerHTML = "";
+        errorBox.classList.add("d-none");
+    }
+
+    function guardarOrden() {
+        const form = document.getElementById("formOrden");
+        const botonGuardar = document.getElementById(
+            "btnConfirmarGuardado"
+        );
+        const modalElemento = document.getElementById(
+            "modalConfirmarGuardado"
+        );
+
+        limpiarErrorDetalle();
+
+        if (!form) {
+            console.error("No se encontró el formulario #formOrden");
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            const modal = bootstrap.Modal.getInstance(modalElemento);
+
+            if (modal) {
+                modal.hide();
+            }
+
+            form.reportValidity();
+            return;
+        }
+
+        if (puedeEditarCodigos) {
+            const resultado = armarDetallesDesdeTabla();
+
+            if (resultado.detalles.length === 0) {
+                const modal = bootstrap.Modal.getInstance(modalElemento);
+
+                if (modal) {
+                    modal.hide();
+                }
+
+                mostrarErrorDetalle(
+                    "Debe conservar al menos un detalle en la orden."
+                );
+                return;
+            }
+
+            if (resultado.errores.length > 0) {
+                const modal = bootstrap.Modal.getInstance(modalElemento);
+
+                if (modal) {
+                    modal.hide();
+                }
+
+                mostrarErrorDetalle(
+                    resultado.errores
+                        .map(error => `<div>${escapeHtml(error)}</div>`)
+                        .join("")
+                );
+                return;
+            }
+
+            document.getElementById("detalles_json").value =
+                JSON.stringify(resultado.detalles);
+        } else {
+            document.getElementById("detalles_json").value = "[]";
+        }
+
+        if (botonGuardar) {
+            botonGuardar.disabled = true;
+            botonGuardar.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-1"
+                      aria-hidden="true"></span>
+                Guardando...
+            `;
+        }
+
+        const modal = bootstrap.Modal.getInstance(modalElemento);
+
+        if (modal) {
+            modal.hide();
+        }
+
+        form.requestSubmit();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        cargarDetallesIniciales();
+
+        const btnConfirmarGuardado = document.getElementById(
+            "btnConfirmarGuardado"
+        );
+
+        if (btnConfirmarGuardado) {
+            btnConfirmarGuardado.addEventListener(
+                "click",
+                guardarOrden
+            );
+        }
+
+        const tablaDetalles = document.getElementById(
+            "tablaDetallesOrden"
+        );
+
+        if (!puedeEditarCodigos) {
+            return;
+        }
+
+        const btnBuscarPrestacion = document.getElementById(
+            "btnBuscarPrestacion"
+        );
+
+        const buscarPrestacionInput = document.getElementById(
+            "buscarPrestacionInput"
+        );
+
+        const btnCargarMasPrestaciones = document.getElementById(
+            "btnCargarMasPrestaciones"
+        );
+
+        const btnAgregarFilaDetalle = document.getElementById(
+            "btnAgregarFilaDetalle"
+        );
+
+        btnAgregarFilaDetalle.addEventListener(
+            "click",
+            agregarFilaDetalle
+        );
+
+        tablaDetalles.addEventListener("click", function (event) {
+            const btnBuscar = event.target.closest(
+                ".btnBuscarPrestacionFila"
+            );
+
+            if (btnBuscar) {
+                filaActualPrestacion = btnBuscar.closest(
+                    "tr.fila-detalle"
+                );
+
+                const codigo = filaActualPrestacion
+                    .querySelector(".detalle_prestacion_codigo")
+                    .value
+                    .trim();
+
+                buscarPrestacionInput.value = codigo;
+                return;
+            }
+
+            const btnEliminar = event.target.closest(
+                ".eliminarFilaDetalle"
+            );
+
+            if (btnEliminar) {
+                eliminarFilaDetalle(
+                    btnEliminar.closest("tr.fila-detalle")
+                );
+            }
+        });
+
+        tablaDetalles.addEventListener(
+            "keydown",
+            function (event) {
+                if (
+                    event.key === "Enter"
+                    && event.target.classList.contains(
+                        "detalle_prestacion_codigo"
+                    )
+                ) {
+                    event.preventDefault();
+
+                    filaActualPrestacion = event.target.closest(
+                        "tr.fila-detalle"
+                    );
+
+                    buscarPrestacionInput.value =
+                        event.target.value.trim();
+
+                    new bootstrap.Modal(
+                        document.getElementById(
+                            "modalBuscarPrestacion"
+                        )
+                    ).show();
+
+                    if (
+                        buscarPrestacionInput.value.length >= 2
+                    ) {
+                        buscarPrestaciones(true);
+                    }
+                }
+            }
+        );
+
+        tablaDetalles.addEventListener(
+            "blur",
+            function (event) {
+                if (
+                    event.target.classList.contains(
+                        "detalle_prestacion_codigo"
+                    )
+                ) {
+                    buscarPrestacionPorCodigoFila(
+                        event.target.closest("tr.fila-detalle")
+                    );
+                }
+            },
+            true
+        );
+
+        btnBuscarPrestacion.addEventListener(
+            "click",
+            function () {
+                buscarPrestaciones(true);
+            }
+        );
+
+        buscarPrestacionInput.addEventListener(
+            "keydown",
+            function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    buscarPrestaciones(true);
+                }
+            }
+        );
+
+        btnCargarMasPrestaciones.addEventListener(
+            "click",
+            function () {
+                if (prestacionHasNext) {
+                    prestacionPage += 1;
+                    buscarPrestaciones(false);
+                }
+            }
+        );
+
+        document
+            .getElementById("modalBuscarPrestacion")
+            .addEventListener(
+                "shown.bs.modal",
+                function () {
+                    buscarPrestacionInput.focus();
+
+                    if (
+                        buscarPrestacionInput
+                            .value
+                            .trim()
+                            .length >= 2
+                    ) {
+                        buscarPrestaciones(true);
+                    }
+                }
+            );
+    });
+</script>
+
+{% endblock %}
