@@ -646,3 +646,100 @@ def guardar_ingreso_erp(request):
             "servicios": servicios,
         },
     )
+
+
+
+def consultar_paciente_innova(documento):
+    documento = limpiar_texto(documento)
+
+    if not documento:
+        return None
+
+    sql = """
+        SELECT TOP (1)
+            p.Documento_Numero AS dni,
+            p.Nombres AS nombre,
+            p.Apellido AS apellido,
+            p.Sexo AS genero,
+            CONVERT(date, p.FechaNacimiento) AS fecha_nacimiento,
+            p.TelefonoCelular AS telefono
+        FROM Personas AS p
+        WHERE p.Documento_Numero = %s
+    """
+
+    with connections["innova"].cursor() as cursor:
+        cursor.execute(sql, [documento])
+        return dictfetchone(cursor)
+
+
+@login_required
+@require_GET
+def buscar_paciente_innova_preingreso(request):
+    documento = limpiar_texto(
+        request.GET.get("documento")
+    )
+
+    if not documento:
+        return JsonResponse({
+            "ok": False,
+            "error": "Debe ingresar el documento del paciente."
+        }, status=400)
+
+    try:
+        datos = consultar_paciente_innova(documento)
+
+    except Exception:
+        return JsonResponse({
+            "ok": False,
+            "error": "No se pudo consultar INNOVA."
+        }, status=500)
+
+    if not datos:
+        return JsonResponse({
+            "ok": False,
+            "error": "No se encontró el paciente en INNOVA."
+        }, status=404)
+
+    dni = limpiar_texto(datos.get("dni"))
+
+    paciente_local = (
+        Paciente.objects
+        .filter(dni=dni)
+        .first()
+    )
+
+    fecha_nacimiento = datos.get(
+        "fecha_nacimiento"
+    )
+
+    return JsonResponse({
+        "ok": True,
+        "paciente": {
+            "id": (
+                paciente_local.id
+                if paciente_local
+                else None
+            ),
+            "existe_localmente": bool(
+                paciente_local
+            ),
+            "dni": dni,
+            "nombre": limpiar_texto(
+                datos.get("nombre")
+            ),
+            "apellido": limpiar_texto(
+                datos.get("apellido")
+            ),
+            "fecha_nacimiento": (
+                fecha_nacimiento.isoformat()
+                if fecha_nacimiento
+                else ""
+            ),
+            "genero": normalizar_genero_innova(
+                datos.get("genero")
+            ),
+            "telefono": limpiar_texto(
+                datos.get("telefono")
+            ),
+        }
+    })

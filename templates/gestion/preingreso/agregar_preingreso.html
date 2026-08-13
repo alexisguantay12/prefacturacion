@@ -231,8 +231,11 @@
     <div id="preingresoFrontendError" class="alert alert-danger d-none" role="alert"></div>
 
     <form method="post" id="formAgregarPreingreso">
-        {% csrf_token %}
-
+        {% csrf_token %} 
+        <input type="hidden"
+       name="innova_documento"
+       id="innova_documento"
+       value="">
         <div class="form-card">
             <div class="section-title">
                 <div class="section-title-left">
@@ -527,14 +530,26 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-search text-primary"></i>
-                    Buscar o crear paciente
+                    Buscar, crear o importar paciente
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
             </div>
 
             <div class="modal-body">
 
-                <ul class="nav nav-tabs mb-3" id="pacienteTabs" role="tablist">
+                <!-- ===================================================== -->
+                <!-- PESTAÑAS -->
+                <!-- ===================================================== -->
+
+                <ul class="nav nav-tabs mb-3"
+                    id="pacienteTabs"
+                    role="tablist">
+
+                    <!-- BUSCAR LOCAL -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active"
                                 id="buscar-paciente-tab"
@@ -542,10 +557,14 @@
                                 role="tab"
                                 data-bs-toggle="tab"
                                 data-bs-target="#tabBuscarPaciente">
-                            <i class="fas fa-search"></i> Buscar paciente
+
+                            <i class="fas fa-search"></i>
+                            Buscar paciente
+
                         </button>
                     </li>
 
+                    <!-- CREAR MANUAL -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link"
                                 id="crear-paciente-tab"
@@ -553,62 +572,117 @@
                                 role="tab"
                                 data-bs-toggle="tab"
                                 data-bs-target="#tabCrearPaciente">
-                            <i class="fas fa-user-plus"></i> Crear paciente
+
+                            <i class="fas fa-user-plus"></i>
+                            Crear paciente
+
                         </button>
                     </li>
+
+                    <!-- IMPORTAR INNOVA -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link"
+                                id="innova-paciente-tab"
+                                type="button"
+                                role="tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tabInnovaPaciente">
+
+                            <i class="fas fa-cloud-download-alt"></i>
+                            Importar desde INNOVA
+
+                        </button>
+                    </li>
+
                 </ul>
+
+                <!-- ===================================================== -->
+                <!-- CONTENIDO PESTAÑAS -->
+                <!-- ===================================================== -->
 
                 <div class="tab-content">
 
-                    <div class="tab-pane fade show active" id="tabBuscarPaciente" role="tabpanel">
+                    <!-- ================================================= -->
+                    <!-- 1. BUSCAR PACIENTE LOCAL -->
+                    <!-- ================================================= -->
 
-                    <div class="row g-2 mb-3">
+                    <div class="tab-pane fade show active"
+                         id="tabBuscarPaciente"
+                         role="tabpanel">
 
-                        <div class="col-md-3">
-                            <label class="form-label mb-1">Apellido</label>
-                            <input type="text"
-                                id="buscarPacienteApellido"
-                                class="form-control"
-                                placeholder="Ingrese apellido">
-                        </div>
+                        <div class="row g-2 mb-3">
 
-                        <div class="col-md-3">
-                            <label class="form-label mb-1">Nombre</label>
-                            <input type="text"
-                                id="buscarPacienteNombre"
-                                class="form-control"
-                                placeholder="Ingrese nombre">
-                        </div>
+                            <div class="col-md-3">
+                                <label class="form-label mb-1">
+                                    Apellido
+                                </label>
 
-                        <div class="col-md-3">
-                            <label class="form-label mb-1">DNI</label>
-                            <input type="text"
-                                id="buscarPacienteDni"
-                                class="form-control"
-                                placeholder="Ingrese DNI">
-                        </div>
-
-                        <div class="col-md-2 d-grid align-self-end">
-                            <button type="button"
-                                    class="btn btn-primary"
-                                    id="btnBuscarPaciente">
-                                <i class="fas fa-search"></i> Buscar
-                            </button>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="mini-help">
-                                Puede completar uno o varios campos para realizar la búsqueda.
+                                <input type="text"
+                                       id="buscarPacienteApellido"
+                                       class="form-control"
+                                       placeholder="Ingrese apellido">
                             </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label mb-1">
+                                    Nombre
+                                </label>
+
+                                <input type="text"
+                                       id="buscarPacienteNombre"
+                                       class="form-control"
+                                       placeholder="Ingrese nombre">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label mb-1">
+                                    DNI
+                                </label>
+
+                                <input type="text"
+                                       id="buscarPacienteDni"
+                                       class="form-control"
+                                       placeholder="Ingrese DNI">
+                            </div>
+
+                            <div class="col-md-2 d-grid align-self-end">
+
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        id="btnBuscarPaciente">
+
+                                    <i class="fas fa-search"></i>
+                                    Buscar
+
+                                </button>
+
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mini-help">
+
+                                    Puede completar uno o varios campos
+                                    para realizar la búsqueda.
+
+                                </div>
+                            </div>
+
                         </div>
 
-                    </div>
-                        <div id="pacientesResultadoInfo" class="text-muted small mb-2">
-                            No se cargan pacientes automáticamente. Realice una búsqueda para comenzar.
+
+                        <div id="pacientesResultadoInfo"
+                             class="text-muted small mb-2">
+
+                            No se cargan pacientes automáticamente.
+                            Realice una búsqueda para comenzar.
+
                         </div>
+
 
                         <div class="table-responsive border rounded-3">
+
                             <table class="table table-sm align-middle mb-0 paciente-table">
+
                                 <thead class="table-light">
                                     <tr>
                                         <th>Paciente</th>
@@ -618,151 +692,534 @@
                                         <th class="text-end">Acción</th>
                                     </tr>
                                 </thead>
+
                                 <tbody id="pacientesResultadoBody">
+
                                     <tr>
-                                        <td colspan="5" class="empty-row">
+                                        <td colspan="5"
+                                            class="empty-row">
+
                                             <i class="fas fa-magnifying-glass"></i>
-                                            Busque un paciente por DNI, apellido o nombre.
+                                            Busque un paciente por DNI,
+                                            apellido o nombre.
+
                                         </td>
                                     </tr>
+
                                 </tbody>
+
                             </table>
+
                         </div>
 
+
                         <div class="d-grid mt-3">
+
                             <button type="button"
                                     id="btnCargarMasPacientes"
                                     class="btn btn-outline-primary d-none">
-                                <i class="fas fa-chevron-down"></i> Cargar 15 más
+
+                                <i class="fas fa-chevron-down"></i>
+                                Cargar 15 más
+
                             </button>
+
                         </div>
 
                     </div>
 
-                    <div class="tab-pane fade" id="tabCrearPaciente" role="tabpanel">
+
+                    <!-- ================================================= -->
+                    <!-- 2. CREAR PACIENTE -->
+                    <!-- ================================================= -->
+
+                    <div class="tab-pane fade"
+                         id="tabCrearPaciente"
+                         role="tabpanel">
 
                         <form id="formCrearPacienteModal">
 
                             <div class="form-card mb-3">
+
                                 <div class="section-title">
+
                                     <div class="section-title-left">
                                         <i class="fas fa-id-card text-primary"></i>
                                         Datos principales
                                     </div>
+
                                 </div>
 
                                 <div class="section-body">
+
                                     <div class="row g-3">
 
                                         <div class="col-md-4">
+
                                             <label class="form-label">
-                                                Apellido <span class="required-mark">*</span>
+                                                Apellido
+                                                <span class="required-mark">*</span>
                                             </label>
+
                                             <input type="text"
                                                    name="apellido"
                                                    class="form-control"
                                                    required>
+
                                         </div>
 
+
                                         <div class="col-md-4">
+
                                             <label class="form-label">
-                                                Nombre <span class="required-mark">*</span>
+                                                Nombre
+                                                <span class="required-mark">*</span>
                                             </label>
+
                                             <input type="text"
                                                    name="nombre"
                                                    class="form-control"
                                                    required>
+
                                         </div>
 
+
                                         <div class="col-md-4">
+
                                             <label class="form-label">
-                                                DNI <span class="required-mark">*</span>
+                                                DNI
+                                                <span class="required-mark">*</span>
                                             </label>
+
                                             <input type="text"
-                                                   name="dni"
-                                                   class="form-control"
-                                                   required>
+                                                name="dni"
+                                                id="id_dni"
+                                                class="form-control"
+                                                pattern="[0-9]+"
+                                                maxlength="13"
+                                                placeholder="Ingrese DNI sin puntos"
+                                                required>
+
                                         </div>
 
+
                                         <div class="col-md-4">
-                                            <label class="form-label">Fecha de nacimiento</label>
+
+                                            <label class="form-label">
+                                                Fecha de nacimiento
+                                            </label>
+
                                             <input type="date"
                                                    name="fecha_nacimiento"
                                                    class="form-control">
+
                                         </div>
 
+
                                         <div class="col-md-4">
-                                            <label class="form-label">Género</label>
-                                            <select name="genero" class="form-select">
-                                                <option value="">Seleccione...</option>
-                                                <option value="M">Masculino</option>
-                                                <option value="F">Femenino</option>
+
+                                            <label class="form-label">
+                                                Género
+                                            </label>
+
+                                            <select name="genero"
+                                                    class="form-select">
+
+                                                <option value="">
+                                                    Seleccione...
+                                                </option>
+
+                                                <option value="M">
+                                                    Masculino
+                                                </option>
+
+                                                <option value="F">
+                                                    Femenino
+                                                </option>
+
                                             </select>
+
                                         </div>
 
+
                                         <div class="col-md-4">
-                                            <label class="form-label">Teléfono</label>
+
+                                            <label class="form-label">
+                                                Teléfono
+                                            </label>
+
                                             <input type="text"
                                                    name="telefono"
                                                    class="form-control"
                                                    placeholder="Ej: 3875555555">
+
                                         </div>
 
                                     </div>
+
                                 </div>
+
                             </div>
 
+
                             <div class="form-card mb-3">
+
                                 <div class="section-title">
+
                                     <div class="section-title-left">
                                         <i class="fas fa-map-marker-alt text-primary"></i>
                                         Datos complementarios
                                     </div>
+
                                 </div>
 
                                 <div class="section-body">
+
                                     <div class="row g-3">
 
                                         <div class="col-md-6">
-                                            <label class="form-label">Dirección</label>
+
+                                            <label class="form-label">
+                                                Dirección
+                                            </label>
+
                                             <input type="text"
                                                    name="direccion"
                                                    class="form-control">
+
                                         </div>
 
+
                                         <div class="col-md-3">
-                                            <label class="form-label">Provincia</label>
+
+                                            <label class="form-label">
+                                                Provincia
+                                            </label>
+
                                             <input type="text"
                                                    name="provincia"
                                                    class="form-control">
+
                                         </div>
 
+
                                         <div class="col-md-3">
-                                            <label class="form-label">Nacionalidad</label>
+
+                                            <label class="form-label">
+                                                Nacionalidad
+                                            </label>
+
                                             <input type="text"
                                                    name="nacionalidad"
                                                    class="form-control">
+
                                         </div>
 
                                     </div>
+
                                 </div>
+
                             </div>
 
-                            <div id="crearPacienteError" class="alert alert-danger d-none"></div>
+
+                            <div id="crearPacienteError"
+                                 class="alert alert-danger d-none">
+                            </div>
+
 
                             <div class="d-flex justify-content-between gap-2">
+
                                 <button type="button"
                                         class="btn btn-outline-secondary"
                                         id="btnVolverBusquedaPaciente">
-                                    <i class="fas fa-arrow-left"></i> Volver a búsqueda
+
+                                    <i class="fas fa-arrow-left"></i>
+                                    Volver a búsqueda
+
                                 </button>
 
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Guardar paciente
+
+                                <button type="submit"
+                                        class="btn btn-primary">
+
+                                    <i class="fas fa-save"></i>
+                                    Guardar paciente
+
                                 </button>
+
                             </div>
 
                         </form>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- 3. IMPORTAR DESDE INNOVA -->
+                    <!-- ================================================= -->
+
+                    <div class="tab-pane fade"
+                         id="tabInnovaPaciente"
+                         role="tabpanel">
+
+                        <!-- BUSCADOR -->
+
+                        <div class="form-card mb-3">
+
+                            <div class="section-title">
+
+                                <div class="section-title-left">
+
+                                    <i class="fas fa-cloud-download-alt text-primary"></i>
+                                    Buscar paciente en INNOVA
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="section-body">
+
+                                <div class="row g-3 align-items-end">
+
+                                    <div class="col-md-8">
+
+                                        <label class="form-label">
+                                            Documento del paciente
+                                            <span class="required-mark">*</span>
+                                        </label>
+
+                                        <input type="text"
+                                               id="innovaBuscarDocumento"
+                                               class="form-control"
+                                               inputmode="numeric"
+                                               autocomplete="off"
+                                               placeholder="Ingrese DNI">
+
+                                        <div class="mini-help mt-1">
+
+                                            Ingrese el documento para consultar
+                                            los datos personales registrados
+                                            en INNOVA.
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="col-md-4 d-grid">
+
+                                        <button type="button"
+                                                id="btnBuscarPacienteInnova"
+                                                class="btn btn-primary">
+
+                                            <i class="fas fa-search"></i>
+                                            Buscar en INNOVA
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ERROR -->
+
+                        <div id="innovaPacienteError"
+                             class="alert alert-danger d-none">
+                        </div>
+
+
+                        <!-- LOADING -->
+
+                        <div id="innovaPacienteLoading"
+                             class="text-center py-5 d-none">
+
+                            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+
+                            <div class="mt-3 text-muted">
+                                Consultando datos del paciente en INNOVA...
+                            </div>
+
+                        </div>
+
+
+                        <!-- RESULTADO -->
+
+                        <div id="innovaPacienteResultado"
+                             class="d-none">
+
+                            <div class="alert alert-info">
+
+                                <div class="d-flex align-items-start gap-2">
+
+                                    <i class="fas fa-circle-info mt-1"></i>
+
+                                    <div>
+                                        <strong>Paciente encontrado en INNOVA.</strong>
+
+                                        <div class="small mt-1">
+                                            Se importarán únicamente los datos
+                                            personales del paciente.
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-card mb-3">
+
+                                <div class="section-title">
+
+                                    <div class="section-title-left">
+
+                                        <i class="fas fa-user text-primary"></i>
+                                        Datos del paciente
+
+                                    </div>
+
+                                    <div id="innovaPacienteEstado">
+                                    </div>
+
+                                </div>
+
+
+                                <div class="section-body">
+
+                                    <div class="row g-3">
+
+                                        <!-- APELLIDO -->
+
+                                        <div class="col-md-4">
+
+                                            <label class="form-label">
+                                                Apellido
+                                            </label>
+
+                                            <input type="text"
+                                                   id="innovaResultadoApellido"
+                                                   class="form-control bg-light"
+                                                   readonly>
+
+                                        </div>
+
+
+                                        <!-- NOMBRE -->
+
+                                        <div class="col-md-4">
+
+                                            <label class="form-label">
+                                                Nombre
+                                            </label>
+
+                                            <input type="text"
+                                                   id="innovaResultadoNombre"
+                                                   class="form-control bg-light"
+                                                   readonly>
+
+                                        </div>
+
+
+                                        <!-- DNI -->
+
+                                        <div class="col-md-4">
+
+                                            <label class="form-label">
+                                                DNI
+                                            </label>
+
+                                            <input type="text"
+                                                   id="innovaResultadoDni"
+                                                   class="form-control bg-light"
+                                                   readonly>
+
+                                        </div>
+
+
+                                        <!-- FECHA NACIMIENTO -->
+
+                                        <div class="col-md-4">
+
+                                            <label class="form-label">
+                                                Fecha de nacimiento
+                                            </label>
+
+                                            <input type="text"
+                                                   id="innovaResultadoNacimiento"
+                                                   class="form-control bg-light"
+                                                   readonly>
+
+                                        </div>
+
+
+                                        <!-- GENERO -->
+
+                                        <div class="col-md-4">
+
+                                            <label class="form-label">
+                                                Género
+                                            </label>
+
+                                            <input type="text"
+                                                   id="innovaResultadoGenero"
+                                                   class="form-control bg-light"
+                                                   readonly>
+
+                                        </div>
+
+
+                                        <!-- TELEFONO -->
+
+                                        <div class="col-md-4">
+
+                                            <label class="form-label">
+                                                Teléfono
+                                            </label>
+
+                                            <input type="text"
+                                                   id="innovaResultadoTelefono"
+                                                   class="form-control bg-light"
+                                                   readonly>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="btnNuevaBusquedaInnova">
+
+                                    <i class="fas fa-rotate-left"></i>
+                                    Nueva búsqueda
+
+                                </button>
+
+
+                                <button type="button"
+                                        class="btn btn-success px-4"
+                                        id="btnUsarPacienteInnova">
+
+                                    <i class="fas fa-check"></i>
+                                    Usar paciente
+
+                                </button>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -773,6 +1230,9 @@
         </div>
     </div>
 </div>
+
+
+
 
 <div class="modal fade" id="modalGuardarPreingreso" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -816,7 +1276,374 @@
     let ingresoEnviado = false;
 
     const buscarPacienteUrl = "{% url 'gestion_app:buscar_pacientes_ajax' %}";
-    const crearPacienteUrl = "{% url 'gestion_app:crear_paciente_ajax' %}";
+    const crearPacienteUrl = "{% url 'gestion_app:crear_paciente_ajax' %}"; 
+    const buscarPacienteInnovaUrl =
+        "{% url 'gestion_app:buscar_paciente_innova_preingreso' %}";
+    const btnBuscarPacienteInnova =
+        document.getElementById(
+            "btnBuscarPacienteInnova"
+        );
+
+    const innovaBuscarDocumento =
+        document.getElementById(
+            "innovaBuscarDocumento"
+        );
+
+    const btnUsarPacienteInnova =
+        document.getElementById(
+            "btnUsarPacienteInnova"
+        );
+
+    const btnNuevaBusquedaInnova =
+        document.getElementById(
+            "btnNuevaBusquedaInnova"
+        );
+
+
+    btnBuscarPacienteInnova.addEventListener(
+        "click",
+        buscarPacienteInnova
+    );
+
+
+    innovaBuscarDocumento.addEventListener(
+        "keydown",
+        function (e) {
+
+            if (e.key === "Enter") {
+
+                e.preventDefault();
+
+                buscarPacienteInnova();
+            }
+        }
+    );
+
+
+    btnUsarPacienteInnova.addEventListener(
+        "click",
+        usarPacienteInnova
+    );
+    document.getElementById("id_dni").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+    });
+
+    btnNuevaBusquedaInnova.addEventListener(
+        "click",
+        function () {
+
+            resetearBusquedaInnova();
+
+            innovaBuscarDocumento.value = "";
+            innovaBuscarDocumento.focus();
+
+        }
+    );
+    let datosPacienteInnova = null;
+
+    function usarPacienteInnova() {
+
+        if (!datosPacienteInnova) {
+
+            mostrarErrorInnova(
+                "Primero debe buscar un paciente."
+            );
+
+            return;
+        }
+
+
+        const paciente =
+            datosPacienteInnova;
+
+
+        // DNI utilizado para importar.
+        document.getElementById(
+            "innova_documento"
+        ).value = paciente.dni || "";
+
+
+        /*
+        * Si ya existe en la base local,
+        * podemos guardar también su ID.
+        *
+        * Si no existe queda vacío y
+        * agregar_preingreso lo creará.
+        */
+        document.getElementById(
+            "paciente_id"
+        ).value = paciente.id || "";
+
+
+        const nombreCompleto =
+            `${paciente.apellido || ""}, ${paciente.nombre || ""}`;
+
+
+        document.getElementById(
+            "paciente_nombre"
+        ).innerHTML = `
+            <i class="fas fa-user-check text-success me-2"></i>
+            ${escapeHtml(nombreCompleto)}
+        `;
+
+
+        document.getElementById(
+            "paciente_dni"
+        ).value = paciente.dni || "-";
+
+
+        document.getElementById(
+            "paciente_fecha_nacimiento"
+        ).value = paciente.fecha_nacimiento || "-";
+
+
+        /*
+        * Este campo sigue editable.
+        */
+        document.getElementById(
+            "paciente_telefono"
+        ).value = paciente.telefono || "";
+
+
+        document.getElementById(
+            "pacienteSeleccionadoBox"
+        ).innerHTML = `
+            <i class="fas fa-check-circle text-success"></i>
+
+            Paciente seleccionado:
+
+            <strong>
+                ${escapeHtml(nombreCompleto)}
+            </strong>
+
+            · DNI:
+            <strong>
+                ${escapeHtml(paciente.dni || "-")}
+            </strong>
+
+            ${
+                paciente.existe_localmente
+                    ? `
+                        ·
+                        <span class="badge bg-success">
+                            Existente
+                        </span>
+                    `
+                    : `
+                        ·
+                        <span class="badge bg-primary">
+                            Importado desde INNOVA
+                        </span>
+                    `
+            }
+        `;
+
+
+        limpiarErrorFrontend();
+
+
+        const modalElement =
+            document.getElementById(
+                "modalBuscarPaciente"
+            );
+
+        const modal =
+            bootstrap.Modal.getInstance(
+                modalElement
+            );
+
+
+        if (modal) {
+            modal.hide();
+        }
+    }
+    function resetearBusquedaInnova() {
+
+        datosPacienteInnova = null;
+
+        document.getElementById(
+            "innovaPacienteResultado"
+        ).classList.add("d-none");
+
+        document.getElementById(
+            "innovaPacienteLoading"
+        ).classList.add("d-none");
+
+        const errorBox =
+            document.getElementById(
+                "innovaPacienteError"
+            );
+
+        errorBox.innerText = "";
+        errorBox.classList.add("d-none");
+    }
+
+
+    function mostrarErrorInnova(mensaje) {
+
+        const errorBox =
+            document.getElementById(
+                "innovaPacienteError"
+            );
+
+        errorBox.innerText = mensaje;
+        errorBox.classList.remove("d-none");
+    }
+
+
+    function renderPacienteInnova(paciente) {
+
+        datosPacienteInnova = paciente;
+
+        document.getElementById(
+            "innovaResultadoApellido"
+        ).value = paciente.apellido || "-";
+
+        document.getElementById(
+            "innovaResultadoNombre"
+        ).value = paciente.nombre || "-";
+
+        document.getElementById(
+            "innovaResultadoDni"
+        ).value = paciente.dni || "-";
+
+        document.getElementById(
+            "innovaResultadoNacimiento"
+        ).value = paciente.fecha_nacimiento || "-";
+
+        document.getElementById(
+            "innovaResultadoGenero"
+        ).value = paciente.genero || "-";
+
+        document.getElementById(
+            "innovaResultadoTelefono"
+        ).value = paciente.telefono || "-";
+
+
+        const estado =
+            document.getElementById(
+                "innovaPacienteEstado"
+            );
+
+        if (paciente.existe_localmente) {
+
+            estado.innerHTML = `
+                <span class="badge bg-success">
+                    <i class="fas fa-check-circle"></i>
+                    Ya existe localmente
+                </span>
+            `;
+
+        } else {
+
+            estado.innerHTML = `
+                <span class="badge bg-primary">
+                    <i class="fas fa-cloud-download-alt"></i>
+                    Paciente nuevo
+                </span>
+            `;
+        }
+
+
+        document.getElementById(
+            "innovaPacienteResultado"
+        ).classList.remove("d-none");
+    }
+
+
+    async function buscarPacienteInnova() {
+
+        const documento =
+            document.getElementById(
+                "innovaBuscarDocumento"
+            ).value.trim();
+
+        resetearBusquedaInnova();
+
+
+        if (!documento) {
+
+            mostrarErrorInnova(
+                "Debe ingresar el documento del paciente."
+            );
+
+            return;
+        }
+
+
+        const boton =
+            document.getElementById(
+                "btnBuscarPacienteInnova"
+            );
+
+        const loading =
+            document.getElementById(
+                "innovaPacienteLoading"
+            );
+
+
+        boton.disabled = true;
+
+        boton.innerHTML = `
+            <i class="fas fa-spinner fa-spin"></i>
+            Buscando...
+        `;
+
+        loading.classList.remove("d-none");
+
+
+        try {
+
+            const params =
+                new URLSearchParams({
+                    documento: documento
+                });
+
+
+            const response =
+                await fetch(
+                    `${buscarPacienteInnovaUrl}?${params.toString()}`
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok || !data.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "No se pudo consultar INNOVA."
+                );
+            }
+
+
+            renderPacienteInnova(
+                data.paciente
+            );
+
+
+        } catch (error) {
+
+            mostrarErrorInnova(
+                error.message ||
+                "No se pudo consultar INNOVA."
+            );
+
+
+        } finally {
+
+            loading.classList.add("d-none");
+
+            boton.disabled = false;
+
+            boton.innerHTML = `
+                <i class="fas fa-search"></i>
+                Buscar en INNOVA
+            `;
+        }
+    }
 
     function getCookie(name) {
         let cookieValue = null;
@@ -864,8 +1691,11 @@
     }
 
     function seleccionarPaciente(paciente) {
+        document.getElementById(
+            "innova_documento"
+        ).value = "";
         const nombreCompleto = `${paciente.apellido || ""}, ${paciente.nombre || ""}`.trim();
-
+       
         document.getElementById("paciente_id").value = paciente.id;
         document.getElementById("paciente_nombre").innerHTML =
         `<i class="fas fa-user-check text-success me-2"></i>${escapeHtml(nombreCompleto)}`;

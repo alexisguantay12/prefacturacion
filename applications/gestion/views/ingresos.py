@@ -386,7 +386,7 @@ def editar_ingreso(request, ingreso_id):
         "servicios": servicios,
     })
 
-
+import logging
 # =============================================================================
 # INGRESO PROGRAMADO
 # =============================================================================
@@ -397,7 +397,7 @@ def agregar_ingreso_programado(request):
     medicos = Medico.objects.all().order_by("apellido", "nombre")
     servicios = Servicio.objects.all().order_by("nombre")
     planes = Plan.objects.all().order_by("obra_social__nombre", "nombre")
-
+    logger = logging.getLogger(__name__)
     if request.method == "POST":
         preingreso_id = request.POST.get("preingreso_id")
 
@@ -442,8 +442,19 @@ def agregar_ingreso_programado(request):
                 preingreso.fecha_pasaje_internacion=timezone.now()
                 preingreso.save()
 
-        except Exception:
-            messages.error(request, "No se pudo registrar el ingreso programado. Intente nuevamente.")
+        except Exception as e: 
+            logger.exception(
+                "Error al registrar ingreso programado. "
+                "Usuario=%s preingreso_id=%s POST=%s",
+                request.user,
+                preingreso_id,
+                request.POST.dict(),
+            )
+
+            messages.error(
+                request,
+                "No se pudo registrar el ingreso programado. Intente nuevamente."
+            )
             return redirect("gestion_app:agregar_ingreso_programado")
 
         messages.success(request, f"Ingreso programado registrado correctamente. Episodio #{preingreso.numero}")

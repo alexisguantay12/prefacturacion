@@ -232,6 +232,10 @@ urlpatterns = [
         views.generar_ordenes_procedimiento_ajax,
         name="generar_ordenes_procedimiento_ajax",
     ),
-
+    path(
+        "preingreso/buscar-paciente-innova/",
+        views.buscar_paciente_innova_preingreso,
+        name="buscar_paciente_innova_preingreso",
+    ),
 
 ]

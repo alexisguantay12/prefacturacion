@@ -190,9 +190,13 @@
                         </label>
                         <input type="text"
                                name="dni"
+                               id="id_dni"
                                class="form-control"
                                value="{{ paciente.dni }}"
-                               required>
+                               pattern="[0-9]+"
+                               maxlength="13"
+                               placeholder="Ingrese DNI sin puntos"
+                               required> 
                     </div>
 
                     <div class="col-md-4">
@@ -314,5 +318,9 @@
         </div>
     </div>
 </div>
-
+<script>
+    document.getElementById("id_dni").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+    });
+</script>
 {% endblock %}

@@ -189,10 +189,13 @@
                             DNI <span class="required-mark">*</span>
                         </label>
                         <input type="text"
-                               name="dni"
-                               class="form-control"
-                               placeholder="Ej: 30111222"
-                               required>
+                                                name="dni"
+                                                id="id_dni"
+                                                class="form-control"
+                                                pattern="[0-9]+"
+                                                maxlength="13"
+                                                placeholder="Ingrese DNI sin puntos"
+                                                required>
                     </div>
 
                     <div class="col-md-4">
@@ -308,5 +311,9 @@
         </div>
     </div>
 </div>
-
+<script>
+    document.getElementById("id_dni").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+    });
+</script>
 {% endblock %}

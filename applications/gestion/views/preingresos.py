@@ -67,6 +67,7 @@ def lista_preingresos(request):
         "obras_sociales": obras_sociales,
     })
 
+from .ingreso_innova import *
 
 @login_required
 def agregar_preingreso(request):
@@ -76,70 +77,315 @@ def agregar_preingreso(request):
     planes = Plan.objects.all().order_by("obra_social__nombre", "nombre")
 
     def render_form(paciente_seleccionado=None):
-        return render(request, "gestion/preingreso/agregar_preingreso.html", {
-            "obras_sociales": obras_sociales,
-            "planes": planes,
-            "medicos": medicos,
-            "servicios": servicios,
-            "form_data": request.POST,
-            "paciente_seleccionado": paciente_seleccionado,
-        })
+        return render(
+            request,
+            "gestion/preingreso/agregar_preingreso.html",
+            {
+                "obras_sociales": obras_sociales,
+                "planes": planes,
+                "medicos": medicos,
+                "servicios": servicios,
+                "form_data": request.POST,
+                "paciente_seleccionado": paciente_seleccionado,
+            },
+        )
 
     if request.method == "POST":
         paciente_id = request.POST.get("paciente")
+
+        # Si el paciente fue seleccionado desde INNOVA,
+        # acá llega el DNI utilizado para importarlo.
+        innova_documento = limpiar_texto(
+            request.POST.get("innova_documento")
+        )
+
         obra_social_id = request.POST.get("obra_social")
         plan_id = request.POST.get("plan") or None
         medico_id = request.POST.get("medico") or None
         servicio_id = request.POST.get("servicio") or None
 
-        fecha_probable_ingreso = request.POST.get("fecha_probable_ingreso") or None
-        numero_afiliado = request.POST.get("numero_afiliado", "").strip()
-        diagnostico = request.POST.get("diagnostico", "").strip()
-        origen_paciente = request.POST.get("origen_paciente") or "domicilio"
-        prioridad = request.POST.get("prioridad") or "normal"
+        fecha_probable_ingreso = (
+            request.POST.get("fecha_probable_ingreso") or None
+        )
 
-        contacto_nombre = request.POST.get("contacto_nombre", "").strip()
-        contacto_dni = request.POST.get("contacto_dni", "").strip()
-        contacto_parentesco = request.POST.get("contacto_parentesco", "").strip()
-        contacto_telefono = request.POST.get("contacto_telefono", "").strip()
-        observaciones = request.POST.get("observaciones", "").strip()
-        paciente_telefono = request.POST.get("paciente_telefono", "").strip()
+        numero_afiliado = limpiar_texto(
+            request.POST.get("numero_afiliado")
+        )
 
-        paciente = Paciente.objects.filter(id=paciente_id).first() if paciente_id else None
-        obra_social = ObraSocial.objects.filter(id=obra_social_id).first() if obra_social_id else None
+        diagnostico = limpiar_texto(
+            request.POST.get("diagnostico")
+        )
 
-        if not paciente_id:
-            messages.error(request, "Debe seleccionar un paciente.")
+        origen_paciente = (
+            request.POST.get("origen_paciente")
+            or "domicilio"
+        )
+
+        prioridad = (
+            request.POST.get("prioridad")
+            or "normal"
+        )
+
+        contacto_nombre = limpiar_texto(
+            request.POST.get("contacto_nombre")
+        )
+
+        contacto_dni = limpiar_texto(
+            request.POST.get("contacto_dni")
+        )
+
+        contacto_parentesco = limpiar_texto(
+            request.POST.get("contacto_parentesco")
+        )
+
+        contacto_telefono = limpiar_texto(
+            request.POST.get("contacto_telefono")
+        )
+
+        observaciones = limpiar_texto(
+            request.POST.get("observaciones")
+        )
+
+        paciente_telefono = limpiar_texto(
+            request.POST.get("paciente_telefono")
+        )
+
+        # ============================================================
+        # VALIDACIONES GENERALES
+        # ============================================================
+
+        if not paciente_id and not innova_documento:
+            messages.error(
+                request,
+                "Debe seleccionar un paciente."
+            )
             return render_form()
 
-        if not paciente:
-            messages.error(request, "El paciente seleccionado no existe.")
-            return render_form()
+        obra_social = (
+            ObraSocial.objects
+            .filter(id=obra_social_id)
+            .first()
+            if obra_social_id
+            else None
+        )
 
         if not obra_social_id:
-            messages.error(request, "Debe seleccionar una obra social.")
-            return render_form(paciente)
+            messages.error(
+                request,
+                "Debe seleccionar una obra social."
+            )
+            return render_form()
 
         if not obra_social:
-            messages.error(request, "La obra social seleccionada no existe.")
-            return render_form(paciente)
+            messages.error(
+                request,
+                "La obra social seleccionada no existe."
+            )
+            return render_form()
 
         if not fecha_probable_ingreso:
-            messages.error(request, "Debe indicar la fecha probable de ingreso.")
-            return render_form(paciente)
+            messages.error(
+                request,
+                "Debe indicar la fecha probable de ingreso."
+            )
+            return render_form()
 
-        plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
-        medico = Medico.objects.filter(id=medico_id).first() if medico_id else None
-        servicio = Servicio.objects.filter(id=servicio_id).first() if servicio_id else None
+        plan = (
+            Plan.objects
+            .filter(id=plan_id)
+            .first()
+            if plan_id
+            else None
+        )
+
+        medico = (
+            Medico.objects
+            .filter(id=medico_id)
+            .first()
+            if medico_id
+            else None
+        )
+
+        servicio = (
+            Servicio.objects
+            .filter(id=servicio_id)
+            .first()
+            if servicio_id
+            else None
+        )
 
         if plan and plan.obra_social_id != obra_social.id:
-            messages.error(request, "El plan seleccionado no corresponde a la obra social indicada.")
-            return render_form(paciente)
+            messages.error(
+                request,
+                "El plan seleccionado no corresponde a la obra social indicada."
+            )
+            return render_form()
+
+        # ============================================================
+        # SI VIENE DESDE INNOVA, REVALIDAR DATOS DEL PACIENTE
+        # ============================================================
+
+        datos_innova = None
+
+        if innova_documento:
+            try:
+                datos_innova = consultar_paciente_innova(
+                    innova_documento
+                )
+
+            except Exception:
+                messages.error(
+                    request,
+                    "No se pudo validar el paciente en INNOVA."
+                )
+                return render_form()
+
+            if not datos_innova:
+                messages.error(
+                    request,
+                    "No se encontró el paciente en INNOVA."
+                )
+                return render_form()
+
+            dni_innova = limpiar_texto(
+                datos_innova.get("dni")
+            )
+
+            if dni_innova != innova_documento:
+                messages.error(
+                    request,
+                    "INNOVA devolvió un documento diferente al solicitado."
+                )
+                return render_form()
+
+        # ============================================================
+        # GUARDADO
+        # ============================================================
 
         try:
             with transaction.atomic():
-                paciente.telefono = paciente_telefono
-                paciente.save(update_fields=["telefono"])
+
+                # ----------------------------------------------------
+                # PACIENTE IMPORTADO DESDE INNOVA
+                # ----------------------------------------------------
+
+                if datos_innova:
+                    dni_innova = limpiar_texto(
+                        datos_innova.get("dni")
+                    )
+
+                    paciente = (
+                        Paciente.objects
+                        .select_for_update()
+                        .filter(dni=dni_innova)
+                        .first()
+                    )
+
+                    if paciente:
+                        # Actualizamos solamente datos propios
+                        # del paciente traídos desde INNOVA.
+                        paciente.nombre = limpiar_texto(
+                            datos_innova.get("nombre")
+                        )
+
+                        paciente.apellido = limpiar_texto(
+                            datos_innova.get("apellido")
+                        )
+
+                        paciente.fecha_nacimiento = (
+                            datos_innova.get(
+                                "fecha_nacimiento"
+                            )
+                        )
+
+                        paciente.genero = (
+                            normalizar_genero_innova(
+                                datos_innova.get("genero")
+                            )
+                        )
+
+                        # El teléfono continúa siendo editable
+                        # desde el formulario de preingreso.
+                        paciente.telefono = (
+                            paciente_telefono or None
+                        )
+
+                        paciente.save(
+                            update_fields=[
+                                "nombre",
+                                "apellido",
+                                "fecha_nacimiento",
+                                "genero",
+                                "telefono",
+                            ]
+                        )
+
+                    else:
+                        paciente = Paciente.objects.create(
+                            dni=dni_innova,
+
+                            nombre=limpiar_texto(
+                                datos_innova.get("nombre")
+                            ),
+
+                            apellido=limpiar_texto(
+                                datos_innova.get("apellido")
+                            ),
+
+                            fecha_nacimiento=(
+                                datos_innova.get(
+                                    "fecha_nacimiento"
+                                )
+                            ),
+
+                            genero=(
+                                normalizar_genero_innova(
+                                    datos_innova.get("genero")
+                                )
+                            ),
+
+                            telefono=(
+                                paciente_telefono or None
+                            ),
+
+                            user_made=request.user,
+                        )
+
+                # ----------------------------------------------------
+                # PACIENTE LOCAL NORMAL
+                # ----------------------------------------------------
+
+                else:
+                    paciente = (
+                        Paciente.objects
+                        .select_for_update()
+                        .filter(id=paciente_id)
+                        .first()
+                    )
+
+                    if not paciente:
+                        messages.error(
+                            request,
+                            "El paciente seleccionado no existe."
+                        )
+                        return render_form()
+
+                    paciente.telefono = (
+                        paciente_telefono or None
+                    )
+
+                    paciente.save(
+                        update_fields=["telefono"]
+                    )
+
+                # ====================================================
+                # PREINGRESO
+                # ====================================================
+                #
+                # Desde acá todo continúa como tu formulario normal.
+                # Nada de obra social, plan, médico, diagnóstico,
+                # afiliado o contacto se obtiene desde INNOVA.
+                # ====================================================
 
                 preingreso = Preingreso.objects.create(
                     paciente=paciente,
@@ -152,30 +398,46 @@ def agregar_preingreso(request):
                     diagnostico=diagnostico or None,
                     origen_paciente=origen_paciente,
                     prioridad=prioridad,
+
                     contacto_nombre=contacto_nombre or None,
                     contacto_dni=contacto_dni or None,
                     contacto_parentesco=contacto_parentesco or None,
                     contacto_telefono=contacto_telefono or None,
+
                     observaciones=observaciones or None,
                     estado="pendiente",
-                    user_made=request.user
+                    user_made=request.user,
                 )
 
         except Exception:
-            messages.error(request, "No se pudo guardar el preingreso. Intente nuevamente.")
-            return render_form(paciente)
+            messages.error(
+                request,
+                "No se pudo guardar el preingreso. Intente nuevamente."
+            )
+            return render_form()
 
-        messages.success(request, f"El preingreso #{preingreso.id} fue creado correctamente.")
-        return redirect("gestion_app:lista_preingresos")
+        messages.success(
+            request,
+            f"El preingreso #{preingreso.id} fue creado correctamente."
+        )
 
-    return render(request, "gestion/preingreso/agregar_preingreso.html", {
-        "obras_sociales": obras_sociales,
-        "planes": planes,
-        "medicos": medicos,
-        "servicios": servicios,
-        "form_data": {},
-        "paciente_seleccionado": None,
-    })
+        return redirect(
+            "gestion_app:lista_preingresos"
+        )
+
+    return render(
+        request,
+        "gestion/preingreso/agregar_preingreso.html",
+        {
+            "obras_sociales": obras_sociales,
+            "planes": planes,
+            "medicos": medicos,
+            "servicios": servicios,
+            "form_data": {},
+            "paciente_seleccionado": None,
+        },
+    )
+
 
 @login_required
 def detalle_preingreso(request, preingreso_id):
