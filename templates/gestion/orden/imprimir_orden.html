@@ -12,6 +12,10 @@
             margin: 6mm;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 10px;
@@ -51,21 +55,35 @@
             margin: 0 auto;
         }
 
+        /*
+         * Cada copia ocupa aproximadamente la mitad
+         * del área imprimible de una hoja A4.
+         */
         .copia {
+            position: relative;
             height: 136mm;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
+        /*
+         * Puede reducirse dentro del flex para dejar
+         * espacio real a firmas y metadatos.
+         */
         .contenido-principal {
-            flex: 1;
+            flex: 1 1 auto;
+            min-height: 0;
         }
 
         .linea-corte {
             border-top: 1px dashed #000;
             margin: 3mm 0;
         }
+
+        /* =========================
+           CABECERA
+           ========================= */
 
         .header-simple {
             display: grid;
@@ -122,6 +140,10 @@
             width: 45px;
         }
 
+        /* =========================
+           DATOS DEL PACIENTE
+           ========================= */
+
         .datos-lineales {
             border: 1px solid #000;
             padding: 5px 6px;
@@ -136,6 +158,10 @@
             min-height: 13px;
         }
 
+        /* =========================
+           DIAGNÓSTICO
+           ========================= */
+
         .diagnostico-simple {
             border: 1px solid #000;
             min-height: 24px;
@@ -143,9 +169,14 @@
             margin-bottom: 4px;
             font-size: 10px;
         }
-        .diagnostico-simple div{
+
+        .diagnostico-simple div {
             min-height: 18px;
         }
+
+        /* =========================
+           TABLA
+           ========================= */
 
         table {
             width: 100%;
@@ -170,10 +201,18 @@
             text-align: center;
         }
 
-        /* Contenedor de la tabla de prestaciones y sello de internación */
+        /*
+         * IMPORTANTE:
+         * Antes estaba en 58mm.
+         *
+         * Se reduce para asegurar que las firmas,
+         * la línea de firma, el texto inferior y
+         * los metadatos entren dentro de los 136mm.
+         */
         .prestaciones-wrap {
             position: relative;
-            min-height: 58mm;
+            min-height: 42mm;
+            height: 42mm;
             overflow: hidden;
         }
 
@@ -182,12 +221,21 @@
             z-index: 1;
         }
 
+        /* =========================
+           SELLO PACIENTE INTERNADO
+           ========================= */
+
         .sello-paciente-internado {
             position: absolute;
-            top: 18mm;
-            left: 50%;
-            z-index: 2;
 
+            /*
+             * Antes: top: 18mm;
+             * Ahora queda un poco más abajo.
+             */
+            top: 101mm;
+
+            left: 50%;
+            z-index: 20;
             width: 72%;
 
             display: flex;
@@ -197,14 +245,16 @@
 
             color: rgba(0, 0, 0, .82);
             font-family: "Arial Black", Arial, Helvetica, sans-serif;
-            font-size: 30px;
-            font-weight: 300;
+            font-size: 21px;
+            font-weight: 20;
             line-height: 1.05;
             letter-spacing: 1px;
             text-align: center;
             text-transform: uppercase;
-            opacity: 0.31;
-            transform: translateX(-50%) rotate(-22deg);
+
+            opacity: 0.5;
+
+            transform: translateX(-50%) rotate(-20deg);
             transform-origin: center;
 
             pointer-events: none;
@@ -214,27 +264,56 @@
         .sello-paciente-internado span {
             display: block;
         }
+
+        /* =========================
+           FIRMAS
+           ========================= */
+
         .firmas {
             margin-top: auto;
             display: flex;
             justify-content: space-between;
             gap: 80px;
             align-items: flex-end;
+
+            /*
+             * Evita que el navegador comprima
+             * o recorte este bloque.
+             */
+            flex-shrink: 0;
         }
 
         .firma-izquierda,
         .firma-derecha {
             width: 230px;
-            height: 28mm;
+
+            /*
+             * Antes 28mm.
+             * 25mm alcanza para sello/firma +
+             * línea + texto inferior.
+             */
+            height: 25mm;
+
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             text-align: center;
         }
-       .sello-medico {
+
+        /* =========================
+           SELLO DEL MÉDICO
+           ========================= */
+
+        .sello-medico {
             width: 5cm;
-            height: 2cm;
-            margin: 0 auto -4px auto;
+
+            /*
+             * Reducimos levemente la altura
+             * para asegurar que entre la base.
+             */
+            height: 1.7cm;
+
+            margin: 0 auto 1px auto;
 
             display: flex;
             flex-direction: column;
@@ -276,31 +355,57 @@
             font-weight: 900;
             margin-top: 3px;
         }
+
+        /* =========================
+           IMAGEN DE FIRMA
+           ========================= */
+
         .firma-img {
             width: 5cm;
-            height: 2cm;
+            height: 1.7cm;
             object-fit: contain;
             display: block;
-            margin: 0 auto -4px auto;
+
+            /*
+             * Sin margen negativo para evitar
+             * que la imagen pise la línea.
+             */
+            margin: 0 auto 1px auto;
         }
 
+        /*
+         * Base horizontal de la firma.
+         */
         .linea-firma {
             border-top: 1px solid #000;
+            width: 100%;
+            flex-shrink: 0;
         }
 
+        /*
+         * Texto debajo de la base.
+         */
         .texto-firma {
-            height: 32px;
+            min-height: 25px;
             text-align: center;
-            font-size: 11px;
-            padding-top: 4px;
+            font-size: 10px;
+            line-height: 12px;
+            padding-top: 3px;
+            flex-shrink: 0;
         }
+
+        /* =========================
+           PIE / METADATOS
+           ========================= */
+
         .bottom-meta {
-            margin-top: 2mm;
+            margin-top: 1mm;
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             font-size: 9px;
             align-items: end;
-            margin-bottom: 3mm;
+            margin-bottom: 1mm;
+            flex-shrink: 0;
         }
 
         .original {
@@ -309,7 +414,12 @@
             font-size: 11px;
         }
 
+        /* =========================
+           IMPRESIÓN
+           ========================= */
+
         @media print {
+
             .screen-actions {
                 display: none;
             }
@@ -318,50 +428,116 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
+            .print-wrap {
+                width: 100%;
+                max-width: none;
+            }
+
+            /*
+             * Evita cortes internos en cada copia.
+             */
+            .copia {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .firmas,
+            .bottom-meta {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
         }
+
     </style>
 </head>
 
 <body>
 
 <div class="screen-actions">
-    <a href="javascript:history.back();" class="btn-back">Volver</a>
-    <button type="button" onclick="window.print();" class="btn-print">Imprimir</button>
+    <a href="javascript:history.back();" class="btn-back">
+        Volver
+    </a>
+
+    <button
+        type="button"
+        onclick="window.print();"
+        class="btn-print">
+        Imprimir
+    </button>
 </div>
+
 
 <div class="print-wrap">
 
-    <!-- ORIGINAL -->
+    <!-- =====================================================
+         ORIGINAL
+         ===================================================== -->
+
     <div class="copia">
+
+        {% if preingreso.estado == "ingresado" %}
+            <div class="sello-paciente-internado" aria-hidden="true">
+                <span>Paciente</span>
+                <span>Internado</span>
+            </div>
+        {% endif %}
 
         <div class="contenido-principal">
 
+            <!-- CABECERA -->
+
             <div class="header-simple">
+
                 <div class="logo-box">
-                    <img src="{% static 'img/logo_actual.jpg' %}" alt="Logo">
+                    <img
+                        src="{% static 'img/logo_actual.jpg' %}"
+                        alt="Logo">
                 </div>
 
                 <div class="title-center">
-                    <div>Hospital Privado Santa Clara de Asís</div>
-                    <strong>Orden de Autorización</strong>
+                    <div>
+                        Hospital Privado Santa Clara de Asís
+                    </div>
+
+                    <strong>
+                        Orden de Autorización
+                    </strong>
                 </div>
 
                 <div class="order-data">
-                    <div><b>Orden</b> {{ orden.id }}</div>
-                    <div><b>Ident.</b> HPSCA </div>
+
+                    <div>
+                        <b>Orden</b>
+                        {{ orden.id }}
+                    </div>
+
+                    <div>
+                        <b>Ident.</b>
+                        HPSCA
+                    </div>
+
                     <div>
                         <b>Fecha</b>
+
                         {% if orden.fecha %}
                             {{ orden.fecha|date:"d/m/Y" }}
                         {% endif %}
                     </div>
+
                 </div>
+
             </div>
 
+
+            <!-- DATOS PACIENTE -->
+
             <div class="datos-lineales">
+
                 <div>
                     <b>Paciente:</b>
-                    {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+                    {{ preingreso.paciente.apellido }},
+                    {{ preingreso.paciente.nombre }}
                 </div>
 
                 <div>
@@ -371,6 +547,7 @@
 
                 <div>
                     <b>Obra Soc.:</b>
+
                     {% if preingreso.obra_social %}
                         {{ preingreso.obra_social.nombre }}
                     {% endif %}
@@ -378,9 +555,10 @@
 
                 <div>
                     <b>Plan:</b>
+
                     {% if preingreso.plan %}
                         {{ preingreso.plan.nombre }}
-                    {%else%}
+                    {% else %}
                         -
                     {% endif %}
                 </div>
@@ -390,223 +568,329 @@
                     {{ preingreso.numero_afiliado|default:"" }}
                 </div>
 
-
                 <div>
                     <b>Nº Asistencia:</b>
-                    {%if preingreso.episodio %}
-                    {{preingreso.numero }}
-                    {%else%}
-                    {{preingreso.id }}
-                    {%endif%}
+
+                    {% if preingreso.episodio %}
+                        {{ preingreso.numero }}
+                    {% else %}
+                        {{ preingreso.id }}
+                    {% endif %}
                 </div>
-                <div> 
+
+                <div>
                     <b>Nº Episodio:</b>
                     {{ preingreso.episodio|default:"-" }}
                 </div>
 
                 <div>
                     <b>Tipo Asistencia:</b>
-                    {%if preingreso.es_preingreso%}
-                    Programada
-                    {%else%}
-                    No programada
-                    {%endif%}
+
+                    {% if preingreso.es_preingreso %}
+                        Programada
+                    {% else %}
+                        No programada
+                    {% endif %}
                 </div>
 
                 <div>
                     <b>Fecha Ingreso:</b>
+
                     {% if preingreso.fecha_ingreso %}
-                        {{ preingreso.fecha_ingreso|date:"d/m/Y"  }}
-                    {%else%}
+                        {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+                    {% else %}
                         -
                     {% endif %}
                 </div>
 
                 <div>
                     <b>Fecha Orden:</b>
+
                     {% if orden.fecha %}
                         {{ orden.fecha|date:"d/m/Y" }}
                     {% endif %}
                 </div>
+
             </div>
 
+
+            <!-- DIAGNÓSTICO -->
+
             <div class="diagnostico-simple">
-                <div><b>Diagnóstico:</b>
-                {{ preingreso.diagnostico|default:"-" }}
-                </div>
+
                 <div>
-                    
-                <b>Observaciones:</b>
-                {{ preingreso.observaciones|default:"-" }}
+                    <b>Diagnóstico:</b>
+                    {{ preingreso.diagnostico|default:"-" }}
                 </div>
-            </div> 
+
+                <div>
+                    <b>Observaciones:</b>
+                    {{ orden.observaciones|default:"-" }}
+                </div>
+
+            </div>
+
+
+            <!-- PRESTACIONES -->
 
             <div class="prestaciones-wrap">
 
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 11%;">Código</th>
-                        <th style="width: 6%;">Cant.</th>
-                        <th style="width: 14%;">Concepto</th>
-                        <th style="width: 14%;">Nivel</th>
-                        <th>Profesional</th>
-                        <th style="width: 10%;">Desde</th>
-                        <th style="width: 10%;">Hasta</th>
-                    </tr>
-                </thead>
+                <table>
 
-                <tbody>
-                    {% for detalle in detalles %}
+                    <thead>
                         <tr>
-                            <td>{{ detalle.prestacion.codigo|default:"" }}</td>
+                            <th style="width: 11%;">
+                                Código
+                            </th>
 
-                            <td class="text-center">
-                                {{ detalle.cantidad|default:"1" }}
-                            </td>
+                            <th style="width: 6%;">
+                                Cant.
+                            </th>
 
-                            <td class="text-center">
-                                {% if detalle.honorarios_gastos %}
-                                    {{ detalle.get_honorarios_gastos_display }}
-                                {% endif %}
-                            </td>
+                            <th style="width: 14%;">
+                                Concepto
+                            </th>
 
-                            <td class="text-center">
-                                {% if detalle.tipo_honorario %}
-                                    {{ detalle.get_tipo_honorario_display }}
-                                {% endif %}
-                            </td>
+                            <th style="width: 14%;">
+                                Nivel
+                            </th>
 
-                            <td>
-                                {% if detalle.orden.medico %}
-                                    MP:{{detalle.orden.medico.matricula}};
-                                    {{ detalle.orden.medico.apellido }}, {{ detalle.orden.medico.nombre }}
-                             
-                                {% endif %}
-                            </td>
+                            <th>
+                                Profesional
+                            </th>
 
-                            <td class="text-center">
-                                {% if detalle.fecha_desde %}
-                                    {{ detalle.fecha_desde|date:"d/m/Y" }}
-                                {% endif %}
-                            </td>
+                            <th style="width: 10%;">
+                                Desde
+                            </th>
 
-                            <td class="text-center">
-                                {% if detalle.fecha_hasta %}
-                                    {{ detalle.fecha_hasta|date:"d/m/Y" }}
-                                {% endif %}
-                            </td>
+                            <th style="width: 10%;">
+                                Hasta
+                            </th>
                         </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                Sin prestaciones cargadas.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
 
-            {% if preingreso.estado == "ingresado" and not orden.esta_entregada and orden.estado != "autorizada"%}
-                <div class="sello-paciente-internado" aria-hidden="true">
-                    <span>Paciente</span>
-                    <span>Internado</span>
-                </div>
-            {% endif %}
+                    <tbody>
+
+                        {% for detalle in detalles %}
+
+                            <tr>
+
+                                <td>
+                                    {{ detalle.prestacion.codigo|default:"" }}
+                                </td>
+
+                                <td class="text-center">
+                                    {{ detalle.cantidad|default:"1" }}
+                                </td>
+
+                                <td class="text-center">
+
+                                    {% if detalle.honorarios_gastos %}
+                                        {{ detalle.get_honorarios_gastos_display }}
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="text-center">
+
+                                    {% if detalle.tipo_honorario %}
+                                        {{ detalle.get_tipo_honorario_display }}
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if detalle.orden.medico %}
+
+                                        MP:{{ detalle.orden.medico.matricula }};
+                                        {{ detalle.orden.medico.apellido }},
+                                        {{ detalle.orden.medico.nombre }}
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="text-center">
+
+                                    {% if detalle.fecha_desde %}
+                                        {{ detalle.fecha_desde|date:"d/m/Y" }}
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="text-center">
+
+                                    {% if detalle.fecha_hasta %}
+                                        {{ detalle.fecha_hasta|date:"d/m/Y" }}
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td
+                                    colspan="7"
+                                    class="text-center">
+
+                                    Sin prestaciones cargadas.
+
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
 
             </div>
 
         </div>
 
+
+        <!-- =================================================
+             FIRMAS ORIGINAL
+             ================================================= -->
+
         <div class="firmas">
+
+            <!-- AUTORIZADO -->
+
             <div class="firma-izquierda">
+
                 <div class="linea-firma"></div>
+
                 <div class="texto-firma">
                     Autorizado
                 </div>
+
             </div>
+
+
+            <!-- PROFESIONAL -->
 
             <div class="firma-derecha">
 
-            {% if medico_firma %}
+                {% if medico_firma %}
 
-                {% if medico_firma.firma_nombre %}
+                    {% if medico_firma.firma_nombre %}
 
-                    <img
-                        src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
-                        alt="Firma profesional"
-                        class="firma-img"
-                        onerror="
-                            if (!this.dataset.intento) {
-                                this.dataset.intento = '1';
-                                this.src='{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
-                            } else {
-                                this.style.display='none';
-                                document.getElementById('sello-medico-{{ medico_firma.id }}').style.display='flex';
-                            }
-                        ">
+                        <img
+                            src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
+                            alt="Firma profesional"
+                            class="firma-img"
 
-                    <div
-                        id="sello-medico-{{ medico_firma.id }}"
-                        class="sello-medico"
-                        style="display:none;">
+                            onerror="
+                                if (!this.dataset.intento) {
 
-                        <div class="nombre">
-                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
+                                    this.dataset.intento = '1';
+
+                                    this.src =
+                                        '{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
+
+                                } else {
+
+                                    this.style.display = 'none';
+
+                                    document.getElementById(
+                                        'sello-medico-original-{{ medico_firma.id }}'
+                                    ).style.display = 'flex';
+
+                                }
+                            "
+                        >
+
+
+                        <div
+                            id="sello-medico-original-{{ medico_firma.id }}"
+                            class="sello-medico"
+                            style="display:none;">
+
+                            <div class="nombre">
+                                Dr.
+                                {{ medico_firma.apellido }}
+                                {{ medico_firma.nombre }}
+                            </div>
+
+                            {% if medico_firma.servicio %}
+
+                                <div class="servicio">
+                                    {{ medico_firma.servicio.nombre }}
+                                </div>
+
+                            {% endif %}
+
+                            {% if medico_firma.matricula %}
+
+                                <div class="matricula">
+                                    MP {{ medico_firma.matricula }}
+                                </div>
+
+                            {% endif %}
+
                         </div>
 
-                        {% if medico_firma.servicio %}
-                            <div class="servicio">
-                                {{ medico_firma.servicio.nombre }}
+
+                    {% else %}
+
+
+                        <div class="sello-medico">
+
+                            <div class="nombre">
+                                Dr.
+                                {{ medico_firma.apellido }}
+                                {{ medico_firma.nombre }}
                             </div>
-                        {% endif %}
 
-                        {% if medico_firma.matricula %}
-                            <div class="matricula">
-                                MP {{ medico_firma.matricula }}
-                            </div>
-                        {% endif %}
+                            {% if medico_firma.servicio %}
 
-                    </div>
+                                <div class="servicio">
+                                    {{ medico_firma.servicio.nombre }}
+                                </div>
 
-                {% else %}
+                            {% endif %}
 
-                    <div class="sello-medico">
+                            {% if medico_firma.matricula %}
 
-                        <div class="nombre">
-                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
+                                <div class="matricula">
+                                    MP {{ medico_firma.matricula }}
+                                </div>
+
+                            {% endif %}
+
                         </div>
 
-                        {% if medico_firma.servicio %}
-                            <div class="servicio">
-                                {{ medico_firma.servicio.nombre }}
-                            </div>
-                        {% endif %}
-
-                        {% if medico_firma.matricula %}
-                            <div class="matricula">
-                                MP {{ medico_firma.matricula }}
-                            </div>
-                        {% endif %}
-
-                    </div>
+                    {% endif %}
 
                 {% endif %}
 
-            {% endif %}
- 
 
-            <div class="linea-firma"></div>
+                <!-- BASE DE LA FIRMA -->
 
-            <div class="texto-firma">
-                Firma y Sello<br>
-                del Profesional
+                <div class="linea-firma"></div>
+
+
+                <!-- TEXTO DEBAJO -->
+
+                <div class="texto-firma">
+                    Firma y Sello<br>
+                    del Profesional
+                </div>
+
             </div>
 
         </div>
-        </div>
+
+
+        <!-- METADATOS ORIGINAL -->
 
         <div class="bottom-meta">
+
             <div>
                 <b>Usuario:</b>
                 {{ request.user.get_full_name|default:request.user.username }}
@@ -620,317 +904,592 @@
             <div class="original">
                 ORIGINAL
             </div>
+
         </div>
 
     </div>
 
+
+    <!-- =====================================================
+         LÍNEA DE CORTE
+         ===================================================== -->
+
     <div class="linea-corte"></div>
+
+
     {% if duplicado %}
-    <!-- DUPLICADO -->
-    <div class="copia">
 
-        <div class="contenido-principal">
+        <!-- =================================================
+             DUPLICADO
+             ================================================= -->
 
-            <div class="header-simple">
-                <div class="logo-box">
-                    <img src="{% static 'img/logo_actual.jpg' %}" alt="Logo">
-                </div>
+        <div class="copia">
 
-                <div class="title-center">
-                    <div>Hospital Privado Santa Clara de Asís</div>
-                    <strong>Orden de Autorización</strong>
-                </div>
-
-                <div class="order-data">
-                    <div><b>Orden</b> {{ orden.id }}</div>
-                    <div><b>Ident.</b> HPSCA </div>
-                    <div>
-                        <b>Fecha</b>
-                        {% if orden.fecha %}
-                            {{ orden.fecha|date:"d/m/Y" }}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="datos-lineales">
-                <div>
-                    <b>Paciente:</b>
-                    {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
-                </div>
-
-                <div>
-                    <b>DNI:</b>
-                    {{ preingreso.paciente.dni|default:"" }}
-                </div>
-
-                <div>
-                    <b>Obra Soc.:</b>
-                    {% if preingreso.obra_social %}
-                        {{ preingreso.obra_social.nombre }}
-                    {% endif %}
-                </div>
-
-                <div>
-                    <b>Plan:</b>
-                    {% if preingreso.plan %}
-                        {{ preingreso.plan.nombre }}
-                    {%else%}
-                        -
-                    {% endif %}
-                </div>
-
-                <div>
-                    <b>Nº Afiliado:</b>
-                    {{ preingreso.numero_afiliado|default:"" }}
-                </div>
-
-                <div>
-                    <b>Nº Asistencia:</b>
-                    {%if preingreso.episodio%}
-                    {{preingreso.numero }}
-                    {%else%}
-                    {{preingreso.id }}
-                    {%endif%}
-                </div>
-
-                <div> 
-                    <b>Nº Episodio:</b>
-                    {{ preingreso.episodio|default:"-" }}
-                </div>
-
-                
-                <div>
-                    <b>Tipo Asistencia:</b>
-                    {%if preingreso.es_preingreso%}
-                    Programada
-                    {%else%}
-                    No programada
-                    {%endif%}
-                </div>
-
-                <div>
-                    <b>Fecha Ingreso:</b>
-                    {% if preingreso.fecha_ingreso %}
-                        {{ preingreso.fecha_ingreso|date:"d/m/Y"  }}
-                    {%else%}
-                        -
-                    {% endif %}
-                </div>
-
-                <div>
-                    <b>Fecha Orden:</b>
-                    {% if orden.fecha %}
-                        {{ orden.fecha|date:"d/m/Y" }}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="diagnostico-simple">
-                <div><b>Diagnóstico:</b>
-                {{ preingreso.diagnostico|default:"-" }}
-                </div>
-                <div>
-                    
-                <b>Observaciones:</b>
-                {{ preingreso.observaciones|default:"-" }}
-                </div>
-            </div> 
-
-
-            <div class="prestaciones-wrap">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 11%;">Código</th>
-                        <th style="width: 6%;">Cant.</th>
-                        <th style="width: 14%;">Concepto</th>
-                        <th style="width: 14%;">Nivel</th>
-                        <th>Profesional</th>
-                        <th style="width: 10%;">Desde</th>
-                        <th style="width: 10%;">Hasta</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for detalle in detalles %}
-                        <tr>
-                            <td>{{ detalle.prestacion.codigo|default:"" }}</td>
-
-                            <td class="text-center">
-                                {{ detalle.cantidad|default:"1" }}
-                            </td>
-
-                            <td class="text-center">
-                                {% if detalle.honorarios_gastos %}
-                                    {{ detalle.get_honorarios_gastos_display }}
-                                {% endif %}
-                            </td>
-
-                            <td class="text-center">
-                                {% if detalle.tipo_honorario %}
-                                    {{ detalle.get_tipo_honorario_display }}
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if detalle.orden.medico %}
-                                    MP:{{detalle.orden.medico.matricula}};
-                                    {{ detalle.orden.medico.apellido }}, {{ detalle.orden.medico.nombre }}
-                             
-                                {% endif %}
-                            </td>
-
-                            <td class="text-center">
-                                {% if detalle.fecha_desde %}
-                                    {{ detalle.fecha_desde|date:"d/m/Y" }}
-                                {% endif %}
-                            </td>
-
-                            <td class="text-center">
-                                {% if detalle.fecha_hasta %}
-                                    {{ detalle.fecha_hasta|date:"d/m/Y" }}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                Sin prestaciones cargadas.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            {% if preingreso.estado == "ingresado" and not orden.esta_entregada and orden.estado != "autorizada"%}
+            {% if preingreso.estado == "ingresado" %}
                 <div class="sello-paciente-internado" aria-hidden="true">
                     <span>Paciente</span>
                     <span>Internado</span>
                 </div>
             {% endif %}
 
-            </div>
+            <div class="contenido-principal">
 
-        </div>
 
-        <div class="firmas">
-            <div class="firma-izquierda">
-                <div class="linea-firma"></div>
-                <div class="texto-firma">
-                    Autorizado
+                <!-- CABECERA -->
+
+                <div class="header-simple">
+
+                    <div class="logo-box">
+
+                        <img
+                            src="{% static 'img/logo_actual.jpg' %}"
+                            alt="Logo">
+
+                    </div>
+
+
+                    <div class="title-center">
+
+                        <div>
+                            Hospital Privado Santa Clara de Asís
+                        </div>
+
+                        <strong>
+                            Orden de Autorización
+                        </strong>
+
+                    </div>
+
+
+                    <div class="order-data">
+
+                        <div>
+                            <b>Orden</b>
+                            {{ orden.id }}
+                        </div>
+
+                        <div>
+                            <b>Ident.</b>
+                            HPSCA
+                        </div>
+
+                        <div>
+
+                            <b>Fecha</b>
+
+                            {% if orden.fecha %}
+                                {{ orden.fecha|date:"d/m/Y" }}
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
                 </div>
-            </div>
 
-           <div class="firma-derecha">
 
-            {% if medico_firma %}
+                <!-- DATOS PACIENTE -->
 
-                {% if medico_firma.firma_nombre %}
+                <div class="datos-lineales">
 
-                    <img
-                        src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
-                        alt="Firma profesional"
-                        class="firma-img"
-                        onerror="
-                            if (!this.dataset.intento) {
-                                this.dataset.intento = '1';
-                                this.src='{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
-                            } else {
-                                this.style.display='none';
-                                document.getElementById('sello-medico-{{ medico_firma.id }}').style.display='flex';
-                            }
-                        ">
+                    <div>
+                        <b>Paciente:</b>
+                        {{ preingreso.paciente.apellido }},
+                        {{ preingreso.paciente.nombre }}
+                    </div>
 
-                    <div
-                        id="sello-medico-{{ medico_firma.id }}"
-                        class="sello-medico"
-                        style="display:none;">
 
-                        <div class="nombre">
-                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
-                        </div>
+                    <div>
+                        <b>DNI:</b>
+                        {{ preingreso.paciente.dni|default:"" }}
+                    </div>
 
-                        {% if medico_firma.servicio %}
-                            <div class="servicio">
-                                {{ medico_firma.servicio.nombre }}
-                            </div>
-                        {% endif %}
 
-                        {% if medico_firma.matricula %}
-                            <div class="matricula">
-                                MP {{ medico_firma.matricula }}
-                            </div>
+                    <div>
+
+                        <b>Obra Soc.:</b>
+
+                        {% if preingreso.obra_social %}
+                            {{ preingreso.obra_social.nombre }}
                         {% endif %}
 
                     </div>
 
-                {% else %}
 
-                    <div class="sello-medico">
+                    <div>
 
-                        <div class="nombre">
-                            Dr. {{ medico_firma.apellido }} {{ medico_firma.nombre }}
-                        </div>
+                        <b>Plan:</b>
 
-                        {% if medico_firma.servicio %}
-                            <div class="servicio">
-                                {{ medico_firma.servicio.nombre }}
-                            </div>
-                        {% endif %}
+                        {% if preingreso.plan %}
 
-                        {% if medico_firma.matricula %}
-                            <div class="matricula">
-                                MP {{ medico_firma.matricula }}
-                            </div>
+                            {{ preingreso.plan.nombre }}
+
+                        {% else %}
+
+                            -
+
                         {% endif %}
 
                     </div>
 
-                {% endif %}
 
-            {% endif %}
- 
+                    <div>
+                        <b>Nº Afiliado:</b>
+                        {{ preingreso.numero_afiliado|default:"" }}
+                    </div>
 
-            <div class="linea-firma"></div>
 
-            <div class="texto-firma">
-                Firma y Sello<br>
-                del Profesional
+                    <div>
+
+                        <b>Nº Asistencia:</b>
+
+                        {% if preingreso.episodio %}
+
+                            {{ preingreso.numero }}
+
+                        {% else %}
+
+                            {{ preingreso.id }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        <b>Nº Episodio:</b>
+                        {{ preingreso.episodio|default:"-" }}
+
+                    </div>
+
+
+                    <div>
+
+                        <b>Tipo Asistencia:</b>
+
+                        {% if preingreso.es_preingreso %}
+
+                            Programada
+
+                        {% else %}
+
+                            No programada
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        <b>Fecha Ingreso:</b>
+
+                        {% if preingreso.fecha_ingreso %}
+
+                            {{ preingreso.fecha_ingreso|date:"d/m/Y" }}
+
+                        {% else %}
+
+                            -
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        <b>Fecha Orden:</b>
+
+                        {% if orden.fecha %}
+
+                            {{ orden.fecha|date:"d/m/Y" }}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- DIAGNÓSTICO -->
+
+                <div class="diagnostico-simple">
+
+                    <div>
+
+                        <b>Diagnóstico:</b>
+                        {{ preingreso.diagnostico|default:"-" }}
+
+                    </div>
+
+                    <div>
+
+                        <b>Observaciones:</b>
+                        {{ preingreso.observaciones|default:"-" }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRESTACIONES -->
+
+                <div class="prestaciones-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="width: 11%;">
+                                    Código
+                                </th>
+
+                                <th style="width: 6%;">
+                                    Cant.
+                                </th>
+
+                                <th style="width: 14%;">
+                                    Concepto
+                                </th>
+
+                                <th style="width: 14%;">
+                                    Nivel
+                                </th>
+
+                                <th>
+                                    Profesional
+                                </th>
+
+                                <th style="width: 10%;">
+                                    Desde
+                                </th>
+
+                                <th style="width: 10%;">
+                                    Hasta
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for detalle in detalles %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ detalle.prestacion.codigo|default:"" }}
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        {{ detalle.cantidad|default:"1" }}
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        {% if detalle.honorarios_gastos %}
+
+                                            {{ detalle.get_honorarios_gastos_display }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        {% if detalle.tipo_honorario %}
+
+                                            {{ detalle.get_tipo_honorario_display }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if detalle.orden.medico %}
+
+                                            MP:{{ detalle.orden.medico.matricula }};
+                                            {{ detalle.orden.medico.apellido }},
+                                            {{ detalle.orden.medico.nombre }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        {% if detalle.fecha_desde %}
+
+                                            {{ detalle.fecha_desde|date:"d/m/Y" }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        {% if detalle.fecha_hasta %}
+
+                                            {{ detalle.fecha_hasta|date:"d/m/Y" }}
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+
+                            {% empty %}
+
+
+                                <tr>
+
+                                    <td
+                                        colspan="7"
+                                        class="text-center">
+
+                                        Sin prestaciones cargadas.
+
+                                    </td>
+
+                                </tr>
+
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+
+                </div>
+
             </div>
+
+
+            <!-- =============================================
+                 FIRMAS DUPLICADO
+                 ============================================= -->
+
+            <div class="firmas">
+
+
+                <!-- AUTORIZADO -->
+
+                <div class="firma-izquierda">
+
+                    <div class="linea-firma"></div>
+
+                    <div class="texto-firma">
+                        Autorizado
+                    </div>
+
+                </div>
+
+
+                <!-- PROFESIONAL -->
+
+                <div class="firma-derecha">
+
+
+                    {% if medico_firma %}
+
+
+                        {% if medico_firma.firma_nombre %}
+
+
+                            <img
+                                src="{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.jpg"
+                                alt="Firma profesional"
+                                class="firma-img"
+
+                                onerror="
+                                    if (!this.dataset.intento) {
+
+                                        this.dataset.intento = '1';
+
+                                        this.src =
+                                            '{% static 'img/medicos/' %}{{ medico_firma.firma_nombre }}.JPG';
+
+                                    } else {
+
+                                        this.style.display = 'none';
+
+                                        document.getElementById(
+                                            'sello-medico-duplicado-{{ medico_firma.id }}'
+                                        ).style.display = 'flex';
+
+                                    }
+                                "
+                            >
+
+
+                            <div
+                                id="sello-medico-duplicado-{{ medico_firma.id }}"
+                                class="sello-medico"
+                                style="display:none;">
+
+                                <div class="nombre">
+
+                                    Dr.
+                                    {{ medico_firma.apellido }}
+                                    {{ medico_firma.nombre }}
+
+                                </div>
+
+
+                                {% if medico_firma.servicio %}
+
+                                    <div class="servicio">
+
+                                        {{ medico_firma.servicio.nombre }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                {% if medico_firma.matricula %}
+
+                                    <div class="matricula">
+
+                                        MP {{ medico_firma.matricula }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                        {% else %}
+
+
+                            <div class="sello-medico">
+
+                                <div class="nombre">
+
+                                    Dr.
+                                    {{ medico_firma.apellido }}
+                                    {{ medico_firma.nombre }}
+
+                                </div>
+
+
+                                {% if medico_firma.servicio %}
+
+                                    <div class="servicio">
+
+                                        {{ medico_firma.servicio.nombre }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                {% if medico_firma.matricula %}
+
+                                    <div class="matricula">
+
+                                        MP {{ medico_firma.matricula }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                        {% endif %}
+
+
+                    {% endif %}
+
+
+                    <!-- BASE DE LA FIRMA -->
+
+                    <div class="linea-firma"></div>
+
+
+                    <!-- TEXTO -->
+
+                    <div class="texto-firma">
+
+                        Firma y Sello<br>
+                        del Profesional
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- METADATOS DUPLICADO -->
+
+            <div class="bottom-meta">
+
+                <div>
+
+                    <b>Usuario:</b>
+
+                    {{ request.user.get_full_name|default:request.user.username }}
+
+                </div>
+
+
+                <div>
+
+                    <b>Impresión:</b>
+
+                    {{ fecha_impresion|date:"d/m/Y H:i:s" }}
+
+                </div>
+
+
+                <div class="original">
+
+                    DUPLICADO
+
+                </div>
+
+            </div>
+
         </div>
-        </div>
-        <div class="bottom-meta">
-            <div>
-                <b>Usuario:</b>
-                {{ request.user.get_full_name|default:request.user.username }}
-            </div>
 
-            <div>
-                <b>Impresión:</b>
-                {{ fecha_impresion|date:"d/m/Y H:i:s" }}
-            </div>
-
-            <div class="original">
-                DUPLICADO
-            </div>
-        </div>
-
-    </div>
     {% endif %}
 
 </div>
 
+
 <script>
+
     window.onload = function () {
         window.print();
-    }
+    };
+
 
     window.onafterprint = function () {
         history.back();
-    }
+    };
+
 </script>
+
 
 </body>
 </html>

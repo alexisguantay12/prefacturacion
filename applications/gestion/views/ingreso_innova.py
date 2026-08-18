@@ -74,7 +74,7 @@ def consultar_episodio_innova(documento):
     sql = """
         SELECT TOP (1)
             e.Id AS episodio,
-            CONVERT(date,e.FechaModificacion) AS fecha_ingreso,
+            CONVERT(date,e.IngresoReal) AS fecha_ingreso,
             e.Diagnostico AS diagnostico,
             e.MotivoIngreso AS motivo_ingreso,
             p.Documento_Numero AS dni,
@@ -108,8 +108,7 @@ def consultar_episodio_innova(documento):
           AND e.IdTipoEpisodio IN (1,2)
           AND e.Estado='A'
         ORDER BY e.Id DESC;
-    """
-    print("Yo llego aca")
+    """ 
     
     try:
         with connections["innova"].cursor() as cursor:

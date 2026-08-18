@@ -193,6 +193,7 @@ def agregar_ingreso(request):
         "planes": planes,
         "medicos": medicos,
         "servicios": servicios,
+        "fecha_hoy": date.today().isoformat(),
     })
 
 
@@ -465,6 +466,7 @@ def agregar_ingreso_programado(request):
         "planes": planes,
         "medicos": medicos,
         "servicios": servicios,
+        "fecha_hoy": date.today().isoformat(),
     })
 
 
