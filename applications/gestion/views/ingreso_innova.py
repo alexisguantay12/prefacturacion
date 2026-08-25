@@ -107,6 +107,7 @@ def consultar_episodio_innova(documento):
         WHERE p.Documento_Numero=%s
           AND e.IdTipoEpisodio IN (1,2)
           AND e.Estado='A'
+          AND UPPER(LTRIM(RTRIM(ISNULL(p.Nombres, '')))) <> 'RN'
         ORDER BY e.Id DESC;
     """ 
     

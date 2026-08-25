@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import Servicio, Paciente, Medico, ObraSocial, Prestacion, Plan
-
+from django.contrib.auth.decorators import login_required
 
 # ============================================================
 # HELPERS
@@ -42,6 +42,7 @@ def asignar_usuario_si_existe(obj, request):
 # SERVICIOS
 # ============================================================
 
+@login_required
 def listado_servicios(request):
     buscar = request.GET.get("buscar", "").strip()
 
@@ -60,7 +61,7 @@ def listado_servicios(request):
         "buscar": buscar,
     })
 
-
+@login_required
 def agregar_servicio(request):
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
@@ -86,7 +87,7 @@ def agregar_servicio(request):
 
     return render(request, "entidades/servicio/agregar_servicio.html")
 
-
+@login_required
 def editar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
 
@@ -114,7 +115,7 @@ def editar_servicio(request, pk):
         "servicio": servicio,
     })
 
-
+@login_required
 def eliminar_servicio(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
 
@@ -133,7 +134,7 @@ def eliminar_servicio(request, pk):
 # ============================================================
 # PACIENTES
 # ============================================================
-
+@login_required
 def listado_pacientes(request):
     buscar = request.GET.get("buscar", "").strip()
 
@@ -154,7 +155,7 @@ def listado_pacientes(request):
         "buscar": buscar,
     })
 
-
+@login_required
 def agregar_paciente(request):
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
@@ -193,7 +194,7 @@ def agregar_paciente(request):
 
     return render(request, "entidades/paciente/agregar_paciente.html")
 
-
+@login_required
 def editar_paciente(request, pk):
     paciente = get_object_or_404(Paciente, pk=pk)
 
@@ -235,7 +236,7 @@ def editar_paciente(request, pk):
         "paciente": paciente,
     })
 
-
+@login_required
 def eliminar_paciente(request, pk):
     paciente = get_object_or_404(Paciente, pk=pk)
 
@@ -254,7 +255,7 @@ def eliminar_paciente(request, pk):
 # ============================================================
 # MÉDICOS
 # ============================================================
-
+@login_required
 def listado_medicos(request):
     buscar = request.GET.get("buscar", "").strip()
 
@@ -276,7 +277,7 @@ def listado_medicos(request):
         "buscar": buscar,
     })
 
-
+@login_required
 def agregar_medico(request):
     servicios = Servicio.objects.all().order_by("nombre")
 
@@ -309,7 +310,7 @@ def agregar_medico(request):
         "servicios": servicios,
     })
 
-
+@login_required
 def editar_medico(request, pk):
     medico = get_object_or_404(Medico, pk=pk)
     servicios = Servicio.objects.all().order_by("nombre")
@@ -343,7 +344,7 @@ def editar_medico(request, pk):
         "servicios": servicios,
     })
 
-
+@login_required
 def eliminar_medico(request, pk):
     medico = get_object_or_404(Medico, pk=pk)
 
@@ -361,7 +362,7 @@ def eliminar_medico(request, pk):
 # ============================================================
 # OBRAS SOCIALES
 # ============================================================
-
+@login_required
 def listado_obras_sociales(request):
     buscar = request.GET.get("buscar", "").strip()
 
@@ -381,7 +382,7 @@ def listado_obras_sociales(request):
         "buscar": buscar,
     })
 
-
+@login_required
 def agregar_obra_social(request):
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
@@ -409,7 +410,7 @@ def agregar_obra_social(request):
 
     return render(request, "entidades/obrasocial/agregar_obra_social.html")
 
-
+@login_required
 def editar_obra_social(request, pk):
     obra_social = get_object_or_404(ObraSocial, pk=pk)
 
@@ -439,7 +440,7 @@ def editar_obra_social(request, pk):
         "obra_social": obra_social,
     })
 
-
+@login_required
 def eliminar_obra_social(request, pk):
     obra_social = get_object_or_404(ObraSocial, pk=pk)
 
@@ -456,7 +457,7 @@ def eliminar_obra_social(request, pk):
 # ============================================================
 # PRESTACIONES
 # ============================================================
-
+@login_required
 def listado_prestaciones(request):
     buscar = request.GET.get("buscar", "").strip()
 
@@ -476,7 +477,7 @@ def listado_prestaciones(request):
         "buscar": buscar,
     })
 
-
+@login_required
 def agregar_prestacion(request):
     if request.method == "POST":
         codigo = request.POST.get("codigo", "").strip()
@@ -504,7 +505,7 @@ def agregar_prestacion(request):
 
     return render(request, "entidades/prestacion/agregar_prestacion.html")
 
-
+@login_required
 def editar_prestacion(request, pk):
     prestacion = get_object_or_404(Prestacion, pk=pk)
 
@@ -534,7 +535,7 @@ def editar_prestacion(request, pk):
         "prestacion": prestacion,
     })
 
-
+@login_required
 def eliminar_prestacion(request, pk):
     prestacion = get_object_or_404(Prestacion, pk=pk)
 
@@ -552,7 +553,7 @@ def eliminar_prestacion(request, pk):
 # ============================================================
 # PLANES
 # ============================================================
-
+@login_required
 def listado_planes(request):
     buscar = request.GET.get("buscar", "").strip()
 
@@ -575,7 +576,7 @@ def listado_planes(request):
         "buscar": buscar,
     })
 
-
+@login_required
 def agregar_plan(request):
     obras_sociales = ObraSocial.objects.all().order_by("nombre")
 
@@ -606,7 +607,7 @@ def agregar_plan(request):
         "obras_sociales": obras_sociales,
     })
 
-
+@login_required
 def editar_plan(request, pk):
     plan = get_object_or_404(Plan, pk=pk)
     obras_sociales = ObraSocial.objects.all().order_by("nombre")
@@ -637,7 +638,7 @@ def editar_plan(request, pk):
         "obras_sociales": obras_sociales,
     })
 
-
+@login_required
 def eliminar_plan(request, pk):
     plan = get_object_or_404(Plan, pk=pk)
 
