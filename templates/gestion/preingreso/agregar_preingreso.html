@@ -1854,106 +1854,64 @@
             });
     }
     function validarYEnviarPreingreso() {
-        const pacienteId = document.getElementById("paciente_id").value;
-        const form = document.getElementById("formAgregarPreingreso");
-        const btnConfirmar = document.getElementById("btnConfirmarGuardarPreingreso");
+    const pacienteId = document
+        .getElementById("paciente_id")
+        .value
+        .trim();
 
-        limpiarErrorFrontend();
+    const innovaDocumento = document
+        .getElementById("innova_documento")
+        .value
+        .trim();
 
-        if (!pacienteId) {
-            const modalGuardar = bootstrap.Modal.getInstance(document.getElementById("modalGuardarPreingreso"));
+    const form = document.getElementById("formAgregarPreingreso");
 
-            if (modalGuardar) {
-                modalGuardar.hide();
-            }
+    const btnConfirmar = document.getElementById(
+        "btnConfirmarGuardarPreingreso"
+    );
 
-            mostrarErrorFrontend("Debe seleccionar un paciente antes de guardar el preingreso.");
- 
-            return;
+    limpiarErrorFrontend();
+
+    /*
+     * El paciente puede provenir de:
+     *
+     * 1. Base local:
+     *      paciente_id tiene valor.
+     *
+     * 2. INNOVA:
+     *      innova_documento tiene valor.
+     *
+     * Solo es error cuando ambos están vacíos.
+     */
+    if (!pacienteId && !innovaDocumento) {
+
+        const modalGuardar = bootstrap.Modal.getInstance(
+            document.getElementById("modalGuardarPreingreso")
+        );
+
+        if (modalGuardar) {
+            modalGuardar.hide();
         }
 
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
+        mostrarErrorFrontend(
+            "Debe seleccionar un paciente antes de guardar el preingreso."
+        );
 
-        btnConfirmar.disabled = true;
-        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-
-        form.submit();
+        return;
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const btnBuscarPaciente = document.getElementById("btnBuscarPaciente");
-        const buscarPacienteApellido = document.getElementById("buscarPacienteApellido");
-        const buscarPacienteNombre = document.getElementById("buscarPacienteNombre");
-        const buscarPacienteDni = document.getElementById("buscarPacienteDni");
-        const btnCargarMasPacientes = document.getElementById("btnCargarMasPacientes");
-        const formCrearPacienteModal = document.getElementById("formCrearPacienteModal");
-        const btnVolverBusquedaPaciente = document.getElementById("btnVolverBusquedaPaciente");
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
 
-        btnBuscarPaciente.addEventListener("click", function () {
-            buscarPacientes(true);
-        });
+    btnConfirmar.disabled = true;
 
-        [
-            buscarPacienteApellido,
-            buscarPacienteNombre,
-            buscarPacienteDni
-        ].forEach(input => {
-            input.addEventListener("keydown", function (e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    buscarPacientes(true);
-                }
-            });
-        });
+    btnConfirmar.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-        btnCargarMasPacientes.addEventListener("click", function () {
-            if (pacienteHasNext) {
-                pacientePage += 1;
-                buscarPacientes(false);
-            }
-        });
-
-        btnVolverBusquedaPaciente.addEventListener("click", function () {
-            const tab = new bootstrap.Tab(document.getElementById("buscar-paciente-tab"));
-            tab.show();
-        });
-
-        formCrearPacienteModal.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const form = this;
-            const errorBox = document.getElementById("crearPacienteError");
-            const formData = new FormData(form);
-
-            errorBox.classList.add("d-none");
-            errorBox.innerText = "";
-
-            fetch(crearPacienteUrl, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: formData
-            })
-            .then(async response => {
-                const data = await response.json();
-
-                if (!response.ok || !data.ok) {
-                    throw data;
-                }
-
-                seleccionarPaciente(data.paciente);
-                form.reset();
-            })
-            .catch(error => {
-                errorBox.innerText = error.error || "No se pudo crear el paciente.";
-                errorBox.classList.remove("d-none");
-            });
-        });
-    });
+    form.submit();
+}
 
 window.addEventListener("pageshow", function (event) {
 

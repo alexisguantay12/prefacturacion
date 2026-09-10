@@ -214,6 +214,10 @@ def blanquear_contraseña(request, usuario_id):
             "usuario_objetivo": usuario,
         }
     )
+
+
+
+
 def traducir_error_contraseña(error):
     error = str(error)
 
@@ -239,3 +243,11 @@ def traducir_error_contraseña(error):
         return "La contraseña actual es incorrecta."
 
     return error
+
+
+
+
+
+
+
+
