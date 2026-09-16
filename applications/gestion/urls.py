@@ -130,6 +130,17 @@ urlpatterns = [
         name="buscar_ingreso_erp",
     ),
 
+    path(
+        "buscar-episodio-erp-detalle/",
+        views.buscar_episodio_erp_detalle,
+        name="buscar_episodio_erp_detalle",
+    ),
+    path(
+        "buscar-ingreso-erp/",
+        views.buscar_ingreso_erp,
+        name="buscar_ingreso_erp",
+    ),
+
 
       # =====================================================
     # PROCEDIMIENTOS

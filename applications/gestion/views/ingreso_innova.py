@@ -30,6 +30,24 @@ def dictfetchone(cursor):
     return dict(zip(columns, row))
 
 
+def dictfetchall(cursor):
+    """
+    Convierte todas las filas SQL en una lista de diccionarios
+    utilizando los alias definidos en el SELECT.
+    """
+    rows = cursor.fetchall()
+
+    columns = [
+        column[0]
+        for column in cursor.description
+    ]
+
+    return [
+        dict(zip(columns, row))
+        for row in rows
+    ]
+
+
 def limpiar_texto(valor):
     if valor is None:
         return ""
@@ -132,10 +150,85 @@ def consultar_episodio_innova(documento):
     return datos
 
 
+
+def consultar_episodios_innova(documento):
+    """
+    Busca todos los episodios del paciente correspondientes
+    a los últimos 45 días.
+
+    Se utiliza únicamente para mostrar el listado inicial
+    de episodios disponibles para seleccionar.
+    """
+    documento = limpiar_texto(documento)
+
+    if not documento:
+        return []
+
+    sql = """
+        SELECT
+            e.Id AS episodio,
+            CONVERT(date, e.IngresoReal) AS fecha_ingreso,
+            p.Documento_Numero AS dni,
+            p.Nombres AS nombre,
+            p.Apellido AS apellido
+        FROM hce.Internacion.Episodios AS e
+        INNER JOIN Personas AS p
+            ON p.Id = e.IdPersona
+        WHERE p.Documento_Numero = %s
+          AND e.IdTipoEpisodio IN (1,2)
+          AND e.IngresoReal >= DATEADD(DAY, -45, GETDATE())
+          AND e.Estado='A'
+          AND UPPER(
+                LTRIM(
+                    RTRIM(
+                        ISNULL(p.Nombres, '')
+                    )
+                )
+              ) <> 'RN'
+        ORDER BY
+            e.IngresoReal DESC,
+            e.Id DESC;
+    """
+
+    try:
+        with connections["innova"].cursor() as cursor:
+            cursor.execute(
+                sql,
+                [documento]
+            )
+
+            episodios = dictfetchall(
+                cursor
+            )
+
+        print(
+            "Episodios encontrados:",
+            episodios
+        )
+
+    except Exception as error:
+        print(
+            "ERROR AL CONSULTAR EPISODIOS EN INNOVA"
+        )
+        print(
+            "Tipo:",
+            type(error).__name__
+        )
+        print(
+            "Detalle:",
+            str(error)
+        )
+
+        raise
+
+    return episodios
+
 @login_required
 @require_GET
 def buscar_ingreso_erp(request):
-    documento = limpiar_texto(request.GET.get("documento"))
+    documento = limpiar_texto(
+        request.GET.get("documento")
+    )
 
     if not documento:
         return JsonResponse(
@@ -147,7 +240,9 @@ def buscar_ingreso_erp(request):
         )
 
     try:
-        datos = consultar_episodio_innova(documento)
+        episodios = consultar_episodios_innova(
+            documento
+        )
 
     except Exception:
         return JsonResponse(
@@ -158,140 +253,446 @@ def buscar_ingreso_erp(request):
             status=500,
         )
 
-    if not datos:
+    if not episodios:
         return JsonResponse(
             {
                 "ok": False,
                 "error": (
-                    "No se encontró un episodio activo para "
-                    "el documento indicado."
+                    "No se encontraron episodios para "
+                    "el documento indicado en los últimos 45 días."
                 ),
             },
             status=404,
         )
 
-    episodio = limpiar_texto(datos.get("episodio"))
-    dni = limpiar_texto(datos.get("dni"))
+    episodios_response = []
 
-    if Preingreso.objects.filter(episodio=episodio).exists():
-        return JsonResponse(
-            {
-                "ok": False,
-                "error": "El episodio encontrado ya fue importado.",
-                "redirect_url": reverse(
-                    "gestion_app:lista_ingresos"
-                ),
-            },
-            status=409,
+    for datos in episodios:
+        episodio = limpiar_texto(
+            datos.get("episodio")
         )
 
-    paciente_local = Paciente.objects.filter(dni=dni).first()
+        dni = limpiar_texto(
+            datos.get("dni")
+        )
 
-    ingreso_abierto = None
+        fecha_ingreso = datos.get(
+            "fecha_ingreso"
+        )
 
-    if paciente_local:
-        ingreso_abierto = (
+        ya_importado = (
             Preingreso.objects
             .filter(
-                paciente=paciente_local,
-                es_preingreso=False,
-                estado="ingresado",
-                fecha_egreso__isnull=True,
+                episodio=episodio
             )
-            .first()
+            .exists()
         )
 
-    if ingreso_abierto:
+        episodios_response.append(
+            {
+                "episodio": episodio,
+
+                "dni": dni,
+
+                "nombre": limpiar_texto(
+                    datos.get("nombre")
+                ),
+
+                "apellido": limpiar_texto(
+                    datos.get("apellido")
+                ),
+
+                "fecha_ingreso": (
+                    fecha_ingreso.isoformat()
+                    if fecha_ingreso else ""
+                ),
+
+                "ya_importado": ya_importado,
+            }
+        )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "episodios": episodios_response,
+        }
+    )
+
+def consultar_episodio_innova_por_id(
+    documento,
+    episodio
+):
+    """
+    Recupera de INNOVA un episodio específico correspondiente
+    al DNI indicado.
+
+    Se utiliza después de que el usuario selecciona un episodio
+    y también para revalidarlo antes de guardar.
+    """
+    documento = limpiar_texto(documento)
+    episodio = limpiar_texto(episodio)
+
+    if not documento or not episodio:
+        return None
+
+    sql = """
+        SELECT TOP (1)
+            e.Id AS episodio,
+            CONVERT(date, e.IngresoReal) AS fecha_ingreso,
+            e.Estado AS estado_episodio,
+            e.Diagnostico AS diagnostico,
+            e.MotivoIngreso AS motivo_ingreso,
+
+            p.Documento_Numero AS dni,
+            p.Nombres AS nombre,
+            p.Apellido AS apellido,
+            p.Sexo AS genero,
+            CONVERT(date, p.FechaNacimiento) AS fecha_nacimiento,
+            p.TelefonoCelular AS telefono,
+
+            ex.NumeroDeAfiliado AS numero_afiliado,
+
+            prof.Matricula AS medico_matricula,
+            per.Nombres AS medico_nombre,
+            per.Apellido AS medico_apellido,
+            per.Documento_Numero AS medico_documento,
+
+            CONCAT(
+                par.Nombres,
+                ', ',
+                par.Apellido
+            ) AS contacto_nombre,
+
+            par.Documento_Numero AS contacto_dni,
+            par.TelefonoCelular AS contacto_telefono,
+            p2.Nombre AS contacto_parentesco
+
+        FROM hce.Internacion.Episodios AS e
+
+        INNER JOIN Personas AS p
+            ON p.Id = e.IdPersona
+
+        LEFT JOIN Profesionales AS prof
+            ON prof.Id = e.IdProfesionalResponsableDeCabecera
+
+        LEFT JOIN Personas AS per
+            ON per.Id = prof.IdPersona
+
+        LEFT JOIN Personas AS par
+            ON par.Id = e.IdPersonaTutor
+
+        LEFT JOIN Parentescos AS p2
+            ON p2.Id = e.IdParentescoTutor
+
+        LEFT JOIN Internacion.Expedientes AS ex
+            ON ex.Id = e.IdExpediente
+
+        WHERE p.Documento_Numero = %s
+          AND e.Id = %s
+          AND e.IdTipoEpisodio IN (1,2)
+          AND e.IngresoReal >= DATEADD(DAY, -45, GETDATE())
+          AND UPPER(
+                LTRIM(
+                    RTRIM(
+                        ISNULL(p.Nombres, '')
+                    )
+                )
+              ) <> 'RN';
+    """
+
+    try:
+        with connections["innova"].cursor() as cursor:
+            cursor.execute(
+                sql,
+                [
+                    documento,
+                    episodio,
+                ]
+            )
+
+            datos = dictfetchone(
+                cursor
+            )
+
+        print(
+            "Episodio específico encontrado:",
+            datos
+        )
+
+    except Exception as error:
+        print(
+            "ERROR AL CONSULTAR EPISODIO EN INNOVA"
+        )
+        print(
+            "Tipo:",
+            type(error).__name__
+        )
+        print(
+            "Detalle:",
+            str(error)
+        )
+
+        raise
+
+    if not datos:
+        return None
+
+    datos["diagnostico_final"] = (
+        obtener_diagnostico_innova(
+            datos
+        )
+    )
+
+    return datos
+
+
+@login_required
+@require_GET
+def buscar_episodio_erp_detalle(request):
+    documento = limpiar_texto(
+        request.GET.get("documento")
+    )
+
+    episodio = limpiar_texto(
+        request.GET.get("episodio")
+    )
+
+    if not documento:
         return JsonResponse(
             {
                 "ok": False,
                 "error": (
-                    f"El paciente ya posee el ingreso "
-                    f"#{ingreso_abierto.numero} abierto."
+                    "Debe indicar el documento del paciente."
                 ),
-                "redirect_url": reverse(
-                    "gestion_app:lista_ingresos"
+            },
+            status=400,
+        )
+
+    if not episodio:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "Debe indicar el episodio."
+                ),
+            },
+            status=400,
+        )
+
+    try:
+        datos = consultar_episodio_innova_por_id(
+            documento,
+            episodio
+        )
+
+    except Exception:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "No se pudo consultar el episodio "
+                    "en INNOVA."
+                ),
+            },
+            status=500,
+        )
+
+    if not datos:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "No se encontró el episodio indicado "
+                    "para ese paciente dentro de los "
+                    "últimos 45 días."
+                ),
+            },
+            status=404,
+        )
+
+    episodio_real = limpiar_texto(
+        datos.get("episodio")
+    )
+
+    dni = limpiar_texto(
+        datos.get("dni")
+    )
+
+    if episodio_real != episodio:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "El episodio recuperado no coincide "
+                    "con el episodio solicitado."
                 ),
             },
             status=409,
         )
 
-    fecha_ingreso = datos.get("fecha_ingreso")
-    fecha_nacimiento = datos.get("fecha_nacimiento")
+    if dni != documento:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "El episodio indicado no corresponde "
+                    "al documento solicitado."
+                ),
+            },
+            status=409,
+        )
 
-    return JsonResponse({
-        "ok": True,
-        "datos": {
-            "episodio": episodio,
-            "fecha_ingreso": (
-                fecha_ingreso.isoformat()
-                if fecha_ingreso else ""
-            ),
-            "diagnostico": datos.get("diagnostico_final") or "",
+    if (
+        Preingreso.objects
+        .filter(
+            episodio=episodio_real
+        )
+        .exists()
+    ):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "El episodio seleccionado ya fue "
+                    "importado anteriormente."
+                ),
+            },
+            status=409,
+        )
 
-            "dni": dni,
-            "nombre": limpiar_texto(datos.get("nombre")),
-            "apellido": limpiar_texto(datos.get("apellido")),
-            "fecha_nacimiento": (
-                fecha_nacimiento.isoformat()
-                if fecha_nacimiento else ""
-            ),
-            "telefono": limpiar_texto(datos.get("telefono")),
+    paciente_local = (
+        Paciente.objects
+        .filter(
+            dni=dni
+        )
+        .first()
+    )
 
-            "numero_afiliado": limpiar_texto(
-                datos.get("numero_afiliado")
-            ),
-            "genero": normalizar_genero_innova(
-                datos.get("genero")
-            ),
-            "medico_matricula": limpiar_texto(
-                datos.get("medico_matricula")
-            ),
-            "medico_nombre": limpiar_texto(
-                datos.get("medico_nombre")
-            ),
-            "medico_apellido": limpiar_texto(
-                datos.get("medico_apellido")
-            ),
-            "medico_documento": limpiar_texto(
-                datos.get("medico_documento")
-            ),
+    fecha_ingreso = datos.get(
+        "fecha_ingreso"
+    )
 
-            "contacto_nombre": limpiar_texto(
-                datos.get("contacto_nombre")
-            ),
-            "contacto_dni": limpiar_texto(
-                datos.get("contacto_dni")
-            ),
-            "contacto_telefono": limpiar_texto(
-                datos.get("contacto_telefono")
-            ),
-            "contacto_parentesco": limpiar_texto(
-                datos.get("contacto_parentesco")
-            ),
+    fecha_nacimiento = datos.get(
+        "fecha_nacimiento"
+    )
 
-            "paciente_existe": bool(paciente_local),
-        },
-    })
+    return JsonResponse(
+        {
+            "ok": True,
 
+            "datos": {
+                "episodio": episodio_real,
 
+                "fecha_ingreso": (
+                    fecha_ingreso.isoformat()
+                    if fecha_ingreso else ""
+                ),
 
+                "estado_episodio": limpiar_texto(
+                    datos.get("estado_episodio")
+                ),
 
+                "diagnostico": (
+                    datos.get("diagnostico_final")
+                    or ""
+                ),
+
+                "dni": dni,
+
+                "nombre": limpiar_texto(
+                    datos.get("nombre")
+                ),
+
+                "apellido": limpiar_texto(
+                    datos.get("apellido")
+                ),
+
+                "fecha_nacimiento": (
+                    fecha_nacimiento.isoformat()
+                    if fecha_nacimiento else ""
+                ),
+
+                "telefono": limpiar_texto(
+                    datos.get("telefono")
+                ),
+
+                "numero_afiliado": limpiar_texto(
+                    datos.get("numero_afiliado")
+                ),
+
+                "genero": normalizar_genero_innova(
+                    datos.get("genero")
+                ),
+
+                "medico_matricula": limpiar_texto(
+                    datos.get("medico_matricula")
+                ),
+
+                "medico_nombre": limpiar_texto(
+                    datos.get("medico_nombre")
+                ),
+
+                "medico_apellido": limpiar_texto(
+                    datos.get("medico_apellido")
+                ),
+
+                "medico_documento": limpiar_texto(
+                    datos.get("medico_documento")
+                ),
+
+                "contacto_nombre": limpiar_texto(
+                    datos.get("contacto_nombre")
+                ),
+
+                "contacto_dni": limpiar_texto(
+                    datos.get("contacto_dni")
+                ),
+
+                "contacto_telefono": limpiar_texto(
+                    datos.get("contacto_telefono")
+                ),
+
+                "contacto_parentesco": limpiar_texto(
+                    datos.get("contacto_parentesco")
+                ),
+
+                "paciente_existe": bool(
+                    paciente_local
+                ),
+            },
+        }
+    )
+
+ 
 @login_required
 def guardar_ingreso_erp(request):
-    obras_sociales = ObraSocial.objects.all().order_by("nombre")
+    obras_sociales = (
+        ObraSocial.objects
+        .all()
+        .order_by("nombre")
+    )
 
     planes = (
         Plan.objects
         .select_related("obra_social")
         .all()
-        .order_by("obra_social__nombre", "nombre")
+        .order_by(
+            "obra_social__nombre",
+            "nombre"
+        )
     )
 
-    servicios = Servicio.objects.all().order_by("nombre")
+    servicios = (
+        Servicio.objects
+        .all()
+        .order_by("nombre")
+    )
 
     if request.method == "POST":
-        dni = limpiar_texto(request.POST.get("dni"))
+        dni = limpiar_texto(
+            request.POST.get("dni")
+        )
+
         episodio_enviado = limpiar_texto(
             request.POST.get("episodio")
         )
@@ -300,60 +701,98 @@ def guardar_ingreso_erp(request):
             request.POST.get("telefono")
         )
 
-        obra_social_id = request.POST.get("obra_social")
-        plan_id = request.POST.get("plan")
-        servicio_id = request.POST.get("servicio") or None
+        obra_social_id = request.POST.get(
+            "obra_social"
+        )
+
+        plan_id = request.POST.get(
+            "plan"
+        )
+
+        servicio_id = (
+            request.POST.get("servicio")
+            or None
+        )
 
         observaciones = limpiar_texto(
             request.POST.get("observaciones")
         )
+
+        # -----------------------------------------------------
+        # VALIDACIONES INICIALES
+        # -----------------------------------------------------
 
         if not dni:
             messages.error(
                 request,
                 "No se recibió el documento del paciente."
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
 
         if not episodio_enviado:
             messages.error(
                 request,
                 "No se recibió el número de episodio."
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
 
         if not obra_social_id:
             messages.error(
                 request,
                 "Debe seleccionar una obra social."
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
 
         if not plan_id:
             messages.error(
                 request,
                 "Debe seleccionar un plan."
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
+
+        # -----------------------------------------------------
+        # COBERTURA
+        # -----------------------------------------------------
 
         obra_social = (
             ObraSocial.objects
-            .filter(id=obra_social_id)
+            .filter(
+                id=obra_social_id
+            )
             .first()
         )
 
         plan = (
             Plan.objects
-            .select_related("obra_social")
-            .filter(id=plan_id)
+            .select_related(
+                "obra_social"
+            )
+            .filter(
+                id=plan_id
+            )
             .first()
         )
 
         servicio = (
             Servicio.objects
-            .filter(id=servicio_id)
+            .filter(
+                id=servicio_id
+            )
             .first()
-            if servicio_id else None
+            if servicio_id
+            else None
         )
 
         if not obra_social:
@@ -361,173 +800,333 @@ def guardar_ingreso_erp(request):
                 request,
                 "La obra social seleccionada no existe."
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
 
         if not plan:
             messages.error(
                 request,
                 "El plan seleccionado no existe."
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
 
-        if plan.obra_social_id != obra_social.id:
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
+
+        if (
+            plan.obra_social_id
+            != obra_social.id
+        ):
             messages.error(
                 request,
-                "El plan no corresponde a la obra social indicada."
+                (
+                    "El plan no corresponde a "
+                    "la obra social indicada."
+                )
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
 
-        # Se vuelve a consultar INNOVA.
-        # No se confía solamente en los campos enviados por el navegador.
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
+
+        # -----------------------------------------------------
+        # REVALIDAR EPISODIO EXACTO EN INNOVA
+        # -----------------------------------------------------
+        #
+        # Se consulta nuevamente DNI + episodio.
+        #
+        # No se confía únicamente en los datos enviados
+        # desde el navegador.
+        # -----------------------------------------------------
+
         try:
-            datos_erp = consultar_episodio_innova(dni)
+            datos_erp = (
+                consultar_episodio_innova_por_id(
+                    dni,
+                    episodio_enviado
+                )
+            )
 
         except Exception:
             messages.error(
                 request,
-                "No se pudo validar nuevamente el episodio en INNOVA."
+                (
+                    "No se pudo validar nuevamente "
+                    "el episodio en INNOVA."
+                )
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
 
         if not datos_erp:
             messages.error(
                 request,
-                "El episodio ya no se encuentra activo en INNOVA."
+                (
+                    "El episodio seleccionado ya no pudo "
+                    "ser encontrado en INNOVA."
+                )
             )
-            return redirect("gestion_app:lista_ingresos")
+
+            return redirect(
+                "gestion_app:lista_ingresos"
+            )
 
         episodio_real = limpiar_texto(
             datos_erp.get("episodio")
         )
 
-        if episodio_real != episodio_enviado:
+        dni_real = limpiar_texto(
+            datos_erp.get("dni")
+        )
+
+        # -----------------------------------------------------
+        # SEGURIDAD:
+        # validar que INNOVA devolvió exactamente el episodio
+        # solicitado.
+        # -----------------------------------------------------
+
+        if (
+            episodio_real
+            != episodio_enviado
+        ):
             messages.error(
                 request,
                 (
-                    "El episodio activo cambió desde que se realizó "
-                    "la búsqueda. Vuelva a iniciar la carga."
+                    "El episodio recuperado desde INNOVA "
+                    "no coincide con el episodio seleccionado."
                 )
             )
-            return redirect("gestion_app:lista_ingresos")
 
-        diagnostico = obtener_diagnostico_innova(datos_erp)
+            return redirect(
+                "gestion_app:lista_ingresos"
+            )
+
+        # -----------------------------------------------------
+        # SEGURIDAD:
+        # validar que el episodio pertenece realmente
+        # al DNI enviado.
+        # -----------------------------------------------------
+
+        if dni_real != dni:
+            messages.error(
+                request,
+                (
+                    "El episodio recuperado desde INNOVA "
+                    "no corresponde al paciente indicado."
+                )
+            )
+
+            return redirect(
+                "gestion_app:lista_ingresos"
+            )
+
+        # -----------------------------------------------------
+        # DIAGNÓSTICO
+        # -----------------------------------------------------
+
+        diagnostico = (
+            obtener_diagnostico_innova(
+                datos_erp
+            )
+        )
 
         if not diagnostico:
             messages.error(
                 request,
                 (
-                    "INNOVA no informó diagnóstico ni motivo "
-                    "de ingreso."
+                    "INNOVA no informó diagnóstico "
+                    "ni motivo de ingreso."
                 )
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
+
+        # -----------------------------------------------------
+        # MÉDICO
+        # -----------------------------------------------------
 
         medico_matricula = limpiar_texto(
-            datos_erp.get("medico_matricula")
+            datos_erp.get(
+                "medico_matricula"
+            )
         )
 
         medico_nombre = limpiar_texto(
-            datos_erp.get("medico_nombre")
+            datos_erp.get(
+                "medico_nombre"
+            )
         )
 
         medico_apellido = limpiar_texto(
-            datos_erp.get("medico_apellido")
+            datos_erp.get(
+                "medico_apellido"
+            )
         )
 
         medico_documento = limpiar_texto(
-            datos_erp.get("medico_documento")
+            datos_erp.get(
+                "medico_documento"
+            )
         )
+
+        # -----------------------------------------------------
+        # TRANSACCIÓN
+        # -----------------------------------------------------
 
         try:
             with transaction.atomic():
-                # Evitar importar dos veces el mismo episodio.
+
+                # -------------------------------------------------
+                # EVITAR DUPLICAR EL MISMO EPISODIO
+                # -------------------------------------------------
+                #
+                # Esta es la regla principal.
+                #
+                # El paciente puede tener otros ingresos abiertos.
+                # Eso NO impide importar este episodio.
+                #
+                # Lo único que no se permite es importar
+                # dos veces el mismo episodio.
+                # -------------------------------------------------
+
                 if (
                     Preingreso.objects
                     .select_for_update()
-                    .filter(episodio=episodio_real)
+                    .filter(
+                        episodio=episodio_real
+                    )
                     .exists()
                 ):
                     messages.error(
                         request,
-                        "El episodio ya fue importado anteriormente."
+                        (
+                            "El episodio ya fue "
+                            "importado anteriormente."
+                        )
                     )
-                    return redirect("gestion_app:lista_ingresos")
+
+                    return redirect(
+                        "gestion_app:lista_ingresos"
+                    )
+
+                # -------------------------------------------------
+                # PACIENTE
+                # -------------------------------------------------
 
                 paciente = (
                     Paciente.objects
                     .select_for_update()
-                    .filter(dni=dni)
+                    .filter(
+                        dni=dni
+                    )
                     .first()
                 )
 
                 if paciente:
-                    ingreso_abierto = (
-                        Preingreso.objects
-                        .select_for_update()
-                        .filter(
-                            paciente=paciente,
-                            es_preingreso=False,
-                            estado="ingresado",
-                            fecha_egreso__isnull=True,
-                        )
-                        .first()
-                    )
+                    # ---------------------------------------------
+                    # IMPORTANTE:
+                    #
+                    # NO se valida si el paciente tiene otro
+                    # ingreso abierto.
+                    #
+                    # Un mismo paciente puede tener distintos
+                    # episodios y todos deben poder importarse.
+                    # ---------------------------------------------
 
-                    if ingreso_abierto:
-                        messages.error(
-                            request,
-                            (
-                                f"El paciente ya posee el ingreso "
-                                f"#{ingreso_abierto.numero} abierto."
+                    paciente.nombre = (
+                        limpiar_texto(
+                            datos_erp.get(
+                                "nombre"
                             )
                         )
-                        return redirect(
-                            "gestion_app:lista_ingresos"
+                    )
+
+                    paciente.apellido = (
+                        limpiar_texto(
+                            datos_erp.get(
+                                "apellido"
+                            )
                         )
-
-                    # Los datos corroborados vienen de INNOVA.
-                    paciente.nombre = limpiar_texto(
-                        datos_erp.get("nombre")
-                    )
-                    paciente.apellido = limpiar_texto(
-                        datos_erp.get("apellido")
-                    )
-                    paciente.fecha_nacimiento = datos_erp.get(
-                        "fecha_nacimiento"
                     )
 
-                    # El teléfono es el único dato editable.
-                    paciente.telefono = telefono or None
-                    paciente.genero = normalizar_genero_innova(
-                        datos_erp.get("genero")
+                    paciente.fecha_nacimiento = (
+                        datos_erp.get(
+                            "fecha_nacimiento"
+                        )
                     )
 
-                    paciente.save(update_fields=[
-                        "nombre",
-                        "apellido",
-                        "fecha_nacimiento",
-                        "genero",
-                        "telefono",
-                    ]) 
+                    paciente.genero = (
+                        normalizar_genero_innova(
+                            datos_erp.get(
+                                "genero"
+                            )
+                        )
+                    )
+
+                    # El teléfono es el único dato
+                    # editable desde el formulario.
+                    paciente.telefono = (
+                        telefono or None
+                    )
+
+                    paciente.save(
+                        update_fields=[
+                            "nombre",
+                            "apellido",
+                            "fecha_nacimiento",
+                            "genero",
+                            "telefono",
+                        ]
+                    )
 
                 else:
-                    paciente = Paciente.objects.create(
-                        nombre=limpiar_texto(
-                            datos_erp.get("nombre")
-                        ),
-                        apellido=limpiar_texto(
-                            datos_erp.get("apellido")
-                        ),
-                        dni=dni,
-                        fecha_nacimiento=datos_erp.get(
-                            "fecha_nacimiento"
-                        ),
-                        genero=normalizar_genero_innova(
-                            datos_erp.get("genero")
-                        ),
-                        telefono=telefono or None,
-                        user_made=request.user,
+                    paciente = (
+                        Paciente.objects.create(
+                            nombre=limpiar_texto(
+                                datos_erp.get(
+                                    "nombre"
+                                )
+                            ),
+
+                            apellido=limpiar_texto(
+                                datos_erp.get(
+                                    "apellido"
+                                )
+                            ),
+
+                            dni=dni,
+
+                            fecha_nacimiento=(
+                                datos_erp.get(
+                                    "fecha_nacimiento"
+                                )
+                            ),
+
+                            genero=(
+                                normalizar_genero_innova(
+                                    datos_erp.get(
+                                        "genero"
+                                    )
+                                )
+                            ),
+
+                            telefono=(
+                                telefono or None
+                            ),
+
+                            user_made=request.user,
+                        )
                     )
+
+                # -------------------------------------------------
+                # MÉDICO
+                # -------------------------------------------------
 
                 medico = None
 
@@ -536,106 +1135,206 @@ def guardar_ingreso_erp(request):
                         Medico.objects
                         .select_for_update()
                         .filter(
-                            matricula__iexact=medico_matricula
+                            matricula__iexact=(
+                                medico_matricula
+                            )
                         )
                         .first()
                     )
 
                     if not medico:
-                        medico = Medico.objects.create(
-                            nombre=medico_nombre or "Sin nombre",
-                            apellido=medico_apellido or "Sin apellido",
-                            numero_documento=(
-                                medico_documento or None
-                            ),
-                            matricula=medico_matricula,
-                            user_made=request.user,
+                        medico = (
+                            Medico.objects.create(
+                                nombre=(
+                                    medico_nombre
+                                    or "Sin nombre"
+                                ),
+
+                                apellido=(
+                                    medico_apellido
+                                    or "Sin apellido"
+                                ),
+
+                                numero_documento=(
+                                    medico_documento
+                                    or None
+                                ),
+
+                                matricula=(
+                                    medico_matricula
+                                ),
+
+                                user_made=(
+                                    request.user
+                                ),
+                            )
                         )
+
+                # -------------------------------------------------
+                # NUMERADOR
+                # -------------------------------------------------
 
                 numerador, creado = (
                     Numerador.objects
                     .select_for_update()
                     .get_or_create(
                         nombre="ingreso",
-                        defaults={"ultimo": 0},
+                        defaults={
+                            "ultimo": 0
+                        },
                     )
                 )
 
                 numerador.ultimo += 1
-                numerador.save(update_fields=["ultimo"])
 
-                ingreso = Preingreso.objects.create(
-                    paciente=paciente,
-                    obra_social=obra_social,
-                    plan=plan,
-                    numero_afiliado=(
-                        limpiar_texto(
-                            datos_erp.get("numero_afiliado")
-                        ) or None
-                    ),
-                    medico=medico,
-                    servicio=servicio,
-                    numero=str(numerador.ultimo),
-                    episodio=episodio_real,
-                    fecha_ingreso=datos_erp.get(
-                        "fecha_ingreso"
-                    ),
-                    fecha_probable_ingreso=None,
-                    fecha_egreso=None,
-                    diagnostico=diagnostico,
-                    origen_paciente="otro",
-                    prioridad="normal",
+                numerador.save(
+                    update_fields=[
+                        "ultimo"
+                    ]
+                )
 
-                    contacto_nombre=(
-                        limpiar_texto(
-                            datos_erp.get("contacto_nombre")
-                        ) or None
-                    ),
-                    contacto_dni=(
-                        limpiar_texto(
-                            datos_erp.get("contacto_dni")
-                        ) or None
-                    ),
-                    contacto_telefono=(
-                        limpiar_texto(
-                            datos_erp.get("contacto_telefono")
-                        ) or None
-                    ),
-                    contacto_parentesco=(
-                        limpiar_texto(
-                            datos_erp.get("contacto_parentesco")
-                        ) or None
-                    ),
+                # -------------------------------------------------
+                # CREAR INGRESO
+                # -------------------------------------------------
 
-                    observaciones=observaciones or None,
-                    estado="ingresado",
-                    es_preingreso=False,
-                    user_made=request.user,
+                ingreso = (
+                    Preingreso.objects.create(
+                        paciente=paciente,
+
+                        obra_social=obra_social,
+
+                        plan=plan,
+
+                        numero_afiliado=(
+                            limpiar_texto(
+                                datos_erp.get(
+                                    "numero_afiliado"
+                                )
+                            )
+                            or None
+                        ),
+
+                        medico=medico,
+
+                        servicio=servicio,
+
+                        numero=str(
+                            numerador.ultimo
+                        ),
+
+                        episodio=episodio_real,
+
+                        fecha_ingreso=(
+                            datos_erp.get(
+                                "fecha_ingreso"
+                            )
+                        ),
+
+                        fecha_probable_ingreso=None,
+
+                        fecha_egreso=None,
+
+                        diagnostico=diagnostico,
+
+                        origen_paciente="otro",
+
+                        prioridad="normal",
+
+                        contacto_nombre=(
+                            limpiar_texto(
+                                datos_erp.get(
+                                    "contacto_nombre"
+                                )
+                            )
+                            or None
+                        ),
+
+                        contacto_dni=(
+                            limpiar_texto(
+                                datos_erp.get(
+                                    "contacto_dni"
+                                )
+                            )
+                            or None
+                        ),
+
+                        contacto_telefono=(
+                            limpiar_texto(
+                                datos_erp.get(
+                                    "contacto_telefono"
+                                )
+                            )
+                            or None
+                        ),
+
+                        contacto_parentesco=(
+                            limpiar_texto(
+                                datos_erp.get(
+                                    "contacto_parentesco"
+                                )
+                            )
+                            or None
+                        ),
+
+                        observaciones=(
+                            observaciones
+                            or None
+                        ),
+
+                        estado="ingresado",
+
+                        es_preingreso=False,
+
+                        user_made=request.user,
+                    )
                 )
 
         except IntegrityError:
             messages.error(
                 request,
                 (
-                    "No se pudo guardar el ingreso porque el episodio "
-                    "o el paciente ya fue procesado."
+                    "No se pudo guardar el ingreso "
+                    "porque el episodio ya fue procesado "
+                    "o existe un conflicto de integridad."
                 )
             )
-            return redirect("gestion_app:lista_ingresos")
+
+            return redirect(
+                "gestion_app:lista_ingresos"
+            )
 
         except Exception:
             messages.error(
                 request,
-                "No se pudo guardar el ingreso. Intente nuevamente."
+                (
+                    "No se pudo guardar el ingreso. "
+                    "Intente nuevamente."
+                )
             )
-            return redirect("gestion_app:guardar_ingreso_erp")
+
+            return redirect(
+                "gestion_app:guardar_ingreso_erp"
+            )
+
+        # -----------------------------------------------------
+        # OK
+        # -----------------------------------------------------
 
         messages.success(
             request,
-            f"El ingreso #{ingreso.numero} fue creado correctamente."
+            (
+                f"El ingreso #{ingreso.numero} "
+                f"fue creado correctamente."
+            )
         )
 
-        return redirect("gestion_app:lista_ingresos")
+        return redirect(
+            "gestion_app:lista_ingresos"
+        )
+
+    # ---------------------------------------------------------
+    # GET
+    # ---------------------------------------------------------
 
     return render(
         request,
@@ -645,7 +1344,8 @@ def guardar_ingreso_erp(request):
             "planes": planes,
             "servicios": servicios,
         },
-    )
+    ) 
+
 
 
 

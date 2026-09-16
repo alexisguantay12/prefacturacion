@@ -110,6 +110,34 @@
         padding: 0.9rem 1rem;
     }
 
+    .table-episodios thead th {
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.8rem;
+        font-weight: 900;
+        border-bottom: 1px solid #dbe3ef;
+        white-space: nowrap;
+    }
+
+    .table-episodios tbody td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .episodio-numero {
+        font-weight: 900;
+        color: #0f4c81;
+    }
+
+    .badge-importado {
+        background: #e5e7eb;
+        color: #4b5563;
+        border-radius: 999px;
+        padding: 0.4rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
     .actions-bar {
         position: sticky;
         bottom: 0;
@@ -136,6 +164,7 @@
 
     <div class="form-hero">
         <div class="d-flex justify-content-between align-items-start gap-3">
+
             <div>
                 <h2>
                     <i class="fas fa-database"></i>
@@ -143,71 +172,188 @@
                 </h2>
 
                 <p>
-                    Busque el episodio activo en INNOVA y complete
-                    únicamente los datos requeridos.
+                    Busque los episodios del paciente en INNOVA
+                    correspondientes a los últimos 45 días.
                 </p>
             </div>
 
             <a href="{% url 'gestion_app:lista_ingresos' %}"
                class="btn btn-outline-secondary">
+
                 <i class="fas fa-arrow-left"></i>
                 Volver al listado
+
             </a>
+
         </div>
     </div>
 
     {% if messages %}
         {% for message in messages %}
+
             <div class="alert alert-{{ message.tags }}
                         alert-dismissible fade show">
+
                 <strong>{{ message }}</strong>
 
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="alert">
                 </button>
+
             </div>
+
         {% endfor %}
     {% endif %}
 
-    <div id="erpError"
-         class="alert alert-danger d-none">
-    </div>
 
-    <div class="form-card" id="bloqueBusqueda">
+    <!-- ===================================================== -->
+    <!-- BÚSQUEDA POR DNI -->
+    <!-- ===================================================== -->
+
+    <div class="form-card"
+         id="bloqueBusqueda">
+
         <div class="section-title">
-            <span class="section-number">1</span>
-            Buscar episodio en INNOVA
+
+            <span class="section-number">
+                1
+            </span>
+
+            Buscar episodios en INNOVA
+
         </div>
 
         <div class="section-body">
+
             <div class="row g-3 align-items-end">
 
                 <div class="col-md-8">
+
                     <label class="form-label">
                         Documento del paciente
-                        <span class="required-mark">*</span>
+                        <span class="required-mark">
+                            *
+                        </span>
                     </label>
 
                     <input type="text"
                            id="documentoBusqueda"
                            class="form-control"
                            autocomplete="off"
+                           inputmode="numeric"
                            placeholder="Ingrese el DNI sin puntos">
+
                 </div>
 
                 <div class="col-md-4 d-grid">
+
                     <button type="button"
                             class="btn btn-primary"
                             id="btnBuscarEpisodio">
+
                         <i class="fas fa-search"></i>
-                        Buscar episodio
+
+                        Buscar episodios
+
                     </button>
+
                 </div>
 
             </div>
+
         </div>
+
     </div>
+
+
+    <!-- ===================================================== -->
+    <!-- LISTADO DE EPISODIOS -->
+    <!-- ===================================================== -->
+
+    <div class="form-card d-none"
+         id="bloqueEpisodios">
+
+        <div class="section-title">
+
+            <span class="section-number">
+                2
+            </span>
+
+            Episodios encontrados
+
+        </div>
+
+        <div class="section-body">
+
+            <div class="alert alert-light border mb-3">
+
+                <i class="fas fa-circle-info text-primary"></i>
+
+                Seleccione el episodio de INNOVA que desea importar.
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover
+                              table-episodios
+                              align-middle
+                              mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Episodio
+                            </th>
+
+                            <th>
+                                Paciente
+                            </th>
+
+                            <th>
+                                Fecha de ingreso
+                            </th>
+
+                            <th class="text-end">
+                                Acción
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tablaEpisodiosBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="mt-3">
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        id="btnVolverBusqueda">
+
+                    <i class="fas fa-arrow-left"></i>
+
+                    Volver a buscar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- FORMULARIO -->
+    <!-- ===================================================== -->
 
     <form method="post"
           id="formIngresoErp"
@@ -223,22 +369,37 @@
                name="episodio"
                id="episodio">
 
+
+        <!-- ================================================= -->
+        <!-- DATOS INNOVA -->
+        <!-- ================================================= -->
+
         <div class="form-card">
+
             <div class="section-title">
-                <span class="section-number">2</span>
+
+                <span class="section-number">
+                    3
+                </span>
+
                 Datos recuperados de INNOVA
+
             </div>
 
             <div class="section-body">
 
                 <div class="erp-summary mb-3">
+
                     <i class="fas fa-circle-check text-success"></i>
+
                     Episodio encontrado y validado en INNOVA.
+
                 </div>
 
                 <div class="row g-3">
 
                     <div class="col-md-4">
+
                         <label class="form-label">
                             Nombre y apellido
                         </label>
@@ -247,18 +408,24 @@
                                id="pacienteNombre"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">DNI</label>
+
+                        <label class="form-label">
+                            DNI
+                        </label>
 
                         <input type="text"
                                id="pacienteDni"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Fecha de nacimiento
                         </label>
@@ -267,9 +434,11 @@
                                id="fechaNacimiento"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Teléfono
                         </label>
@@ -279,9 +448,12 @@
                                id="telefono"
                                class="form-control"
                                placeholder="Teléfono del paciente">
+
                     </div>
 
+
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Episodio
                         </label>
@@ -290,9 +462,11 @@
                                id="episodioVisual"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Fecha de ingreso
                         </label>
@@ -301,9 +475,11 @@
                                id="fechaIngreso"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Matrícula del médico
                         </label>
@@ -312,9 +488,11 @@
                                id="medicoMatricula"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Médico
                         </label>
@@ -323,9 +501,11 @@
                                id="medicoNombre"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-12">
+
                         <label class="form-label">
                             Diagnóstico
                         </label>
@@ -334,25 +514,46 @@
                                   class="form-control readonly-erp"
                                   rows="2"
                                   readonly></textarea>
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
+
+        <!-- ================================================= -->
+        <!-- COBERTURA -->
+        <!-- ================================================= -->
+
         <div class="form-card">
+
             <div class="section-title">
-                <span class="section-number">3</span>
+
+                <span class="section-number">
+                    4
+                </span>
+
                 Cobertura y servicio
+
             </div>
 
             <div class="section-body">
+
                 <div class="row g-3">
 
                     <div class="col-md-4">
+
                         <label class="form-label">
+
                             Obra social
-                            <span class="required-mark">*</span>
+
+                            <span class="required-mark">
+                                *
+                            </span>
+
                         </label>
 
                         <select name="obra_social"
@@ -365,17 +566,28 @@
                             </option>
 
                             {% for obra_social in obras_sociales %}
+
                                 <option value="{{ obra_social.id }}">
                                     {{ obra_social.nombre }}
                                 </option>
+
                             {% endfor %}
+
                         </select>
+
                     </div>
 
+
                     <div class="col-md-4">
+
                         <label class="form-label">
+
                             Plan
-                            <span class="required-mark">*</span>
+
+                            <span class="required-mark">
+                                *
+                            </span>
+
                         </label>
 
                         <select name="plan"
@@ -388,15 +600,23 @@
                             </option>
 
                             {% for plan in planes %}
+
                                 <option value="{{ plan.id }}"
                                         data-obra-social-id="{{ plan.obra_social_id }}">
+
                                     {{ plan.nombre }}
+
                                 </option>
+
                             {% endfor %}
+
                         </select>
+
                     </div>
 
+
                     <div class="col-md-4">
+
                         <label class="form-label">
                             Número de afiliado
                         </label>
@@ -405,9 +625,12 @@
                                id="numeroAfiliado"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
+
                     <div class="col-md-6">
+
                         <label class="form-label">
                             Servicio
                         </label>
@@ -420,27 +643,46 @@
                             </option>
 
                             {% for servicio in servicios %}
+
                                 <option value="{{ servicio.id }}">
                                     {{ servicio.nombre }}
                                 </option>
+
                             {% endfor %}
+
                         </select>
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
+
+        <!-- ================================================= -->
+        <!-- CONTACTO -->
+        <!-- ================================================= -->
+
         <div class="form-card">
+
             <div class="section-title">
-                <span class="section-number">4</span>
+
+                <span class="section-number">
+                    5
+                </span>
+
                 Contacto responsable
+
             </div>
 
             <div class="section-body">
+
                 <div class="row g-3">
 
                     <div class="col-md-4">
+
                         <label class="form-label">
                             Nombre y apellido
                         </label>
@@ -449,18 +691,24 @@
                                id="contactoNombre"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">DNI</label>
+
+                        <label class="form-label">
+                            DNI
+                        </label>
 
                         <input type="text"
                                id="contactoDni"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Parentesco
                         </label>
@@ -469,9 +717,11 @@
                                id="contactoParentesco"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                     <div class="col-md-3">
+
                         <label class="form-label">
                             Teléfono
                         </label>
@@ -480,40 +730,68 @@
                                id="contactoTelefono"
                                class="form-control readonly-erp"
                                readonly>
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
+
+        <!-- ================================================= -->
+        <!-- OBSERVACIONES -->
+        <!-- ================================================= -->
+
         <div class="form-card">
+
             <div class="section-title">
-                <span class="section-number">5</span>
+
+                <span class="section-number">
+                    6
+                </span>
+
                 Observaciones
+
             </div>
 
             <div class="section-body">
+
                 <textarea name="observaciones"
                           class="form-control"
                           rows="3"
                           placeholder="Observaciones adicionales"></textarea>
+
             </div>
+
         </div>
+
+
+        <!-- ================================================= -->
+        <!-- ACCIONES -->
+        <!-- ================================================= -->
 
         <div class="actions-bar">
 
             <button type="button"
                     class="btn btn-outline-secondary"
                     id="btnNuevaBusqueda">
+
                 <i class="fas fa-rotate-left"></i>
+
                 Buscar otro episodio
+
             </button>
 
             <button type="submit"
                     class="btn btn-primary px-4"
                     id="btnGuardarIngreso">
+
                 <i class="fas fa-save"></i>
+
                 Crear ingreso
+
             </button>
 
         </div>
@@ -521,57 +799,112 @@
     </form>
 
 </div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL CONFIRMACIÓN -->
+<!-- ========================================================= -->
+
 <div class="modal fade"
      id="modalConfirmarEpisodio"
      tabindex="-1"
      aria-hidden="true">
 
     <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content modal-confirmacion">
 
             <div class="modal-header">
+
                 <h5 class="modal-title">
+
                     <i class="fas fa-clipboard-check text-primary"></i>
+
                     Confirmar episodio
+
                 </h5>
 
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal">
                 </button>
+
             </div>
 
             <div class="modal-body">
 
                 <div class="alert alert-light border mb-3">
-                    Verifique que este sea el episodio que desea importar.
+
+                    Verifique que este sea el episodio
+                    que desea importar.
+
                 </div>
 
                 <div class="row g-3">
 
                     <div class="col-12">
-                        <div class="text-muted small">Paciente</div>
-                        <div class="fw-bold" id="confirmPaciente">-</div>
+
+                        <div class="text-muted small">
+                            Paciente
+                        </div>
+
+                        <div class="fw-bold"
+                             id="confirmPaciente">
+                            -
+                        </div>
+
                     </div>
 
                     <div class="col-md-6">
-                        <div class="text-muted small">DNI</div>
-                        <div class="fw-bold" id="confirmDni">-</div>
+
+                        <div class="text-muted small">
+                            DNI
+                        </div>
+
+                        <div class="fw-bold"
+                             id="confirmDni">
+                            -
+                        </div>
+
                     </div>
 
                     <div class="col-md-6">
-                        <div class="text-muted small">Episodio</div>
-                        <div class="fw-bold" id="confirmEpisodio">-</div>
+
+                        <div class="text-muted small">
+                            Episodio
+                        </div>
+
+                        <div class="fw-bold"
+                             id="confirmEpisodio">
+                            -
+                        </div>
+
                     </div>
 
                     <div class="col-md-6">
-                        <div class="text-muted small">Fecha de ingreso</div>
-                        <div class="fw-bold" id="confirmFechaIngreso">-</div>
+
+                        <div class="text-muted small">
+                            Fecha de ingreso
+                        </div>
+
+                        <div class="fw-bold"
+                             id="confirmFechaIngreso">
+                            -
+                        </div>
+
                     </div>
 
                     <div class="col-md-6">
-                        <div class="text-muted small">Médico</div>
-                        <div class="fw-bold" id="confirmMedico">-</div>
+
+                        <div class="text-muted small">
+                            Médico
+                        </div>
+
+                        <div class="fw-bold"
+                             id="confirmMedico">
+                            -
+                        </div>
+
                     </div>
 
                 </div>
@@ -583,21 +916,34 @@
                 <button type="button"
                         class="btn btn-outline-secondary"
                         data-bs-dismiss="modal">
-                    No, buscar otro
+
+                    No, volver
+
                 </button>
 
                 <button type="button"
                         class="btn btn-primary"
                         id="btnConfirmarEpisodio">
+
                     <i class="fas fa-check"></i>
+
                     Sí, usar este episodio
+
                 </button>
 
             </div>
 
         </div>
+
     </div>
+
 </div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL MENSAJES -->
+<!-- ========================================================= -->
+
 <div class="modal fade"
      id="modalMensajeErp"
      tabindex="-1"
@@ -608,7 +954,9 @@
         <div class="modal-content modal-confirmacion">
 
             <div class="modal-header">
-                <h5 class="modal-title" id="modalMensajeTitulo">
+
+                <h5 class="modal-title"
+                    id="modalMensajeTitulo">
                     Aviso
                 </h5>
 
@@ -616,10 +964,14 @@
                         class="btn-close"
                         data-bs-dismiss="modal">
                 </button>
+
             </div>
 
             <div class="modal-body">
-                <div id="modalMensajeTexto"></div>
+
+                <div id="modalMensajeTexto">
+                </div>
+
             </div>
 
             <div class="modal-footer">
@@ -627,48 +979,98 @@
                 <button type="button"
                         class="btn btn-primary"
                         data-bs-dismiss="modal">
+
                     Aceptar
+
                 </button>
 
             </div>
 
         </div>
+
     </div>
+
 </div>
 
+
 <script>
+    // ---------------------------------------------------------
+    // URLs
+    // ---------------------------------------------------------
+
     const buscarIngresoUrl =
         "{% url 'gestion_app:buscar_ingreso_erp' %}";
+
+    const buscarEpisodioDetalleUrl =
+        "{% url 'gestion_app:buscar_episodio_erp_detalle' %}";
 
     const listaIngresosUrl =
         "{% url 'gestion_app:lista_ingresos' %}";
 
+
+    // ---------------------------------------------------------
+    // ELEMENTOS
+    // ---------------------------------------------------------
+
     const documentoBusqueda =
-        document.getElementById("documentoBusqueda");
+        document.getElementById(
+            "documentoBusqueda"
+        );
 
     const btnBuscarEpisodio =
-        document.getElementById("btnBuscarEpisodio");
-
-    const formIngresoErp =
-        document.getElementById("formIngresoErp");
+        document.getElementById(
+            "btnBuscarEpisodio"
+        );
 
     const bloqueBusqueda =
-        document.getElementById("bloqueBusqueda");
+        document.getElementById(
+            "bloqueBusqueda"
+        );
+
+    const bloqueEpisodios =
+        document.getElementById(
+            "bloqueEpisodios"
+        );
+
+    const tablaEpisodiosBody =
+        document.getElementById(
+            "tablaEpisodiosBody"
+        );
+
+    const btnVolverBusqueda =
+        document.getElementById(
+            "btnVolverBusqueda"
+        );
+
+    const formIngresoErp =
+        document.getElementById(
+            "formIngresoErp"
+        );
 
     const btnNuevaBusqueda =
-        document.getElementById("btnNuevaBusqueda");
+        document.getElementById(
+            "btnNuevaBusqueda"
+        );
 
     const btnGuardarIngreso =
-        document.getElementById("btnGuardarIngreso");
+        document.getElementById(
+            "btnGuardarIngreso"
+        );
 
     const btnConfirmarEpisodio =
-        document.getElementById("btnConfirmarEpisodio");
+        document.getElementById(
+            "btnConfirmarEpisodio"
+        );
 
     const modalConfirmarEpisodioElement =
-        document.getElementById("modalConfirmarEpisodio");
+        document.getElementById(
+            "modalConfirmarEpisodio"
+        );
 
     const modalMensajeElement =
-        document.getElementById("modalMensajeErp");
+        document.getElementById(
+            "modalMensajeErp"
+        );
 
 
     // ---------------------------------------------------------
@@ -676,7 +1078,11 @@
     // ---------------------------------------------------------
 
     let episodioPendiente = null;
-    let buscandoEpisodio = false;
+
+    let buscandoEpisodios = false;
+
+    let buscandoDetalle = false;
+
     let ingresoEnviado = false;
 
 
@@ -701,30 +1107,60 @@
             return "-";
         }
 
-        const partes = String(fecha).split("-");
+        const partes =
+            String(fecha).split("-");
 
         if (partes.length !== 3) {
             return fecha;
         }
 
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        return (
+            `${partes[2]}/` +
+            `${partes[1]}/` +
+            `${partes[0]}`
+        );
     }
 
 
-    function nombreCompleto(apellido, nombre) {
-        apellido = valorOTexto(apellido);
-        nombre = valorOTexto(nombre);
+    function nombreCompleto(
+        apellido,
+        nombre
+    ) {
+        apellido =
+            valorOTexto(apellido);
 
-        if (apellido && nombre) {
-            return `${apellido}, ${nombre}`;
+        nombre =
+            valorOTexto(nombre);
+
+        if (
+            apellido &&
+            nombre
+        ) {
+            return (
+                `${apellido}, ${nombre}`
+            );
         }
 
-        return apellido || nombre || "-";
+        return (
+            apellido ||
+            nombre ||
+            "-"
+        );
+    }
+
+
+    function escaparHtml(valor) {
+        return valorOTexto(valor)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
 
     // ---------------------------------------------------------
-    // MODAL DE MENSAJES
+    // MODAL MENSAJES
     // ---------------------------------------------------------
 
     function mostrarModalMensaje(
@@ -733,23 +1169,28 @@
         redirectUrl = null
     ) {
         const tituloElement =
-            document.getElementById("modalMensajeTitulo");
+            document.getElementById(
+                "modalMensajeTitulo"
+            );
 
         const textoElement =
-            document.getElementById("modalMensajeTexto");
+            document.getElementById(
+                "modalMensajeTexto"
+            );
 
-        tituloElement.innerText = titulo;
-        textoElement.innerText = mensaje;
+        tituloElement.innerText =
+            titulo;
 
-        /*
-         * Si existía un redirect anterior, lo limpiamos.
-         */
+        textoElement.innerText =
+            mensaje;
+
         modalMensajeElement.dataset.redirectUrl =
             redirectUrl || "";
 
-        const modal = bootstrap.Modal.getOrCreateInstance(
-            modalMensajeElement
-        );
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalMensajeElement
+            );
 
         modal.show();
     }
@@ -758,87 +1199,174 @@
     modalMensajeElement.addEventListener(
         "hidden.bs.modal",
         function () {
-            const redirectUrl =
-                modalMensajeElement.dataset.redirectUrl;
 
-            modalMensajeElement.dataset.redirectUrl = "";
+            const redirectUrl =
+                modalMensajeElement
+                    .dataset
+                    .redirectUrl;
+
+            modalMensajeElement.dataset.redirectUrl =
+                "";
 
             if (redirectUrl) {
-                window.location.href = redirectUrl;
+                window.location.href =
+                    redirectUrl;
             }
         }
     );
 
 
     // ---------------------------------------------------------
-    // MODAL DE CONFIRMACIÓN DEL EPISODIO
+    // MOSTRAR LISTADO DE EPISODIOS
     // ---------------------------------------------------------
 
-    function mostrarConfirmacionEpisodio(datos) {
-        document.getElementById(
-            "confirmPaciente"
-        ).innerText = nombreCompleto(
-            datos.apellido,
-            datos.nombre
+    function mostrarEpisodios(
+        episodios
+    ) {
+        tablaEpisodiosBody.innerHTML =
+            "";
+
+        episodios.forEach(
+            function (datos) {
+
+                const tr =
+                    document.createElement(
+                        "tr"
+                    );
+
+                const episodio =
+                    escaparHtml(
+                        datos.episodio
+                    );
+
+                const dni =
+                    escaparHtml(
+                        datos.dni
+                    );
+
+                const paciente =
+                    escaparHtml(
+                        nombreCompleto(
+                            datos.apellido,
+                            datos.nombre
+                        )
+                    );
+
+                const fechaIngreso =
+                    escaparHtml(
+                        formatearFecha(
+                            datos.fecha_ingreso
+                        )
+                    );
+
+                let accionHtml = "";
+
+                if (
+                    datos.ya_importado
+                ) {
+                    accionHtml = `
+                        <span class="badge-importado">
+                            <i class="fas fa-check-circle"></i>
+                            Ya importado
+                        </span>
+                    `;
+                } else {
+                    accionHtml = `
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm btn-elegir-episodio"
+                            data-episodio="${episodio}"
+                            data-dni="${dni}">
+
+                            <i class="fas fa-check"></i>
+
+                            Elegir
+                        </button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td>
+                        <span class="episodio-numero">
+                            ${episodio}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${paciente}
+                    </td>
+
+                    <td>
+                        ${fechaIngreso}
+                    </td>
+
+                    <td class="text-end">
+                        ${accionHtml}
+                    </td>
+                `;
+
+                tablaEpisodiosBody.appendChild(
+                    tr
+                );
+            }
         );
 
-        document.getElementById(
-            "confirmDni"
-        ).innerText =
-            valorOTexto(datos.dni) || "-";
-
-        document.getElementById(
-            "confirmEpisodio"
-        ).innerText =
-            valorOTexto(datos.episodio) || "-";
-
-        document.getElementById(
-            "confirmFechaIngreso"
-        ).innerText =
-            formatearFecha(datos.fecha_ingreso);
-
-        document.getElementById(
-            "confirmMedico"
-        ).innerText = nombreCompleto(
-            datos.medico_apellido,
-            datos.medico_nombre
+        bloqueBusqueda.classList.add(
+            "d-none"
         );
 
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalConfirmarEpisodioElement
-            );
+        formIngresoErp.classList.add(
+            "d-none"
+        );
 
-        modal.show();
+        bloqueEpisodios.classList.remove(
+            "d-none"
+        );
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     }
 
 
     // ---------------------------------------------------------
-    // BUSCAR EPISODIO EN INNOVA
+    // BUSCAR LISTADO DE EPISODIOS
     // ---------------------------------------------------------
 
-    async function buscarEpisodio() {
-        if (buscandoEpisodio) {
+    async function buscarEpisodios() {
+        if (buscandoEpisodios) {
             return;
         }
 
         const documento =
-            documentoBusqueda.value.trim();
+            documentoBusqueda
+                .value
+                .trim();
 
         if (!documento) {
             mostrarModalMensaje(
-                "Debe ingresar el documento del paciente.",
+                (
+                    "Debe ingresar el documento " +
+                    "del paciente."
+                ),
                 "Documento requerido"
             );
 
             documentoBusqueda.focus();
+
             return;
         }
 
-        buscandoEpisodio = true;
+        buscandoEpisodios = true;
+
         episodioPendiente = null;
 
-        btnBuscarEpisodio.disabled = true;
+        tablaEpisodiosBody.innerHTML =
+            "";
+
+        btnBuscarEpisodio.disabled =
+            true;
 
         const textoOriginal =
             btnBuscarEpisodio.innerHTML;
@@ -849,35 +1377,49 @@
         `;
 
         try {
-            const params = new URLSearchParams({
-                documento: documento
-            });
+            const params =
+                new URLSearchParams({
+                    documento:
+                        documento
+                });
 
-            const response = await fetch(
-                `${buscarIngresoUrl}?${params.toString()}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "X-Requested-With":
-                            "XMLHttpRequest"
+            const response =
+                await fetch(
+                    `${buscarIngresoUrl}?${params.toString()}`,
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        }
                     }
-                }
-            );
+                );
 
             let data;
 
             try {
-                data = await response.json();
+                data =
+                    await response.json();
+
             } catch {
                 throw new Error(
-                    "El servidor devolvió una respuesta inválida."
+                    (
+                        "El servidor devolvió " +
+                        "una respuesta inválida."
+                    )
                 );
             }
 
-            if (!response.ok || !data.ok) {
+            if (
+                !response.ok ||
+                !data.ok
+            ) {
                 mostrarModalMensaje(
-                    data.error ||
-                    "No se pudo consultar el episodio.",
+                    (
+                        data.error ||
+                        "No se pudieron consultar los episodios."
+                    ),
                     "No se puede continuar",
                     data.redirect_url || null
                 );
@@ -885,39 +1427,292 @@
                 return;
             }
 
-            episodioPendiente = data.datos;
+            if (
+                !Array.isArray(
+                    data.episodios
+                ) ||
+                data.episodios.length === 0
+            ) {
+                mostrarModalMensaje(
+                    (
+                        "No se encontraron episodios " +
+                        "en los últimos 45 días."
+                    ),
+                    "Sin resultados"
+                );
 
-            /*
-             * MUY IMPORTANTE:
-             * Todavía NO llamamos cargarFormulario().
-             *
-             * Primero el admisionista debe confirmar
-             * visualmente el episodio.
-             */
+                return;
+            }
+
+            mostrarEpisodios(
+                data.episodios
+            );
+
+        } catch (error) {
+            console.error(
+                "Error buscando episodios:",
+                error
+            );
+
+            mostrarModalMensaje(
+                (
+                    error.message ||
+                    (
+                        "Ocurrió un error al " +
+                        "consultar INNOVA."
+                    )
+                ),
+                "Error de conexión"
+            );
+
+        } finally {
+            buscandoEpisodios =
+                false;
+
+            btnBuscarEpisodio.disabled =
+                false;
+
+            btnBuscarEpisodio.innerHTML =
+                textoOriginal;
+        }
+    }
+
+
+    // ---------------------------------------------------------
+    // BUSCAR DETALLE DEL EPISODIO ELEGIDO
+    // ---------------------------------------------------------
+
+    async function buscarDetalleEpisodio(
+        dni,
+        episodio,
+        boton
+    ) {
+        if (buscandoDetalle) {
+            return;
+        }
+
+        dni =
+            valorOTexto(dni);
+
+        episodio =
+            valorOTexto(episodio);
+
+        if (
+            !dni ||
+            !episodio
+        ) {
+            mostrarModalMensaje(
+                (
+                    "No se recibió correctamente " +
+                    "el episodio seleccionado."
+                ),
+                "No se puede continuar"
+            );
+
+            return;
+        }
+
+        buscandoDetalle = true;
+
+        episodioPendiente = null;
+
+        const textoOriginal =
+            boton.innerHTML;
+
+        boton.disabled =
+            true;
+
+        boton.innerHTML = `
+            <i class="fas fa-spinner fa-spin"></i>
+            Consultando...
+        `;
+
+        try {
+            const params =
+                new URLSearchParams({
+                    documento: dni,
+                    episodio: episodio
+                });
+
+            const response =
+                await fetch(
+                    `${buscarEpisodioDetalleUrl}?${params.toString()}`,
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        }
+                    }
+                );
+
+            let data;
+
+            try {
+                data =
+                    await response.json();
+
+            } catch {
+                throw new Error(
+                    (
+                        "El servidor devolvió " +
+                        "una respuesta inválida."
+                    )
+                );
+            }
+
+            if (
+                !response.ok ||
+                !data.ok
+            ) {
+                mostrarModalMensaje(
+                    (
+                        data.error ||
+                        (
+                            "No se pudo recuperar " +
+                            "el episodio."
+                        )
+                    ),
+                    "No se puede continuar",
+                    data.redirect_url || null
+                );
+
+                return;
+            }
+
+            if (!data.datos) {
+                mostrarModalMensaje(
+                    (
+                        "INNOVA no devolvió los datos " +
+                        "del episodio seleccionado."
+                    ),
+                    "No se puede continuar"
+                );
+
+                return;
+            }
+
+            episodioPendiente =
+                data.datos;
+
             mostrarConfirmacionEpisodio(
                 episodioPendiente
             );
 
         } catch (error) {
             console.error(
-                "Error buscando episodio:",
+                "Error consultando detalle:",
                 error
             );
 
             mostrarModalMensaje(
-                error.message ||
-                "Ocurrió un error al consultar INNOVA.",
+                (
+                    error.message ||
+                    (
+                        "Ocurrió un error al consultar " +
+                        "el episodio en INNOVA."
+                    )
+                ),
                 "Error de conexión"
             );
 
         } finally {
-            buscandoEpisodio = false;
+            buscandoDetalle =
+                false;
 
-            btnBuscarEpisodio.disabled = false;
+            boton.disabled =
+                false;
 
-            btnBuscarEpisodio.innerHTML =
+            boton.innerHTML =
                 textoOriginal;
         }
+    }
+
+
+    // ---------------------------------------------------------
+    // CLICK SOBRE ELEGIR
+    // ---------------------------------------------------------
+
+    tablaEpisodiosBody.addEventListener(
+        "click",
+        function (event) {
+
+            const boton =
+                event.target.closest(
+                    ".btn-elegir-episodio"
+                );
+
+            if (!boton) {
+                return;
+            }
+
+            const dni =
+                boton.dataset.dni;
+
+            const episodio =
+                boton.dataset.episodio;
+
+            buscarDetalleEpisodio(
+                dni,
+                episodio,
+                boton
+            );
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // MODAL CONFIRMACIÓN
+    // ---------------------------------------------------------
+
+    function mostrarConfirmacionEpisodio(
+        datos
+    ) {
+        document.getElementById(
+            "confirmPaciente"
+        ).innerText =
+            nombreCompleto(
+                datos.apellido,
+                datos.nombre
+            );
+
+        document.getElementById(
+            "confirmDni"
+        ).innerText =
+            valorOTexto(
+                datos.dni
+            ) || "-";
+
+        document.getElementById(
+            "confirmEpisodio"
+        ).innerText =
+            valorOTexto(
+                datos.episodio
+            ) || "-";
+
+        document.getElementById(
+            "confirmFechaIngreso"
+        ).innerText =
+            formatearFecha(
+                datos.fecha_ingreso
+            );
+
+        document.getElementById(
+            "confirmMedico"
+        ).innerText =
+            nombreCompleto(
+                datos.medico_apellido,
+                datos.medico_nombre
+            );
+
+        const modal =
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    modalConfirmarEpisodioElement
+                );
+
+        modal.show();
     }
 
 
@@ -928,9 +1723,13 @@
     btnConfirmarEpisodio.addEventListener(
         "click",
         function () {
+
             if (!episodioPendiente) {
                 mostrarModalMensaje(
-                    "No existe ningún episodio pendiente de confirmación.",
+                    (
+                        "No existe ningún episodio " +
+                        "pendiente de confirmación."
+                    ),
                     "No se puede continuar"
                 );
 
@@ -939,6 +1738,14 @@
 
             const datosConfirmados =
                 episodioPendiente;
+
+            /*
+             * Limpiamos ANTES de cerrar el modal,
+             * porque el evento hidden también modifica
+             * episodioPendiente.
+             */
+            episodioPendiente =
+                null;
 
             const modal =
                 bootstrap.Modal.getInstance(
@@ -949,26 +1756,23 @@
                 modal.hide();
             }
 
-            /*
-             * Recién ahora se cargan todos los edits.
-             */
             cargarFormulario(
                 datosConfirmados
             );
-
-            episodioPendiente = null;
         }
     );
 
 
     /*
-     * Si cierra/cancela el modal sin confirmar,
-     * descartamos los datos encontrados.
+     * Si el usuario cierra o cancela
+     * el modal sin confirmar, descartamos
+     * el episodio pendiente.
      */
     modalConfirmarEpisodioElement.addEventListener(
         "hidden.bs.modal",
         function () {
-            episodioPendiente = null;
+            episodioPendiente =
+                null;
         }
     );
 
@@ -977,18 +1781,32 @@
     // CARGAR FORMULARIO
     // ---------------------------------------------------------
 
-    function cargarFormulario(datos) {
+    function cargarFormulario(
+        datos
+    ) {
+        ingresoEnviado =
+            false;
 
-        // Datos ocultos que después recibirá el POST.
+        formIngresoErp.reset();
+
+
+        // -----------------------------------------------------
+        // CAMPOS OCULTOS
+        // -----------------------------------------------------
+
         document.getElementById(
             "dni"
         ).value =
-            valorOTexto(datos.dni);
+            valorOTexto(
+                datos.dni
+            );
 
         document.getElementById(
             "episodio"
         ).value =
-            valorOTexto(datos.episodio);
+            valorOTexto(
+                datos.episodio
+            );
 
 
         // -----------------------------------------------------
@@ -997,15 +1815,18 @@
 
         document.getElementById(
             "pacienteNombre"
-        ).value = nombreCompleto(
-            datos.apellido,
-            datos.nombre
-        );
+        ).value =
+            nombreCompleto(
+                datos.apellido,
+                datos.nombre
+            );
 
         document.getElementById(
             "pacienteDni"
         ).value =
-            valorOTexto(datos.dni);
+            valorOTexto(
+                datos.dni
+            );
 
         document.getElementById(
             "fechaNacimiento"
@@ -1014,13 +1835,12 @@
                 datos.fecha_nacimiento
             );
 
-        /*
-         * Único dato del paciente editable.
-         */
         document.getElementById(
             "telefono"
         ).value =
-            valorOTexto(datos.telefono);
+            valorOTexto(
+                datos.telefono
+            );
 
 
         // -----------------------------------------------------
@@ -1030,17 +1850,23 @@
         document.getElementById(
             "episodioVisual"
         ).value =
-            valorOTexto(datos.episodio);
+            valorOTexto(
+                datos.episodio
+            );
 
         document.getElementById(
             "fechaIngreso"
         ).value =
-            valorOTexto(datos.fecha_ingreso);
+            valorOTexto(
+                datos.fecha_ingreso
+            );
 
         document.getElementById(
             "diagnostico"
         ).value =
-            valorOTexto(datos.diagnostico);
+            valorOTexto(
+                datos.diagnostico
+            );
 
 
         // -----------------------------------------------------
@@ -1068,14 +1894,15 @@
 
         document.getElementById(
             "medicoNombre"
-        ).value = nombreCompleto(
-            datos.medico_apellido,
-            datos.medico_nombre
-        );
+        ).value =
+            nombreCompleto(
+                datos.medico_apellido,
+                datos.medico_nombre
+            );
 
 
         // -----------------------------------------------------
-        // CONTACTO RESPONSABLE
+        // CONTACTO
         // -----------------------------------------------------
 
         document.getElementById(
@@ -1108,21 +1935,9 @@
 
 
         // -----------------------------------------------------
-        // MOSTRAR FORMULARIO
+        // COBERTURA MANUAL
         // -----------------------------------------------------
 
-        bloqueBusqueda.classList.add(
-            "d-none"
-        );
-
-        formIngresoErp.classList.remove(
-            "d-none"
-        );
-
-        /*
-         * Reiniciamos cobertura porque debe ser
-         * elegida manualmente por admisión.
-         */
         const obraSocial =
             document.getElementById(
                 "idObraSocial"
@@ -1134,23 +1949,52 @@
             );
 
         if (obraSocial) {
-            obraSocial.value = "";
+            obraSocial.value =
+                "";
         }
 
         if (plan) {
-            plan.value = "";
-            filtrarPlanes();
+            plan.value =
+                "";
         }
+
+        filtrarPlanes();
+
+
+        // -----------------------------------------------------
+        // BOTÓN GUARDAR
+        // -----------------------------------------------------
+
+        btnGuardarIngreso.disabled =
+            false;
+
+        btnGuardarIngreso.innerHTML = `
+            <i class="fas fa-save"></i>
+            Crear ingreso
+        `;
+
+
+        // -----------------------------------------------------
+        // MOSTRAR FORMULARIO
+        // -----------------------------------------------------
+
+        bloqueBusqueda.classList.add(
+            "d-none"
+        );
+
+        bloqueEpisodios.classList.add(
+            "d-none"
+        );
+
+        formIngresoErp.classList.remove(
+            "d-none"
+        );
 
         window.scrollTo({
             top: 0,
             behavior: "smooth"
         });
 
-        /*
-         * El primer campo realmente editable
-         * del paciente.
-         */
         const telefono =
             document.getElementById(
                 "telefono"
@@ -1158,7 +2002,9 @@
 
         if (telefono) {
             setTimeout(
-                () => telefono.focus(),
+                function () {
+                    telefono.focus();
+                },
                 300
             );
         }
@@ -1166,18 +2012,20 @@
 
 
     // ---------------------------------------------------------
-    // NUEVA BÚSQUEDA
+    // VOLVER DESDE LISTADO DE EPISODIOS
     // ---------------------------------------------------------
 
-    btnNuevaBusqueda.addEventListener(
+    btnVolverBusqueda.addEventListener(
         "click",
         function () {
-            episodioPendiente = null;
-            ingresoEnviado = false;
 
-            formIngresoErp.reset();
+            episodioPendiente =
+                null;
 
-            formIngresoErp.classList.add(
+            tablaEpisodiosBody.innerHTML =
+                "";
+
+            bloqueEpisodios.classList.add(
                 "d-none"
             );
 
@@ -1185,25 +2033,73 @@
                 "d-none"
             );
 
-            /*
-             * Limpiar campos ocultos.
-             */
+            formIngresoErp.classList.add(
+                "d-none"
+            );
+
+            setTimeout(
+                function () {
+                    documentoBusqueda.focus();
+                },
+                200
+            );
+        }
+    );
+
+
+    // ---------------------------------------------------------
+    // NUEVA BÚSQUEDA DESDE FORMULARIO
+    // ---------------------------------------------------------
+
+    btnNuevaBusqueda.addEventListener(
+        "click",
+        function () {
+
+            episodioPendiente =
+                null;
+
+            ingresoEnviado =
+                false;
+
+            formIngresoErp.reset();
+
+            formIngresoErp.classList.add(
+                "d-none"
+            );
+
+            bloqueEpisodios.classList.add(
+                "d-none"
+            );
+
+            bloqueBusqueda.classList.remove(
+                "d-none"
+            );
+
+            tablaEpisodiosBody.innerHTML =
+                "";
+
             document.getElementById(
                 "dni"
-            ).value = "";
+            ).value =
+                "";
 
             document.getElementById(
                 "episodio"
-            ).value = "";
+            ).value =
+                "";
 
-            documentoBusqueda.value = "";
+            documentoBusqueda.value =
+                "";
 
-            btnGuardarIngreso.disabled = false;
+            btnGuardarIngreso.disabled =
+                false;
 
             btnGuardarIngreso.innerHTML = `
                 <i class="fas fa-save"></i>
                 Crear ingreso
             `;
+
+            filtrarPlanes();
 
             window.scrollTo({
                 top: 0,
@@ -1211,7 +2107,9 @@
             });
 
             setTimeout(
-                () => documentoBusqueda.focus(),
+                function () {
+                    documentoBusqueda.focus();
+                },
                 300
             );
         }
@@ -1224,7 +2122,7 @@
 
     btnBuscarEpisodio.addEventListener(
         "click",
-        buscarEpisodio
+        buscarEpisodios
     );
 
 
@@ -1235,9 +2133,14 @@
     documentoBusqueda.addEventListener(
         "keydown",
         function (event) {
-            if (event.key === "Enter") {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
                 event.preventDefault();
-                buscarEpisodio();
+
+                buscarEpisodios();
             }
         }
     );
@@ -1257,10 +2160,6 @@
             "idPlan"
         );
 
-    /*
-     * Guardamos una copia de todas
-     * las opciones originales.
-     */
     const opcionesPlanes =
         selectPlan
             ? Array.from(
@@ -1280,27 +2179,30 @@
         const obraSocialId =
             selectObraSocial.value;
 
-        selectPlan.value = "";
+        selectPlan.value =
+            "";
 
         opcionesPlanes.forEach(
             function (option) {
 
-                /*
-                 * "Seleccione un plan"
-                 */
                 if (!option.value) {
-                    option.hidden = false;
-                    option.disabled = false;
+                    option.hidden =
+                        false;
+
+                    option.disabled =
+                        false;
+
                     return;
                 }
 
                 const planObraSocialId =
-                    option.dataset.obraSocialId;
+                    option.dataset
+                        .obraSocialId;
 
                 const corresponde =
                     obraSocialId &&
                     planObraSocialId ===
-                    obraSocialId;
+                        obraSocialId;
 
                 option.hidden =
                     !corresponde;
@@ -1310,10 +2212,6 @@
             }
         );
 
-        /*
-         * Si todavía no seleccionaron
-         * OS, el plan queda deshabilitado.
-         */
         selectPlan.disabled =
             !obraSocialId;
     }
@@ -1328,7 +2226,7 @@
 
 
     // ---------------------------------------------------------
-    // VALIDACIÓN ANTES DE ENVIAR
+    // VALIDACIÓN ANTES DE GUARDAR
     // ---------------------------------------------------------
 
     formIngresoErp.addEventListener(
@@ -1343,38 +2241,52 @@
             const dni =
                 document.getElementById(
                     "dni"
-                ).value.trim();
+                )
+                .value
+                .trim();
 
             const episodio =
                 document.getElementById(
                     "episodio"
-                ).value.trim();
+                )
+                .value
+                .trim();
 
-            if (!dni || !episodio) {
+            if (
+                !dni ||
+                !episodio
+            ) {
                 event.preventDefault();
 
                 mostrarModalMensaje(
-                    "Debe seleccionar y confirmar un episodio de INNOVA antes de guardar.",
+                    (
+                        "Debe seleccionar y confirmar " +
+                        "un episodio de INNOVA antes " +
+                        "de guardar."
+                    ),
                     "Episodio requerido"
                 );
 
                 return;
             }
 
-            /*
-             * Validación HTML:
-             * obra social, plan, etc.
-             */
-            if (!formIngresoErp.checkValidity()) {
+            if (
+                !formIngresoErp
+                    .checkValidity()
+            ) {
                 event.preventDefault();
 
-                formIngresoErp.reportValidity();
+                formIngresoErp
+                    .reportValidity();
+
                 return;
             }
 
-            ingresoEnviado = true;
+            ingresoEnviado =
+                true;
 
-            btnGuardarIngreso.disabled = true;
+            btnGuardarIngreso.disabled =
+                true;
 
             btnGuardarIngreso.innerHTML = `
                 <i class="fas fa-spinner fa-spin"></i>
@@ -1394,11 +2306,17 @@
 
             filtrarPlanes();
 
-            /*
-             * Al entrar a la pantalla la búsqueda
-             * es lo único visible.
-             */
+            episodioPendiente =
+                null;
+
+            ingresoEnviado =
+                false;
+
             formIngresoErp.classList.add(
+                "d-none"
+            );
+
+            bloqueEpisodios.classList.add(
                 "d-none"
             );
 
@@ -1418,6 +2336,7 @@
     window.addEventListener(
         "pageshow",
         function (event) {
+
             const navEntries =
                 performance.getEntriesByType(
                     "navigation"
@@ -1430,15 +2349,23 @@
 
             const vinoPorBackForward =
                 event.persisted ||
-                navType === "back_forward";
+                navType ===
+                    "back_forward";
 
-            if (vinoPorBackForward) {
-                /*
-                 * Evitamos que el navegador restaure
-                 * un episodio viejo desde cache.
-                 */
-                episodioPendiente = null;
-                ingresoEnviado = false;
+            if (
+                vinoPorBackForward
+            ) {
+                episodioPendiente =
+                    null;
+
+                ingresoEnviado =
+                    false;
+
+                buscandoEpisodios =
+                    false;
+
+                buscandoDetalle =
+                    false;
 
                 formIngresoErp.reset();
 
@@ -1446,13 +2373,46 @@
                     "d-none"
                 );
 
+                bloqueEpisodios.classList.add(
+                    "d-none"
+                );
+
                 bloqueBusqueda.classList.remove(
                     "d-none"
                 );
 
-                documentoBusqueda.value = "";
+                tablaEpisodiosBody.innerHTML =
+                    "";
+
+                documentoBusqueda.value =
+                    "";
+
+                document.getElementById(
+                    "dni"
+                ).value =
+                    "";
+
+                document.getElementById(
+                    "episodio"
+                ).value =
+                    "";
+
+                btnGuardarIngreso.disabled =
+                    false;
+
+                btnGuardarIngreso.innerHTML = `
+                    <i class="fas fa-save"></i>
+                    Crear ingreso
+                `;
 
                 filtrarPlanes();
+
+                setTimeout(
+                    function () {
+                        documentoBusqueda.focus();
+                    },
+                    200
+                );
             }
         }
     );
