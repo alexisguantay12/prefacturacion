@@ -70,8 +70,21 @@ urlpatterns = [
         views.cerrar_episodio_ajax,
         name="cerrar_episodio_ajax",
     ),    
-
-
+    path(
+        "entregas/planillas/<int:planilla_id>/editar/",
+        views.editar_planilla_entrega,
+        name="editar_planilla_entrega",
+    ),
+    path(
+        "entregas/planillas/<int:planilla_id>/confirmar/",
+        views.confirmar_planilla_entrega,
+        name="confirmar_planilla_entrega",
+    ),
+    path(
+        "entregas/ordenes/<int:orden_id>/editar-datos/",
+        views.editar_datos_orden_planilla_ajax,
+        name="editar_datos_orden_planilla_ajax",
+    ),
     path(
         "ordenes/gestion/",
         views.gestion_ordenes,

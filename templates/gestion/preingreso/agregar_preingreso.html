@@ -1299,6 +1299,97 @@
             "btnNuevaBusquedaInnova"
         );
 
+    // ============================================================
+    // BUSCADOR LOCAL DE PACIENTES
+    // ============================================================
+
+    const btnBuscarPaciente =
+        document.getElementById(
+            "btnBuscarPaciente"
+        );
+
+    const btnCargarMasPacientes =
+        document.getElementById(
+            "btnCargarMasPacientes"
+        );
+
+    const buscarPacienteApellido =
+        document.getElementById(
+            "buscarPacienteApellido"
+        );
+
+    const buscarPacienteNombre =
+        document.getElementById(
+            "buscarPacienteNombre"
+        );
+
+    const buscarPacienteDni =
+        document.getElementById(
+            "buscarPacienteDni"
+        );
+
+
+    if (btnBuscarPaciente) {
+
+        btnBuscarPaciente.addEventListener(
+            "click",
+            function () {
+
+                buscarPacientes(true);
+
+            }
+        );
+
+    }
+
+
+    if (btnCargarMasPacientes) {
+
+        btnCargarMasPacientes.addEventListener(
+            "click",
+            function () {
+
+                pacientePage += 1;
+
+                buscarPacientes(false);
+
+            }
+        );
+
+    }
+
+
+    [
+        buscarPacienteApellido,
+        buscarPacienteNombre,
+        buscarPacienteDni
+    ].forEach(function (input) {
+
+        if (!input) {
+            return;
+        }
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    buscarPacientes(true);
+
+                }
+
+            }
+        );
+
+    });
+
+
+    // ============================================================
+    // BUSCADOR INNOVA
+    // ============================================================
 
     btnBuscarPacienteInnova.addEventListener(
         "click",

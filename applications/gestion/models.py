@@ -295,7 +295,10 @@ class OrdenAutorizacion(BaseAbstractWithUser):
     fecha_anulacion = models.DateField(blank=True,null=True)
     fecha_tenencia = models.DateField(blank=True,null=True)
     fecha_entrega = models.DateField(blank=True,null=True)
-    
+    fecha_ejecucion = models.DateField(
+        blank=True,
+        null=True
+    )
 
 
     def __str__(self):
@@ -369,30 +372,73 @@ class DetalleOrden(BaseAbstractWithUser):
 
 
 class PlanillaEntrega(BaseAbstractWithUser):
+
+    ESTADOS = [
+        ("borrador", "Borrador"),
+        ("confirmada", "Confirmada"),
+        ("entregada", "Entregada"),
+        ("anulada", "Anulada"),
+    ]
+
     medico = models.ForeignKey(
         "entidades.Medico",
         on_delete=models.PROTECT,
         related_name="planillas_entrega"
-    ) 
-    
-    entregada = models.BooleanField(default=False)
-    fecha_entrega = models.DateField(blank=True,null=True)
-    user_entrega= models.ForeignKey(
-        'users.User',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True, 
-        related_name="user_entrega"
     )
-    observaciones = models.CharField(max_length=500, blank=True, null=True)
-    anulada = models.BooleanField(default=False)
-    fecha_anulacion = models.DateTimeField(blank=True, null=True)
-    user_anulacion= models.ForeignKey(
-        'users.User',
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADOS,
+        default="borrador",
+    )
+
+    observaciones = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True
+    )
+
+    fecha_confirmacion = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    user_confirmacion = models.ForeignKey(
+        "users.User",
         on_delete=models.SET_NULL,
         null=True,
-        blank=True, 
-        related_name="user_anulacion"
+        blank=True,
+        related_name="planillas_confirmadas"
+    )
+
+    fecha_entrega = models.DateField(
+        blank=True,
+        null=True
+    )
+    observacion_entrega=models.CharField(
+        max_length=500,
+        blank=True,
+        null=True
+    )
+    user_entrega = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="planillas_entregadas"
+    )
+
+    fecha_anulacion = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    user_anulacion = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="planillas_anuladas"
     )
 
 

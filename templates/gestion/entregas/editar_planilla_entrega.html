@@ -1,0 +1,1740 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Editar planilla {{ planilla.id }}
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .edit-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem;
+    }
+
+    .edit-header,
+    .summary-card,
+    .orders-card,
+    .observations-card {
+        background: #ffffff;
+        border: 1px solid #d8e0ea;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    /* =========================================================
+       HEADER
+       ========================================================= */
+
+    .edit-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.15rem 1.25rem;
+        margin-bottom: 1rem;
+        border-radius: 18px;
+    }
+
+    .edit-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .edit-title-icon {
+        width: 46px;
+        height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 13px;
+        background: #fff7ed;
+        color: #c2410c;
+        font-size: 1.25rem;
+    }
+
+    .edit-title {
+        margin: 0;
+        color: #102a4c;
+        font-size: 1.35rem;
+        font-weight: 900;
+    }
+
+    .edit-subtitle {
+        margin-top: 0.2rem;
+        color: #667085;
+        font-size: 0.86rem;
+    }
+
+    .edit-actions {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap;
+    }
+
+    .edit-actions .btn {
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
+    /* =========================================================
+       RESUMEN
+       ========================================================= */
+
+    .summary-card {
+        border-radius: 18px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+
+    .summary-item {
+        min-height: 92px;
+        padding: 1rem 1.1rem;
+        border-right: 1px solid #e4e9f0;
+    }
+
+    .summary-item:last-child {
+        border-right: none;
+    }
+
+    .summary-label {
+        margin-bottom: .4rem;
+        color: #667085;
+        font-size: .72rem;
+        font-weight: 900;
+        letter-spacing: .035em;
+        text-transform: uppercase;
+    }
+
+    .summary-value {
+        color: #101828;
+        font-size: .94rem;
+        font-weight: 800;
+    }
+
+    .summary-secondary {
+        margin-top: .2rem;
+        color: #667085;
+        font-size: .78rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .38rem .7rem;
+        border-radius: 999px;
+        border: 1px solid #fde68a;
+        background: #fffbeb;
+        color: #92400e;
+        font-size: .75rem;
+        font-weight: 900;
+    }
+
+    /* =========================================================
+       OBSERVACIONES
+       ========================================================= */
+
+    .observations-card {
+        padding: 1rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+    }
+
+    .observations-label {
+        margin-bottom: .35rem;
+        color: #344054;
+        font-size: .76rem;
+        font-weight: 900;
+    }
+
+    /* =========================================================
+       ORDENES
+       ========================================================= */
+
+    .orders-card {
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .orders-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .95rem 1.1rem;
+        background: #fbfdff;
+        border-bottom: 1px solid #e4e9f0;
+        flex-wrap: wrap;
+    }
+
+    .orders-title {
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+        margin: 0;
+        color: #102a4c;
+        font-size: .98rem;
+        font-weight: 900;
+    }
+
+    .orders-title i {
+        color: #0f5f9b;
+    }
+
+    .orders-tools {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        flex-wrap: wrap;
+    }
+
+    .selected-count {
+        padding: .32rem .7rem;
+        background: #e8f4ff;
+        border: 1px solid #b9d7ff;
+        border-radius: 999px;
+        color: #0f5f9b;
+        font-size: .75rem;
+        font-weight: 900;
+    }
+
+    .search-box {
+        width: 270px;
+        max-width: 100%;
+    }
+
+    .orders-table {
+        width: 100%;
+        margin: 0;
+        font-size: .81rem;
+    }
+
+    .orders-table thead th {
+        padding: .75rem .6rem;
+        background: #f1f5f9;
+        color: #475467;
+        border-bottom: 1px solid #cbd5e1;
+        font-size: .69rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .orders-table tbody td {
+        padding: .75rem .6rem;
+        border-bottom: 1px solid #edf1f5;
+        vertical-align: middle;
+    }
+
+    .orders-table tbody tr:hover {
+        background: #fbfdff;
+    }
+
+    .orders-table tbody tr.selected-row {
+        background: #f0f9ff;
+    }
+
+    .order-number {
+        color: #102a4c;
+        font-weight: 900;
+    }
+
+    .patient-name {
+        color: #101828;
+        font-weight: 800;
+    }
+
+    .secondary-text {
+        margin-top: .15rem;
+        color: #667085;
+        font-size: .72rem;
+    }
+
+    .benefit-name {
+        max-width: 230px;
+        white-space: normal;
+    }
+
+    .cupon-value {
+        font-weight: 800;
+        color: #344054;
+        white-space: nowrap;
+    }
+
+    .date-value {
+        white-space: nowrap;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       CHECK + EDIT
+       ========================================================= */
+
+    .selection-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .4rem;
+        white-space: nowrap;
+    }
+
+    .order-checkbox {
+        width: 19px;
+        height: 19px;
+        cursor: pointer;
+    }
+
+    .btn-edit-order {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    /* =========================================================
+       CODIGOS
+       ========================================================= */
+
+    .codes-cell {
+        max-width: 260px;
+        white-space: normal;
+        line-height: 1.45;
+    }
+
+    .codes-list {
+        color: #3730a3;
+        font-size: .75rem;
+        font-weight: 800;
+    }
+
+    .codes-empty {
+        color: #98a2b3;
+        font-size: .75rem;
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.1rem;
+        border-top: 1px solid #e4e9f0;
+        background: #fbfdff;
+        flex-wrap: wrap;
+    }
+
+    .footer-info {
+        color: #667085;
+        font-size: .78rem;
+    }
+
+    .footer-actions {
+        display: flex;
+        gap: .5rem;
+    }
+
+    .footer-actions .btn {
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #667085;
+    }
+
+    /* =========================================================
+       AJAX FEEDBACK
+       ========================================================= */
+
+    .row-updated {
+        animation: highlightRow 1.5s ease;
+    }
+
+    @keyframes highlightRow {
+
+        0% {
+            background: #dcfce7;
+        }
+
+        100% {
+            background: transparent;
+        }
+
+    }
+
+    .modal-order-info {
+        padding: .75rem;
+        margin-bottom: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .modal-order-number {
+        color: #102a4c;
+        font-weight: 900;
+    }
+
+    @media (max-width: 900px) {
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-item {
+            border-right: none;
+            border-bottom: 1px solid #e4e9f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .edit-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+
+<div class="edit-page">
+
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+
+    <section class="edit-header">
+
+        <div class="edit-title-wrap">
+
+            <div class="edit-title-icon">
+
+                <i class="fas fa-pen-to-square"></i>
+
+            </div>
+
+
+            <div>
+
+                <h1 class="edit-title">
+
+                    Editar planilla de entrega {{ planilla.id }}
+
+                </h1>
+
+
+                <div class="edit-subtitle">
+
+                    Agregue o quite órdenes y, si es necesario,
+                    corrija cupón o fecha de ejecución antes de confirmar.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="edit-actions">
+
+            <a href="{% url 'gestion_app:detalle_planilla_entrega' planilla.id %}"
+               class="btn btn-outline-secondary">
+
+                <i class="fas fa-arrow-left me-1"></i>
+                Volver
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         RESUMEN
+         ========================================================= -->
+
+    <section class="summary-card">
+
+        <div class="summary-grid">
+
+            <div class="summary-item">
+
+                <div class="summary-label">
+                    Médico / profesional
+                </div>
+
+                <div class="summary-value">
+
+                    {% if planilla.medico %}
+
+                        {{ planilla.medico.apellido|title }},
+                        {{ planilla.medico.nombre|title }}
+
+                    {% else %}
+
+                        Sin médico asignado
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="summary-secondary">
+
+                    Matrícula:
+
+                    {% if planilla.medico and planilla.medico.matricula %}
+
+                        {{ planilla.medico.matricula }}
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-item">
+
+                <div class="summary-label">
+                    Estado
+                </div>
+
+                <span class="status-badge">
+
+                    <i class="fas fa-pencil-alt"></i>
+                    Borrador
+
+                </span>
+
+            </div>
+
+
+            <div class="summary-item">
+
+                <div class="summary-label">
+                    Órdenes actuales
+                </div>
+
+                <div class="summary-value">
+                    {{ total_actual }}
+                </div>
+
+                <div class="summary-secondary">
+                    antes de esta modificación
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         FORMULARIO PRINCIPAL
+         ========================================================= -->
+
+    <form method="post"
+          id="formEditarPlanilla">
+
+        {% csrf_token %}
+
+
+        <!-- =====================================================
+             OBSERVACIONES
+             ===================================================== -->
+
+        <section class="observations-card">
+
+            <label for="observaciones"
+                   class="observations-label">
+
+                Observaciones
+
+            </label>
+
+
+            <textarea name="observaciones"
+                      id="observaciones"
+                      rows="2"
+                      class="form-control"
+                      maxlength="500"
+                      placeholder="Observaciones de la planilla...">{{ planilla.observaciones|default:"" }}</textarea>
+
+        </section>
+
+
+        <!-- =====================================================
+             ORDENES
+             ===================================================== -->
+
+        <section class="orders-card">
+
+            <div class="orders-header">
+
+                <h2 class="orders-title">
+
+                    <i class="fas fa-list-check"></i>
+
+                    Órdenes disponibles
+
+                </h2>
+
+
+                <div class="orders-tools">
+
+                    <span class="selected-count">
+
+                        <span id="cantidadSeleccionadas">
+                            0
+                        </span>
+
+                        seleccionada(s)
+
+                    </span>
+
+
+                    <input type="text"
+                           id="buscarOrden"
+                           class="form-control form-control-sm search-box"
+                           placeholder="Buscar orden, paciente, DNI, episodio, cupón...">
+
+                </div>
+
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table orders-table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="text-center">
+
+                                <div class="selection-actions">
+
+                                    <input type="checkbox"
+                                           id="seleccionarTodas"
+                                           class="form-check-input">
+
+                                    <span>Sel.</span>
+
+                                </div>
+
+                            </th>
+
+                            <th>Orden</th>
+
+                            <th>Fecha ejec.</th>
+
+                            <th>Cupón</th>
+
+                            <th>Paciente</th>
+
+                            <th>Episodio</th>
+
+                            <th>Obra social</th>
+
+                            <th>Códigos</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="tablaOrdenesBody">
+
+                        {% for orden in ordenes %}
+
+                            <tr id="filaOrden{{ orden.id }}"
+                                class="fila-orden {% if orden.seleccionada %}selected-row{% endif %}"
+
+                                data-search="
+                                    {{ orden.id }}
+                                    {{ orden.preingreso.paciente.apellido }}
+                                    {{ orden.preingreso.paciente.nombre }}
+                                    {{ orden.preingreso.paciente.dni }}
+                                    {{ orden.preingreso.episodio }}
+                                    {{ orden.preingreso.numero }}
+                                    {{ orden.preingreso.obra_social }}
+                                    {{ orden.numero_cupon }}
+                                    {{ orden.codigos_prestaciones|join:' ' }}
+                                ">
+
+                                <!-- =========================================
+                                     CHECK + EDITAR
+                                     ========================================= -->
+
+                                <td class="text-center">
+
+                                    <div class="selection-actions">
+
+                                        <input type="checkbox"
+                                               name="ordenes"
+                                               value="{{ orden.id }}"
+                                               class="form-check-input order-checkbox"
+
+                                               {% if orden.seleccionada %}
+                                                   checked
+                                               {% endif %}>
+
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary btn-edit-order btnEditarOrden"
+
+                                                data-id="{{ orden.id }}"
+
+                                                data-numero="{{ orden.id|stringformat:'06d' }}"
+
+                                                data-cupon="{{ orden.numero_cupon|default:'' }}"
+
+                                                data-fecha-ejecucion="{% if orden.fecha_ejecucion_mostrar %}{{ orden.fecha_ejecucion_mostrar|date:'Y-m-d' }}{% endif %}"
+
+                                                data-url="{% url 'gestion_app:editar_datos_orden_planilla_ajax' orden.id %}"
+
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEditarOrden"
+
+                                                title="Editar cupón y fecha de ejecución">
+
+                                            <i class="fas fa-pen"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     ORDEN
+                                     ========================================= -->
+
+                                <td>
+
+                                    <span class="order-number">
+
+                                        {{ orden.id|stringformat:"06d" }}
+
+                                    </span>
+
+
+                                    {% if orden.seleccionada %}
+
+                                        <div class="secondary-text">
+
+                                            Actualmente en la planilla
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     FECHA
+                                     ========================================= -->
+
+                                <td>
+
+                                    <span class="date-value"
+                                          id="fechaOrden{{ orden.id }}">
+
+                                        {% if orden.fecha_ejecucion_mostrar %}
+
+                                            {{ orden.fecha_ejecucion_mostrar|date:"d/m/Y" }}
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     CUPÓN
+                                     ========================================= -->
+
+                                <td>
+
+                                    <span class="cupon-value"
+                                          id="cuponOrden{{ orden.id }}">
+
+                                        {{ orden.numero_cupon|default:"—" }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     PACIENTE
+                                     ========================================= -->
+
+                                <td>
+
+                                    <div class="patient-name">
+
+                                        {{ orden.preingreso.paciente.apellido|title }},
+                                        {{ orden.preingreso.paciente.nombre|title }}
+
+                                    </div>
+
+
+                                    <div class="secondary-text">
+
+                                        DNI
+                                        {{ orden.preingreso.paciente.dni|default:"—" }}
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     EPISODIO
+                                     ========================================= -->
+
+                                <td>
+
+                                    {% if orden.preingreso.episodio %}
+
+                                        {{ orden.preingreso.episodio }}
+
+                                    {% elif orden.preingreso.numero %}
+
+                                        {{ orden.preingreso.numero }}
+
+                                    {% else %}
+
+                                        {{ orden.preingreso.id }}
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     OBRA SOCIAL
+                                     ========================================= -->
+
+                                <td>
+
+                                    <div class="benefit-name">
+
+                                        {{ orden.preingreso.obra_social|default:"—" }}
+
+
+                                        {% if orden.preingreso.plan %}
+
+                                            <div class="secondary-text">
+
+                                                Plan {{ orden.preingreso.plan }}
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- =========================================
+                                     CODIGOS
+                                     ========================================= -->
+
+                                <td class="codes-cell">
+
+                                    {% if orden.codigos_prestaciones %}
+
+                                        <span class="codes-list">
+
+                                            {{ orden.codigos_prestaciones|join:", " }}
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="codes-empty">
+                                            Sin códigos
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="8">
+
+                                    <div class="empty-state">
+
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+
+                                        <div class="fw-bold">
+
+                                            No existen órdenes disponibles.
+
+                                        </div>
+
+                                        <div class="small">
+
+                                            No hay órdenes autorizadas disponibles
+                                            para este médico.
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 FOOTER
+                 ================================================= -->
+
+            <div class="form-footer">
+
+                <div class="footer-info">
+
+                    Solo puede guardar la planilla si queda al menos
+                    una orden seleccionada.
+
+                </div>
+
+
+                <div class="footer-actions">
+
+                    <a href="{% url 'gestion_app:detalle_planilla_entrega' planilla.id %}"
+                       class="btn btn-outline-secondary">
+
+                        Cancelar
+
+                    </a>
+
+
+                    <button type="submit"
+                            id="btnGuardarPlanilla"
+                            class="btn btn-primary">
+
+                        <i class="fas fa-save me-1"></i>
+                        Guardar cambios
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </form>
+
+
+    <!-- =========================================================
+         MODAL EDITAR ORDEN
+         
+         Está fuera del formulario principal.
+         ========================================================= -->
+
+    <div class="modal fade"
+         id="modalEditarOrden"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content"
+                 style="border-radius:16px; overflow:hidden;">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title fw-bold">
+
+                        <i class="fas fa-pen text-primary me-1"></i>
+
+                        Editar datos de la orden
+
+                    </h5>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
+                    </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <div class="modal-order-info">
+
+                        Orden
+
+                        <span class="modal-order-number"
+                              id="numeroOrdenEditar">
+
+                            —
+
+                        </span>
+
+                    </div>
+
+
+                    <div id="errorEditarOrden"
+                         class="alert alert-danger d-none">
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label for="numeroCuponEditar"
+                               class="form-label fw-bold">
+
+                            Número de cupón
+
+                        </label>
+
+
+                        <input type="text"
+                               id="numeroCuponEditar"
+                               class="form-control"
+                               maxlength="120"
+                               autocomplete="off"
+                               required>
+
+                    </div>
+
+
+                    <div class="mb-2">
+
+                        <label for="fechaEjecucionEditar"
+                               class="form-label fw-bold">
+
+                            Fecha de ejecución
+
+                        </label>
+
+
+                        <input type="date"
+                               id="fechaEjecucionEditar"
+                               class="form-control"
+                               required>
+
+                    </div>
+
+
+                    <div class="form-text">
+
+                        Los cambios se guardan inmediatamente sobre la orden.
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button type="button"
+                            class="btn btn-primary"
+                            id="btnGuardarDatosOrden">
+
+                        <i class="fas fa-save me-1"></i>
+                        Guardar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // =========================================================================
+    // SELECCIÓN DE ÓRDENES
+    // =========================================================================
+
+    const checkboxes = document.querySelectorAll(
+        ".order-checkbox"
+    );
+
+    const seleccionarTodas = document.getElementById(
+        "seleccionarTodas"
+    );
+
+    const contador = document.getElementById(
+        "cantidadSeleccionadas"
+    );
+
+    const buscar = document.getElementById(
+        "buscarOrden"
+    );
+
+    const form = document.getElementById(
+        "formEditarPlanilla"
+    );
+
+    const btnGuardar = document.getElementById(
+        "btnGuardarPlanilla"
+    );
+
+
+    // -------------------------------------------------------------------------
+    // CONTADOR
+    // -------------------------------------------------------------------------
+
+    function actualizarContador() {
+
+        let cantidad = 0;
+
+        checkboxes.forEach(function (checkbox) {
+
+            if (checkbox.checked) {
+
+                cantidad++;
+
+            }
+
+            const fila =
+                checkbox.closest("tr");
+
+            if (fila) {
+
+                if (checkbox.checked) {
+
+                    fila.classList.add(
+                        "selected-row"
+                    );
+
+                } else {
+
+                    fila.classList.remove(
+                        "selected-row"
+                    );
+
+                }
+
+            }
+
+        });
+
+        contador.textContent =
+            cantidad;
+
+        btnGuardar.disabled =
+            cantidad === 0;
+
+    }
+
+
+    checkboxes.forEach(function (checkbox) {
+
+        checkbox.addEventListener(
+            "change",
+            actualizarContador
+        );
+
+    });
+
+
+    // -------------------------------------------------------------------------
+    // SELECCIONAR TODAS LAS VISIBLES
+    // -------------------------------------------------------------------------
+
+    if (seleccionarTodas) {
+
+        seleccionarTodas.addEventListener(
+            "change",
+            function () {
+
+                document.querySelectorAll(
+                    ".fila-orden"
+                ).forEach(function (fila) {
+
+                    if (
+                        fila.style.display !== "none"
+                    ) {
+
+                        const checkbox =
+                            fila.querySelector(
+                                ".order-checkbox"
+                            );
+
+                        if (checkbox) {
+
+                            checkbox.checked =
+                                seleccionarTodas.checked;
+
+                        }
+
+                    }
+
+                });
+
+                actualizarContador();
+
+            }
+        );
+
+    }
+
+
+    // -------------------------------------------------------------------------
+    // BUSCADOR
+    // -------------------------------------------------------------------------
+
+    if (buscar) {
+
+        buscar.addEventListener(
+            "input",
+            function () {
+
+                const texto = (
+                    this.value || ""
+                )
+                .toLowerCase()
+                .trim();
+
+
+                document.querySelectorAll(
+                    ".fila-orden"
+                ).forEach(function (fila) {
+
+                    const contenido = (
+                        fila.dataset.search || ""
+                    ).toLowerCase();
+
+                    fila.style.display =
+                        contenido.includes(texto)
+                            ? ""
+                            : "none";
+
+                });
+
+            }
+        );
+
+    }
+
+
+    // -------------------------------------------------------------------------
+    // GUARDAR COMPOSICIÓN PLANILLA
+    // -------------------------------------------------------------------------
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            function (event) {
+
+                const seleccionadas =
+                    document.querySelectorAll(
+                        ".order-checkbox:checked"
+                    ).length;
+
+                if (seleccionadas === 0) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Debe seleccionar al menos una orden."
+                    );
+
+                    return;
+
+                }
+
+                btnGuardar.disabled =
+                    true;
+
+                btnGuardar.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Guardando...
+                `;
+
+            }
+        );
+
+    }
+
+
+    // =========================================================================
+    // EDICIÓN AJAX DE ORDEN
+    // =========================================================================
+
+    let ordenEditarId = null;
+    let urlEditarOrden = null;
+    let botonEditarActual = null;
+
+    const modalEditarElemento =
+        document.getElementById(
+            "modalEditarOrden"
+        );
+
+    const numeroOrdenEditar =
+        document.getElementById(
+            "numeroOrdenEditar"
+        );
+
+    const numeroCuponEditar =
+        document.getElementById(
+            "numeroCuponEditar"
+        );
+
+    const fechaEjecucionEditar =
+        document.getElementById(
+            "fechaEjecucionEditar"
+        );
+
+    const errorEditarOrden =
+        document.getElementById(
+            "errorEditarOrden"
+        );
+
+    const btnGuardarDatosOrden =
+        document.getElementById(
+            "btnGuardarDatosOrden"
+        );
+
+
+    // -------------------------------------------------------------------------
+    // ABRIR MODAL
+    // -------------------------------------------------------------------------
+
+    document.querySelectorAll(
+        ".btnEditarOrden"
+    ).forEach(function (boton) {
+
+        boton.addEventListener(
+            "click",
+            function () {
+
+                ordenEditarId =
+                    this.dataset.id;
+
+                urlEditarOrden =
+                    this.dataset.url;
+
+                botonEditarActual =
+                    this;
+
+                numeroOrdenEditar.textContent =
+                    "#" + this.dataset.numero;
+
+                numeroCuponEditar.value =
+                    this.dataset.cupon || "";
+
+                fechaEjecucionEditar.value =
+                    this.dataset.fechaEjecucion || "";
+
+                errorEditarOrden.textContent =
+                    "";
+
+                errorEditarOrden.classList.add(
+                    "d-none"
+                );
+
+            }
+        );
+
+    });
+
+
+    // -------------------------------------------------------------------------
+    // CSRF
+    // -------------------------------------------------------------------------
+
+    function getCookie(name) {
+
+        let cookieValue = null;
+
+        if (
+            document.cookie
+            && document.cookie !== ""
+        ) {
+
+            const cookies =
+                document.cookie.split(";");
+
+            for (
+                let i = 0;
+                i < cookies.length;
+                i++
+            ) {
+
+                const cookie =
+                    cookies[i].trim();
+
+                if (
+                    cookie.substring(
+                        0,
+                        name.length + 1
+                    ) === (
+                        name + "="
+                    )
+                ) {
+
+                    cookieValue =
+                        decodeURIComponent(
+                            cookie.substring(
+                                name.length + 1
+                            )
+                        );
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+        return cookieValue;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // GUARDAR DATOS DE ORDEN
+    // -------------------------------------------------------------------------
+
+    if (btnGuardarDatosOrden) {
+
+        btnGuardarDatosOrden.addEventListener(
+            "click",
+            async function () {
+
+                if (
+                    !ordenEditarId
+                    || !urlEditarOrden
+                ) {
+
+                    return;
+
+                }
+
+                const numeroCupon =
+                    numeroCuponEditar.value.trim();
+
+                const fechaEjecucion =
+                    fechaEjecucionEditar.value.trim();
+
+
+                // -------------------------------------------------------------
+                // VALIDACIONES
+                // -------------------------------------------------------------
+
+                if (!numeroCupon) {
+
+                    errorEditarOrden.textContent =
+                        "Debe ingresar el número de cupón.";
+
+                    errorEditarOrden.classList.remove(
+                        "d-none"
+                    );
+
+                    numeroCuponEditar.focus();
+
+                    return;
+
+                }
+
+
+                if (!fechaEjecucion) {
+
+                    errorEditarOrden.textContent =
+                        "Debe ingresar la fecha de ejecución.";
+
+                    errorEditarOrden.classList.remove(
+                        "d-none"
+                    );
+
+                    fechaEjecucionEditar.focus();
+
+                    return;
+
+                }
+
+
+                // -------------------------------------------------------------
+                // LOADING
+                // -------------------------------------------------------------
+
+                this.disabled = true;
+
+                const contenidoOriginal =
+                    this.innerHTML;
+
+                this.innerHTML = `
+                    <span
+                        class="spinner-border spinner-border-sm me-1"
+                        role="status">
+                    </span>
+                    Guardando...
+                `;
+
+
+                try {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        "numero_cupon",
+                        numeroCupon
+                    );
+
+                    formData.append(
+                        "fecha_ejecucion",
+                        fechaEjecucion
+                    );
+
+
+                    // ---------------------------------------------------------
+                    // AJAX
+                    // ---------------------------------------------------------
+
+                    const response =
+                        await fetch(
+                            urlEditarOrden,
+                            {
+                                method: "POST",
+
+                                headers: {
+
+                                    "X-CSRFToken":
+                                        getCookie(
+                                            "csrftoken"
+                                        ),
+
+                                    "X-Requested-With":
+                                        "XMLHttpRequest"
+
+                                },
+
+                                body: formData
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok
+                        || !data.ok
+                    ) {
+
+                        throw new Error(
+                            data.mensaje
+                            || "No se pudo actualizar la orden."
+                        );
+
+                    }
+
+
+                    // =========================================================
+                    // ACTUALIZAR FILA
+                    // =========================================================
+
+                    const cuponCelda =
+                        document.getElementById(
+                            "cuponOrden"
+                            + ordenEditarId
+                        );
+
+                    const fechaCelda =
+                        document.getElementById(
+                            "fechaOrden"
+                            + ordenEditarId
+                        );
+
+
+                    if (cuponCelda) {
+
+                        cuponCelda.textContent =
+                            data.orden.numero_cupon;
+
+                    }
+
+
+                    if (fechaCelda) {
+
+                        fechaCelda.textContent =
+                            data.orden.fecha_ejecucion_display;
+
+                    }
+
+
+                    // ---------------------------------------------------------
+                    // ACTUALIZAR DATASET
+                    // ---------------------------------------------------------
+
+                    if (botonEditarActual) {
+
+                        botonEditarActual.dataset.cupon =
+                            data.orden.numero_cupon;
+
+                        botonEditarActual.dataset.fechaEjecucion =
+                            data.orden.fecha_ejecucion;
+
+                    }
+
+
+                    // ---------------------------------------------------------
+                    // ACTUALIZAR TEXTO DEL BUSCADOR DE LA FILA
+                    // ---------------------------------------------------------
+
+                    const fila =
+                        document.getElementById(
+                            "filaOrden"
+                            + ordenEditarId
+                        );
+
+                    if (fila) {
+
+                        fila.dataset.search =
+                            (
+                                fila.dataset.search
+                                + " "
+                                + data.orden.numero_cupon
+                            );
+
+                        fila.classList.remove(
+                            "row-updated"
+                        );
+
+                        void fila.offsetWidth;
+
+                        fila.classList.add(
+                            "row-updated"
+                        );
+
+                    }
+
+
+                    // ---------------------------------------------------------
+                    // CERRAR MODAL
+                    // ---------------------------------------------------------
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            modalEditarElemento
+                        );
+
+                    if (modal) {
+
+                        modal.hide();
+
+                    }
+
+                } catch (error) {
+
+                    errorEditarOrden.textContent =
+                        error.message;
+
+                    errorEditarOrden.classList.remove(
+                        "d-none"
+                    );
+
+                } finally {
+
+                    this.disabled = false;
+
+                    this.innerHTML =
+                        contenidoOriginal;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // =========================================================================
+    // INICIALIZAR
+    // =========================================================================
+
+    actualizarContador();
+
+});
+
+</script>
+
+{% endblock %}

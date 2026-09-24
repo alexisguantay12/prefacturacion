@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.db.models import Q, Count, Exists, OuterRef
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -8,24 +8,108 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
-
+from django.db.models import Count, Q
 from applications.entidades.models import Medico, ObraSocial
-from ..models import OrdenAutorizacion
-
+from ..models import OrdenAutorizacion,DetallePlanillaEntrega
 
 @login_required
 def gestion_ordenes(request):
-    fecha_desde = request.GET.get("fecha_desde", "").strip()
-    fecha_hasta = request.GET.get("fecha_hasta", "").strip()
-    nombre = request.GET.get("nombre", "").strip()
-    apellido = request.GET.get("apellido", "").strip()
-    obra_social_id = request.GET.get("obra_social", "").strip()
-    medico_tenencia_id = request.GET.get("medico_tenencia", "").strip()
-    numero_orden = request.GET.get("numero_orden", "").strip()
-    episodio = request.GET.get("episodio", "").strip()
-    numero_preingreso = request.GET.get("numero_preingreso", "").strip()
-    estado = request.GET.get("estado", "").strip()
-    estado_entrega = request.GET.get("estado_entrega", "").strip()
+
+    fecha_desde = (
+        request.GET.get(
+            "fecha_desde",
+            "",
+        ).strip()
+    )
+
+    fecha_hasta = (
+        request.GET.get(
+            "fecha_hasta",
+            "",
+        ).strip()
+    )
+
+    nombre = (
+        request.GET.get(
+            "nombre",
+            "",
+        ).strip()
+    )
+
+    apellido = (
+        request.GET.get(
+            "apellido",
+            "",
+        ).strip()
+    )
+
+    obra_social_id = (
+        request.GET.get(
+            "obra_social",
+            "",
+        ).strip()
+    )
+
+    medico_tenencia_id = (
+        request.GET.get(
+            "medico_tenencia",
+            "",
+        ).strip()
+    )
+
+    numero_orden = (
+        request.GET.get(
+            "numero_orden",
+            "",
+        ).strip()
+    )
+
+    episodio = (
+        request.GET.get(
+            "episodio",
+            "",
+        ).strip()
+    )
+
+    numero_preingreso = (
+        request.GET.get(
+            "numero_preingreso",
+            "",
+        ).strip()
+    )
+
+    estado = (
+        request.GET.get(
+            "estado",
+            "",
+        ).strip()
+    )
+
+    estado_entrega = (
+        request.GET.get(
+            "estado_entrega",
+            "",
+        ).strip()
+    )
+
+    # =========================================================================
+    # PLANILLA ACTIVA
+    # =========================================================================
+
+    planilla_activa = (
+        DetallePlanillaEntrega.objects
+        .filter(
+            orden_id=OuterRef("pk"),
+            planilla_entrega__is_deleted=False,
+        )
+        .exclude(
+            planilla_entrega__estado="anulada"
+        )
+    )
+
+    # =========================================================================
+    # QUERYSET
+    # =========================================================================
 
     ordenes = (
         OrdenAutorizacion.objects
@@ -37,119 +121,254 @@ def gestion_ordenes(request):
             "medico",
             "medico_tenencia",
         )
+        .prefetch_related(
+            "detalles"
+        )
         .annotate(
+
             cantidad_prestaciones=Count(
                 "detalles",
+                filter=Q(
+                    detalles__deleted_at__isnull=True
+                ),
                 distinct=True,
-            )
+            ),
+
+            bloqueada_por_planilla=Exists(
+                planilla_activa
+            ),
+
         )
-        .order_by("-id")
+        .order_by(
+            "-id"
+        )
     )
 
+    # =========================================================================
+    # FILTROS
+    # =========================================================================
+
     if fecha_desde:
+
         try:
-            fecha_desde_parseada = datetime.strptime(
-                fecha_desde,
-                "%Y-%m-%d",
-            ).date()
+
+            fecha_desde_parseada = (
+                datetime.strptime(
+                    fecha_desde,
+                    "%Y-%m-%d",
+                ).date()
+            )
 
             ordenes = ordenes.filter(
                 fecha__gte=fecha_desde_parseada
             )
+
         except ValueError:
             pass
 
     if fecha_hasta:
+
         try:
-            fecha_hasta_parseada = datetime.strptime(
-                fecha_hasta,
-                "%Y-%m-%d",
-            ).date()
+
+            fecha_hasta_parseada = (
+                datetime.strptime(
+                    fecha_hasta,
+                    "%Y-%m-%d",
+                ).date()
+            )
 
             ordenes = ordenes.filter(
                 fecha__lte=fecha_hasta_parseada
             )
+
         except ValueError:
             pass
 
     if nombre:
+
         ordenes = ordenes.filter(
             preingreso__paciente__nombre__icontains=nombre
         )
 
     if apellido:
+
         ordenes = ordenes.filter(
             preingreso__paciente__apellido__icontains=apellido
         )
 
     if obra_social_id:
+
         ordenes = ordenes.filter(
             preingreso__obra_social_id=obra_social_id
         )
 
     if medico_tenencia_id == "sin_tenencia":
+
         ordenes = ordenes.filter(
             medico_tenencia__isnull=True
         )
+
     elif medico_tenencia_id:
+
         ordenes = ordenes.filter(
             medico_tenencia_id=medico_tenencia_id
         )
 
     if numero_orden:
+
         try:
+
             ordenes = ordenes.filter(
                 id=int(numero_orden)
             )
-        except (TypeError, ValueError):
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+
             ordenes = ordenes.none()
 
     if episodio:
+
         ordenes = ordenes.filter(
             preingreso__episodio__icontains=episodio
         )
 
     if numero_preingreso:
+
         ordenes = ordenes.filter(
             preingreso__numero__icontains=numero_preingreso
         )
 
-    if estado in ["pendiente", "autorizada", "anulada"]:
+    if estado in [
+        "pendiente",
+        "autorizada",
+        "anulada",
+    ]:
+
         ordenes = ordenes.filter(
             estado=estado
         )
 
     if estado_entrega == "entregadas":
+
         ordenes = ordenes.filter(
             esta_entregada=True
         )
+
     elif estado_entrega == "no_entregadas":
+
         ordenes = ordenes.filter(
             esta_entregada=False
         )
 
-    paginator = Paginator(ordenes, 15)
+    # =========================================================================
+    # PAGINACIÓN
+    # =========================================================================
+
+    paginator = Paginator(
+        ordenes,
+        15,
+    )
+
     page_obj = paginator.get_page(
         request.GET.get("page")
     )
 
+    ordenes_pagina = list(
+        page_obj.object_list
+    )
+
+    # =========================================================================
+    # DATOS TEMPORALES DEL FRONT
+    # =========================================================================
+
+    for orden in ordenes_pagina:
+
+        # ---------------------------------------------------------------------
+        # FECHA EJECUCIÓN SUGERIDA
+        # ---------------------------------------------------------------------
+
+        fechas_detalles = [
+            detalle.fecha_desde
+            for detalle in orden.detalles.all()
+            if detalle.fecha_desde
+            and getattr(
+                detalle,
+                "deleted_at",
+                None,
+            ) is None
+        ]
+
+        if fechas_detalles:
+
+            orden.fecha_ejecucion_sugerida = min(
+                fechas_detalles
+            )
+
+        else:
+
+            orden.fecha_ejecucion_sugerida = (
+                orden.fecha
+            )
+
+        # ---------------------------------------------------------------------
+        # PUEDE GESTIONARSE
+        # ---------------------------------------------------------------------
+
+        orden.puede_gestionar = (
+            orden.estado != "anulada"
+            and not orden.esta_entregada
+            and not orden.bloqueada_por_planilla
+        )
+
+    page_obj.object_list = (
+        ordenes_pagina
+    )
+
+    # =========================================================================
+    # QUERYSTRING
+    # =========================================================================
+
     parametros = request.GET.copy()
-    parametros.pop("page", None)
+
+    parametros.pop(
+        "page",
+        None,
+    )
+
+    # =========================================================================
+    # CONTEXTO
+    # =========================================================================
 
     context = {
+
         "page_obj": page_obj,
-        "ordenes": page_obj.object_list,
+
+        "ordenes": ordenes_pagina,
+
         "medicos": (
             Medico.objects
             .all()
-            .order_by("apellido", "nombre")
+            .order_by(
+                "apellido",
+                "nombre",
+            )
         ),
+
         "obras_sociales": (
             ObraSocial.objects
             .all()
-            .order_by("nombre")
+            .order_by(
+                "nombre"
+            )
         ),
-        "querystring": parametros.urlencode(),
+
+        "querystring": (
+            parametros.urlencode()
+        ),
+
     }
 
     return render(
@@ -157,7 +376,6 @@ def gestion_ordenes(request):
         "gestion/orden/gestion_ordenes.html",
         context,
     )
-
 
 @login_required
 @require_GET
@@ -309,8 +527,37 @@ def detalle_orden_gestion_ajax(request, orden_id):
 @login_required
 @require_POST
 def autorizar_orden_gestion_ajax(request, orden_id):
+
+    numero_cupon = request.POST.get("numero_cupon", "").strip()
+    fecha_ejecucion_str = request.POST.get("fecha_ejecucion", "").strip()
+
+    if not numero_cupon:
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "Debe ingresar el número de cupón.",
+        }, status=400)
+
+    if not fecha_ejecucion_str:
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "Debe ingresar la fecha de ejecución.",
+        }, status=400)
+
+    try:
+        fecha_ejecucion = datetime.strptime(
+            fecha_ejecucion_str,
+            "%Y-%m-%d"
+        ).date()
+
+    except ValueError:
+        return JsonResponse({
+            "ok": False,
+            "mensaje": "La fecha de ejecución no es válida.",
+        }, status=400)
+
     try:
         with transaction.atomic():
+
             orden = (
                 OrdenAutorizacion.objects
                 .select_for_update()
@@ -320,30 +567,28 @@ def autorizar_orden_gestion_ajax(request, orden_id):
             if orden.estado == "anulada":
                 return JsonResponse({
                     "ok": False,
-                    "mensaje": (
-                        "No se puede autorizar una orden anulada."
-                    ),
+                    "mensaje": "No se puede autorizar una orden anulada.",
                 }, status=400)
 
             if orden.estado == "autorizada":
                 return JsonResponse({
                     "ok": False,
-                    "mensaje": (
-                        "La orden ya se encuentra autorizada."
-                    ),
+                    "mensaje": "La orden ya se encuentra autorizada.",
                 }, status=400)
-
-            fecha_actual = timezone.now()
 
             orden.estado = "autorizada"
             orden.autorizada = True
-            orden.fecha_autorizacion = fecha_actual
+            orden.numero_cupon = numero_cupon
+            orden.fecha_ejecucion = fecha_ejecucion
+            orden.fecha_autorizacion = timezone.now()
             orden.user_autorizacion = request.user
 
             orden.save(
                 update_fields=[
                     "estado",
                     "autorizada",
+                    "numero_cupon",
+                    "fecha_ejecucion",
                     "fecha_autorizacion",
                     "user_autorizacion",
                 ]
@@ -361,17 +606,16 @@ def autorizar_orden_gestion_ajax(request, orden_id):
 
     return JsonResponse({
         "ok": True,
-        "mensaje": (
-            f"La orden N.º {orden.id:06d} fue autorizada."
-        ),
+        "mensaje": f"La orden N.º {orden.id:06d} fue autorizada.",
         "orden": {
             "id": orden.id,
             "estado": orden.estado,
             "estado_display": orden.get_estado_display(),
             "autorizada": True,
+            "numero_cupon": orden.numero_cupon,
+            "fecha_ejecucion": orden.fecha_ejecucion.strftime("%d/%m/%Y"),
         },
     })
-
 
 @login_required
 @require_POST

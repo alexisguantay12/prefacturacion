@@ -1,6 +1,6 @@
 from datetime import date,datetime
 import json
-
+from django.db.models import Q, Count, Exists, OuterRef
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -438,9 +438,9 @@ def agregar_preingreso(request):
         },
     )
 
-
 @login_required
 def detalle_preingreso(request, preingreso_id):
+
     preingreso = get_object_or_404(
         Preingreso.objects.select_related(
             "paciente",
@@ -452,51 +452,134 @@ def detalle_preingreso(request, preingreso_id):
         id=preingreso_id,
     )
 
-    medicos = Medico.objects.all().order_by(
-        "apellido",
-        "nombre",
+    medicos = (
+        Medico.objects
+        .all()
+        .order_by(
+            "apellido",
+            "nombre",
+        )
+    )
+
+    # =========================================================================
+    # PLANILLA ACTIVA
+    # =========================================================================
+
+    planilla_activa = (
+        DetallePlanillaEntrega.objects
+        .filter(
+            orden_id=OuterRef("pk"),
+            planilla_entrega__is_deleted=False,
+        )
+        .exclude(
+            planilla_entrega__estado="anulada"
+        )
     )
 
     ordenes = list(
         OrdenAutorizacion.objects
-        .filter(preingreso=preingreso)
+        .filter(
+            preingreso=preingreso
+        )
         .select_related(
             "medico",
             "medico_tenencia",
         )
+        .prefetch_related(
+            "detalles"
+        )
         .annotate(
+
             cantidad_prestaciones=Count(
                 "detalles",
                 filter=Q(
                     detalles__deleted_at__isnull=True
                 ),
                 distinct=True,
-            )
+            ),
+
+            bloqueada_por_planilla=Exists(
+                planilla_activa
+            ),
+
         )
-        .order_by("-created_at", "-id")
+        .order_by(
+            "-created_at",
+            "-id",
+        )
     )
 
     hoy = date.today()
 
     for orden in ordenes:
+
         orden.puede_editar = False
         orden.puede_editar_codigos = False
+        orden.puede_gestionar = False
         orden.dias_transcurridos = None
+
+        # ---------------------------------------------------------------------
+        # FECHA DE EJECUCIÓN SUGERIDA
+        # ---------------------------------------------------------------------
+
+        fechas_detalles = [
+            detalle.fecha_desde
+            for detalle in orden.detalles.all()
+            if detalle.fecha_desde
+            and getattr(
+                detalle,
+                "deleted_at",
+                None,
+            ) is None
+        ]
+
+        if fechas_detalles:
+
+            orden.fecha_ejecucion_sugerida = min(
+                fechas_detalles
+            )
+
+        else:
+
+            orden.fecha_ejecucion_sugerida = (
+                orden.fecha
+            )
+
+        # ---------------------------------------------------------------------
+        # PUEDE GESTIONARSE
+        # ---------------------------------------------------------------------
+
+        orden.puede_gestionar = (
+            orden.estado != "anulada"
+            and not orden.esta_entregada
+            and not orden.bloqueada_por_planilla
+        )
+
+        # ---------------------------------------------------------------------
+        # PERMISOS DE EDICIÓN
+        # ---------------------------------------------------------------------
 
         fecha_orden = orden.fecha
 
         if not fecha_orden:
             continue
 
-        if isinstance(fecha_orden, datetime):
+        if isinstance(
+            fecha_orden,
+            datetime,
+        ):
             fecha_orden = fecha_orden.date()
 
-        dias_transcurridos = (hoy - fecha_orden).days
+        dias_transcurridos = (
+            hoy - fecha_orden
+        ).days
 
-        orden.dias_transcurridos = dias_transcurridos
+        orden.dias_transcurridos = (
+            dias_transcurridos
+        )
 
         orden.puede_editar = (
-            orden.estado != "anulada"
+            orden.puede_gestionar
             and 0 <= dias_transcurridos <= 45
         )
 

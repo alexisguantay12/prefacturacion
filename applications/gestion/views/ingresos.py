@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.db.models import Q, Count, Exists, OuterRef
 from applications.entidades.models import *
 from ..models import *
 from django.core.paginator import Paginator
@@ -196,10 +196,9 @@ def agregar_ingreso(request):
         "fecha_hoy": date.today().isoformat(),
     })
 
-
 @login_required
 def detalle_ingreso(request, preingreso_id):
-    
+
     preingreso = get_object_or_404(
         Preingreso.objects.select_related(
             "paciente",
@@ -210,49 +209,146 @@ def detalle_ingreso(request, preingreso_id):
         ),
         id=preingreso_id,
     )
-    if preingreso.estado=='pendiente':
-            return redirect("gestion_app:detalle_preingreso", preingreso_id=preingreso.id)
+
+    if preingreso.estado == "pendiente":
+
+        return redirect(
+            "gestion_app:detalle_preingreso",
+            preingreso_id=preingreso.id,
+        )
+
+    # =========================================================================
+    # PLANILLA ACTIVA
+    # =========================================================================
+    #
+    # Una orden queda bloqueada si pertenece a una planilla:
+    #
+    # - borrador
+    # - confirmada
+    # - entregada
+    #
+    # Una planilla anulada NO bloquea.
+    # =========================================================================
+
+    planilla_activa = (
+        DetallePlanillaEntrega.objects
+        .filter(
+            orden_id=OuterRef("pk"),
+            planilla_entrega__is_deleted=False,
+        )
+        .exclude(
+            planilla_entrega__estado="anulada"
+        )
+    )
+
     ordenes = list(
         OrdenAutorizacion.objects
-        .filter(preingreso=preingreso)
+        .filter(
+            preingreso=preingreso
+        )
         .select_related(
             "medico",
             "medico_tenencia",
         )
+        .prefetch_related(
+            "detalles"
+        )
         .annotate(
+
             cantidad_prestaciones=Count(
                 "detalles",
                 filter=Q(
                     detalles__deleted_at__isnull=True
                 ),
                 distinct=True,
-            )
+            ),
+
+            # -------------------------------------------------------------
+            # NUEVO
+            # -------------------------------------------------------------
+
+            bloqueada_por_planilla=Exists(
+                planilla_activa
+            ),
+
         )
-        .order_by("-created_at", "-id")
+        .order_by(
+            "-created_at",
+            "-id",
+        )
     )
 
     hoy = date.today()
 
     for orden in ordenes:
+
         orden.puede_editar = False
         orden.puede_editar_codigos = False
+        orden.puede_gestionar = False
         orden.dias_transcurridos = None
+
+        # ---------------------------------------------------------------------
+        # FECHA DE EJECUCIÓN SUGERIDA
+        # ---------------------------------------------------------------------
+
+        fechas_detalles = [
+            detalle.fecha_desde
+            for detalle in orden.detalles.all()
+            if detalle.fecha_desde
+            and getattr(
+                detalle,
+                "deleted_at",
+                None,
+            ) is None
+        ]
+
+        if fechas_detalles:
+
+            orden.fecha_ejecucion_sugerida = min(
+                fechas_detalles
+            )
+
+        else:
+
+            orden.fecha_ejecucion_sugerida = (
+                orden.fecha
+            )
+
+        # ---------------------------------------------------------------------
+        # PUEDE GESTIONARSE DESDE EL CIRCUITO NORMAL
+        # ---------------------------------------------------------------------
+
+        orden.puede_gestionar = (
+            orden.estado != "anulada"
+            and not orden.esta_entregada
+            and not orden.bloqueada_por_planilla
+        )
+
+        # ---------------------------------------------------------------------
+        # PERMISOS DE EDICIÓN
+        # ---------------------------------------------------------------------
 
         fecha_orden = orden.fecha
 
         if not fecha_orden:
             continue
 
-        # Si es DateTimeField, convertimos directamente a fecha.
-        if isinstance(fecha_orden, datetime):
+        if isinstance(
+            fecha_orden,
+            datetime,
+        ):
             fecha_orden = fecha_orden.date()
 
-        dias_transcurridos = (hoy - fecha_orden).days
+        dias_transcurridos = (
+            hoy - fecha_orden
+        ).days
 
-        orden.dias_transcurridos = dias_transcurridos
+        orden.dias_transcurridos = (
+            dias_transcurridos
+        )
 
         orden.puede_editar = (
-            orden.estado != "anulada"
+            orden.puede_gestionar
             and 0 <= dias_transcurridos <= 45
         )
 
@@ -262,9 +358,13 @@ def detalle_ingreso(request, preingreso_id):
             and not orden.autorizada
         )
 
-    medicos = Medico.objects.all().order_by(
-        "apellido",
-        "nombre",
+    medicos = (
+        Medico.objects
+        .all()
+        .order_by(
+            "apellido",
+            "nombre",
+        )
     )
 
     return render(
@@ -276,6 +376,7 @@ def detalle_ingreso(request, preingreso_id):
             "medicos": medicos,
         },
     )
+
 
 
 @login_required

@@ -599,33 +599,111 @@
                                 </td>
 
                                 <td class="text-end">
+
+                                    <!-- VER SIEMPRE -->
+
                                     <a href="{% url 'gestion_app:detalle_orden_preingreso' orden.id %}"
-                                       class="btn btn-outline-primary btn-sm action-circle"
-                                       title="Ver orden">
+                                    class="btn btn-outline-primary btn-sm action-circle"
+                                    title="Ver orden">
+
                                         <i class="fas fa-eye"></i>
+
                                     </a>
+
 
                                     {% if orden.estado != "anulada" %}
 
-                                        {% if orden.puede_editar %}
-                                            <a href="{% url 'gestion_app:editar_orden_ingreso' orden.id %}"
-                                               class="btn btn-outline-warning btn-sm action-circle"
-                                               title="Editar orden">
-                                                <i class="fas fa-pen"></i>
-                                            </a>
-                                        {% endif %}
+                                        <!-- =====================================================
+                                            ACCIONES QUE MODIFICAN LA ORDEN
+                                            =====================================================
+                                            
+                                            Si la orden ya pertenece a una planilla activa
+                                            (borrador / confirmada / entregada),
+                                            puede_gestionar viene False desde backend.
+                                            ===================================================== -->
 
-                                        {% if not orden.autorizada %}
+                                        {% if orden.puede_gestionar %}
+
+                                            <!-- EDITAR -->
+
+                                            {% if orden.puede_editar %}
+
+                                                <a href="{% url 'gestion_app:editar_orden_ingreso' orden.id %}"
+                                                class="btn btn-outline-warning btn-sm action-circle"
+                                                title="Editar orden">
+
+                                                    <i class="fas fa-pen"></i>
+
+                                                </a>
+
+                                            {% endif %}
+
+
+                                            <!-- AUTORIZAR -->
+
+                                            {% if not orden.autorizada %}
+
+                                                <button type="button"
+                                                        class="btn btn-outline-success btn-sm action-circle btnAbrirModalAutorizar"
+                                                        title="Autorizar orden"
+                                                        data-url="{% url 'gestion_app:autorizar_orden' orden.id %}"
+                                                        data-orden="{{ orden.id|stringformat:'06d' }}"
+                                                        data-cupon="{{ orden.numero_cupon|default:'' }}"
+                                                        data-fecha-ejecucion="{{ orden.fecha_ejecucion_sugerida|date:'Y-m-d' }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalAutorizarOrden">
+
+                                                    <i class="fas fa-check"></i>
+
+                                                </button>
+
+                                            {% endif %}
+
+
+                                            <!-- CAMBIAR TENENCIA -->
+
+                                            {% if orden.autorizada %}
+
+                                                <button type="button"
+                                                        class="btn btn-outline-warning btn-sm action-circle btnAbrirModalTenencia"
+                                                        title="Cambiar tenencia"
+                                                        data-url="{% url 'gestion_app:cambiar_tenencia_orden' orden.id %}"
+                                                        data-medico-id="{% if orden.medico_tenencia_id %}{{ orden.medico_tenencia_id }}{% else %}{{ orden.medico_id|default:'' }}{% endif %}"
+                                                        data-orden="{{ orden.id|stringformat:'06d' }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalCambiarTenencia">
+
+                                                    <i class="fas fa-user-doctor"></i>
+
+                                                </button>
+
+                                            {% endif %}
+
+
+                                            <!-- ANULAR -->
+
                                             <button type="button"
-                                                    class="btn btn-outline-success btn-sm action-circle btnAbrirModalAutorizar"
-                                                    title="Autorizar orden"
-                                                    data-url="{% url 'gestion_app:autorizar_orden' orden.id %}"
+                                                    class="btn btn-outline-danger btn-sm action-circle btnAbrirModalAnular"
+                                                    title="Anular orden"
+                                                    data-url="{% url 'gestion_app:anular_orden' orden.id %}"
                                                     data-orden="{{ orden.id|stringformat:'06d' }}"
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#modalAutorizarOrden">
-                                                <i class="fas fa-check"></i>
+                                                    data-bs-target="#modalAnularOrden">
+
+                                                <i class="fas fa-trash"></i>
+
                                             </button>
+
                                         {% endif %}
+
+
+                                        <!-- =====================================================
+                                            IMPRIMIR
+                                            
+                                            La impresión NO modifica la orden.
+                                            Por eso puede seguir disponible aunque esté
+                                            dentro de una planilla.
+                                            ===================================================== -->
 
                                         <button type="button"
                                                 class="btn btn-outline-dark btn-sm action-circle btnAbrirModalImpresion"
@@ -633,40 +711,47 @@
                                                 data-url="{% url 'gestion_app:imprimir_orden' orden.id %}"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalImprimirOrden">
+
                                             <i class="fas fa-print"></i>
+
                                         </button>
 
-                                        {% if orden.autorizada %}
+
+                                        <!-- =====================================================
+                                            ORDEN BLOQUEADA POR PLANILLA
+                                            ===================================================== -->
+
+                                        {% if orden.bloqueada_por_planilla %}
+
                                             <button type="button"
-                                                    class="btn btn-outline-warning btn-sm action-circle btnAbrirModalTenencia"
-                                                    title="Cambiar tenencia"
-                                                    data-url="{% url 'gestion_app:cambiar_tenencia_orden' orden.id %}"
-                                                    data-medico-id="{% if orden.medico_tenencia_id %}{{ orden.medico_tenencia_id }}{% else %}{{ orden.medico_id|default:'' }}{% endif %}"
-                                                    data-orden="{{ orden.id|stringformat:'06d' }}"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalCambiarTenencia">
-                                                <i class="fas fa-user-doctor"></i>
+                                                    class="btn btn-outline-secondary btn-sm action-circle"
+                                                    title="Orden incluida en una planilla de entrega"
+                                                    disabled>
+
+                                                <i class="fas fa-lock"></i>
+
                                             </button>
+
                                         {% endif %}
 
-                                        <button type="button"
-                                                class="btn btn-outline-danger btn-sm action-circle btnAbrirModalAnular"
-                                                title="Anular orden"
-                                                data-url="{% url 'gestion_app:anular_orden' orden.id %}"
-                                                data-orden="{{ orden.id|stringformat:'06d' }}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalAnularOrden">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
 
                                     {% else %}
+
+                                        <!-- ORDEN ANULADA -->
+
                                         <button type="button"
                                                 class="btn btn-outline-secondary btn-sm action-circle"
                                                 title="Orden anulada"
                                                 disabled>
+
                                             <i class="fas fa-ban"></i>
+
                                         </button>
+
                                     {% endif %}
+
+
+                                    <!-- HISTORIAL SIEMPRE -->
 
                                     <button type="button"
                                             class="btn btn-outline-dark btn-sm action-circle btnVerHistorialOrden"
@@ -675,8 +760,11 @@
                                             data-orden-id="{{ orden.id }}"
                                             data-bs-toggle="modal"
                                             data-bs-target="#modalHistorialOrden">
+
                                         <i class="fas fa-clock-rotate-left"></i>
+
                                     </button>
+
                                 </td>
                             </tr>
                         {% endfor %}
@@ -776,26 +864,78 @@
         </div>
     </div>
 </div>
+<div class="modal fade"
+     id="modalAutorizarOrden"
+     tabindex="-1"
+     aria-hidden="true">
 
-<div class="modal fade" id="modalAutorizarOrden" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form method="post" id="formAutorizarOrden" class="modal-content" style="border-radius:16px; overflow:hidden;">
+
+        <form method="post"
+              id="formAutorizarOrden"
+              class="modal-content"
+              style="border-radius:16px; overflow:hidden;">
+
             {% csrf_token %}
-            <input type="hidden" name="preingreso" value="true">
+
+            <input type="hidden"
+                   name="preingreso"
+                   value="true">
 
             <div class="modal-header">
+
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-check text-success"></i>
                     Autorizar orden
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
             </div>
 
             <div class="modal-body">
-                ¿Desea autorizar la orden <strong id="textoOrdenAutorizar"></strong>?
+
+                <p class="mb-3">
+                    Autorizar orden
+                    <strong id="textoOrdenAutorizar"></strong>
+                </p>
+
+                <div class="mb-3">
+                    <label for="numeroCuponAutorizar"
+                           class="form-label fw-bold">
+                        Número de cupón
+                    </label>
+
+                    <input type="text"
+                           name="numero_cupon"
+                           id="numeroCuponAutorizar"
+                           class="form-control"
+                           maxlength="120"
+                           placeholder="Ingrese número de cupón"
+                           autocomplete="off"
+                           required>
+                </div>
+
+                <div class="mb-2">
+                    <label for="fechaEjecucionAutorizar"
+                           class="form-label fw-bold">
+                        Fecha de ejecución
+                    </label>
+
+                    <input type="date"
+                           name="fecha_ejecucion"
+                           id="fechaEjecucionAutorizar"
+                           class="form-control"
+                           required>
+                </div>
+
             </div>
 
             <div class="modal-footer">
+
                 <button type="button"
                         class="btn btn-outline-secondary"
                         data-bs-dismiss="modal">
@@ -804,10 +944,14 @@
 
                 <button type="submit"
                         class="btn btn-success">
-                    <i class="fas fa-check"></i> Sí, autorizar
+                    <i class="fas fa-check"></i>
+                    Sí, autorizar
                 </button>
+
             </div>
+
         </form>
+
     </div>
 </div>
 
@@ -2007,13 +2151,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 `${urlImpresionSeleccionada}?${parametros.toString()}`;
         });
 
-        document.querySelectorAll(".btnAbrirModalAutorizar").forEach(btn => {
-            btn.addEventListener("click", function () {
-                document.getElementById("formAutorizarOrden").action = this.dataset.url;
-                document.getElementById("textoOrdenAutorizar").innerText = this.dataset.orden;
-            });
-        });
+       document.querySelectorAll(".btnAbrirModalAutorizar").forEach(btn => {
 
+            btn.addEventListener("click", function () {
+
+                const form = document.getElementById("formAutorizarOrden");
+                const textoOrden = document.getElementById("textoOrdenAutorizar");
+                const inputCupon = document.getElementById("numeroCuponAutorizar");
+                const inputFecha = document.getElementById("fechaEjecucionAutorizar");
+
+                form.action = this.dataset.url;
+
+                textoOrden.innerText = this.dataset.orden;
+
+                inputCupon.value = this.dataset.cupon || "";
+
+                inputFecha.value = this.dataset.fechaEjecucion || "";
+
+            });
+
+        });
         document.querySelectorAll(".btnAbrirModalAnular").forEach(btn => {
             btn.addEventListener("click", function () {
                 document.getElementById("formAnularOrden").action = this.dataset.url;

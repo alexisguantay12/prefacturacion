@@ -12,24 +12,55 @@ from .ordenes import redirigir_segun_origen
 # ACCIONES SOBRE ÓRDENES
 # =============================================================================
 
-@require_POST
-
+@require_POST 
 def autorizar_orden(request, orden_id):
-    orden = get_object_or_404(OrdenAutorizacion, id=orden_id)
+    orden = get_object_or_404(
+        OrdenAutorizacion,
+        id=orden_id
+    )
 
     if orden.estado == "anulada":
-        messages.error(request, "No se puede autorizar una orden anulada.")
+        messages.error(
+            request,
+            "No se puede autorizar una orden anulada."
+        )
         return redirigir_segun_origen(request, orden)
 
+    numero_cupon = request.POST.get("numero_cupon", "").strip()
+    fecha_ejecucion = request.POST.get("fecha_ejecucion", "").strip()
+
+    if not numero_cupon:
+        messages.error(
+            request,
+            "Debe ingresar el número de cupón."
+        )
+        return redirigir_segun_origen(request, orden)
+
+    if not fecha_ejecucion:
+        messages.error(
+            request,
+            "Debe ingresar la fecha de ejecución."
+        )
+        return redirigir_segun_origen(request, orden)
+
+    orden.numero_cupon = numero_cupon
+    orden.fecha_ejecucion = fecha_ejecucion
     orden.autorizada = True
     orden.estado = "autorizada"
+    orden.fecha_autorizacion = timezone.now()
+    orden.user_autorizacion = request.user
+
     orden.save()
 
-    orden.fecha_autorizacion= timezone.now()
-    orden.user_autorizacion= request.user
-    orden.detalles.update(autorizada=True)
+    orden.detalles.update(
+        autorizada=True
+    )
 
-    messages.success(request, "Orden autorizada correctamente.")
+    messages.success(
+        request,
+        "Orden autorizada correctamente."
+    )
+
     return redirigir_segun_origen(request, orden)
 
 

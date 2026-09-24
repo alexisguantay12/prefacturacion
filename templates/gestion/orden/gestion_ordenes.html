@@ -772,13 +772,15 @@
                                                         title="Autorizar"
                                                         data-id="{{ orden.id }}"
                                                         data-numero="{{ orden.id|stringformat:'06d' }}"
+                                                        data-cupon="{{ orden.numero_cupon|default:'' }}"
+                                                        data-fecha-ejecucion="{{ orden.fecha_ejecucion_sugerida|date:'Y-m-d' }}"
                                                         data-url="{% url 'gestion_app:autorizar_orden_gestion_ajax' orden.id %}"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#modalAutorizarOrden">
+
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             {% endif %}
-
                                             <button type="button"
                                                     class="btn btn-outline-dark btn-sm action-circle btnImprimirOrden"
                                                     title="Imprimir"
@@ -788,7 +790,7 @@
                                                 <i class="fas fa-print"></i>
                                             </button>
 
-                                            {% if not orden.esta_entregada %}
+                                            {% if orden.puede_gestionar %}
                                                 <button type="button"
                                                         class="btn btn-outline-warning btn-sm action-circle btnTenenciaOrden"
                                                         title="Cambiar tenencia"
@@ -1035,12 +1037,14 @@
      aria-hidden="true">
 
     <div class="modal-dialog modal-dialog-centered">
+
         <form id="formAutorizarOrden"
               class="modal-content modal-content-custom">
 
             {% csrf_token %}
 
             <div class="modal-header">
+
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-check text-success"></i>
                     Autorizar orden
@@ -1050,21 +1054,66 @@
                         class="btn-close"
                         data-bs-dismiss="modal">
                 </button>
+
             </div>
 
             <div class="modal-body">
+
                 <div id="alertaAutorizar"
-                     class="alert d-none"></div>
+                     class="alert d-none">
+                </div>
 
-                ¿Desea autorizar la orden
-                <strong id="numeroOrdenAutorizar"></strong>?
+                <p class="mb-3">
+                    Autorizar orden
+                    <strong id="numeroOrdenAutorizar"></strong>
+                </p>
 
-                <div class="text-muted small mt-2">
+                <div class="mb-3">
+
+                    <label for="numeroCuponAutorizar"
+                           class="form-label fw-bold">
+                        Número de cupón
+                    </label>
+
+                    <input type="text"
+                           name="numero_cupon"
+                           id="numeroCuponAutorizar"
+                           class="form-control"
+                           maxlength="120"
+                           autocomplete="off"
+                           placeholder="Ingrese número de cupón"
+                           required>
+
+                </div>
+
+                <div class="mb-2">
+
+                    <label for="fechaEjecucionAutorizar"
+                           class="form-label fw-bold">
+                        Fecha de ejecución
+                    </label>
+
+                    <input type="date"
+                           name="fecha_ejecucion"
+                           id="fechaEjecucionAutorizar"
+                           class="form-control"
+                           required>
+
+                    <div class="form-text">
+                        Se propone automáticamente la fecha de ejecución
+                        de las prestaciones de la orden.
+                    </div>
+
+                </div>
+
+                <div class="text-muted small mt-3">
                     Se marcará la orden y todas sus prestaciones como autorizadas.
                 </div>
+
             </div>
 
             <div class="modal-footer">
+
                 <button type="button"
                         class="btn btn-outline-secondary"
                         data-bs-dismiss="modal">
@@ -1074,11 +1123,16 @@
                 <button type="submit"
                         id="btnConfirmarAutorizar"
                         class="btn btn-success">
+
                     <i class="fas fa-check"></i>
                     Autorizar
+
                 </button>
+
             </div>
+
         </form>
+
     </div>
 </div>
 
@@ -1457,15 +1511,28 @@
         );
 
         document.querySelectorAll(".btnAutorizarOrden").forEach(function (boton) {
+
             boton.addEventListener("click", function () {
+
                 ordenSeleccionadaId = this.dataset.id;
                 urlAutorizarSeleccionada = this.dataset.url;
 
-                document.getElementById("numeroOrdenAutorizar").textContent =
-                    this.dataset.numero;
+                document.getElementById(
+                    "numeroOrdenAutorizar"
+                ).textContent = this.dataset.numero;
+
+                document.getElementById(
+                    "numeroCuponAutorizar"
+                ).value = this.dataset.cupon || "";
+
+                document.getElementById(
+                    "fechaEjecucionAutorizar"
+                ).value = this.dataset.fechaEjecucion || "";
 
                 limpiarAlertaModal(alertaAutorizar);
+
             });
+
         });
 
         formAutorizar.addEventListener("submit", async function (event) {

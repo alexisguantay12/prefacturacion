@@ -3,8 +3,9 @@
 {% block content %}
 
 <style>
+
     .page-wrap {
-        max-width: 1320px;
+        max-width: 1450px;
         margin: 0 auto;
     }
 
@@ -61,6 +62,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
     }
 
     .table-card-title {
@@ -77,36 +80,31 @@
         color: #0f4c81;
     }
 
-    .table-count {
-        background: #e8f2ff;
-        color: #0f4c81;
-        border: 1px solid #b9d7ff;
-        border-radius: 999px;
-        padding: 0.28rem 0.6rem;
-        font-size: 0.74rem;
-        font-weight: 900;
-    }
-
     .table-ordenes {
         width: 100%;
         margin-bottom: 0;
-        font-size: 0.84rem;
+        font-size: 0.82rem;
     }
 
     .table-ordenes thead th {
         background: #f1f5f9;
         color: #374151;
-        font-size: 0.76rem;
+        font-size: 0.72rem;
         font-weight: 900;
         white-space: nowrap;
-        padding: 0.8rem 0.75rem;
+        padding: 0.75rem 0.6rem;
         border-bottom: 1px solid #cbd5e1;
+        text-transform: uppercase;
     }
 
     .table-ordenes tbody td {
         vertical-align: middle;
-        padding: 0.75rem;
+        padding: 0.72rem 0.6rem;
         border-bottom: 1px solid #eef2f7;
+    }
+
+    .table-ordenes tbody tr:hover {
+        background: #fbfdff;
     }
 
     .patient-name {
@@ -133,18 +131,6 @@
         border: 1px solid #a7f3d0;
     }
 
-    .badge-no-autorizada {
-        background: #fff7ed;
-        color: #c2410c;
-        border: 1px solid #fed7aa;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 2.5rem;
-        color: #6b7280;
-    }
-
     .summary-box {
         display: flex;
         gap: 0.5rem;
@@ -164,343 +150,1460 @@
     .summary-pill strong {
         color: #0f4c81;
     }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: #6b7280;
+    }
+
+    .cupon-value {
+        font-weight: 800;
+        color: #344054;
+        white-space: nowrap;
+    }
+
+    .fecha-value {
+        white-space: nowrap;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       SELECCIÓN + EDICIÓN
+       ========================================================= */
+
+    .selection-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+    }
+
+    .check-orden {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .btn-edit-order {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    /* =========================================================
+       CÓDIGOS
+       ========================================================= */
+
+    .codes-cell {
+        max-width: 260px;
+        white-space: normal;
+        line-height: 1.45;
+    }
+
+    .codes-list {
+        color: #3730a3;
+        font-weight: 800;
+        font-size: 0.76rem;
+    }
+
+    .codes-empty {
+        color: #98a2b3;
+        font-size: 0.76rem;
+    }
+
+    /* =========================================================
+       FILA MODIFICADA
+       ========================================================= */
+
+    .row-updated {
+        animation: highlightRow 1.5s ease;
+    }
+
+    @keyframes highlightRow {
+
+        0% {
+            background: #dcfce7;
+        }
+
+        100% {
+            background: transparent;
+        }
+
+    }
+
+    /* =========================================================
+       MODAL EDITAR
+       ========================================================= */
+
+    .modal-order-info {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .modal-order-number {
+        color: #102a4c;
+        font-weight: 900;
+    }
+
 </style>
 
+
 <div class="container-fluid py-3">
+
     <div class="page-wrap">
 
+        <!-- =========================================================
+             ENCABEZADO
+             ========================================================= -->
+
         <div class="page-header">
+
             <div class="d-flex justify-content-between align-items-start gap-3">
+
                 <div>
+
                     <h2 class="page-title">
+
                         <i class="fas fa-file-signature"></i>
+
                         Confeccionar planilla de entrega
+
                     </h2>
 
                     <div class="page-subtitle">
-                        Seleccione el médico ejecutor y confeccione una planilla con órdenes no entregadas.
+
+                        Seleccione el médico ejecutor y las órdenes que formarán parte de la planilla.
+
                     </div>
+
                 </div>
+
 
                 <div>
-                    <a href="{% url 'gestion_app:lista_planillas_entrega' %}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> Volver
+
+                    <a href="{% url 'gestion_app:lista_planillas_entrega' %}"
+                       class="btn btn-outline-secondary btn-sm">
+
+                        <i class="fas fa-arrow-left"></i>
+                        Volver
+
                     </a>
+
                 </div>
+
             </div>
+
         </div>
+
+
+        <!-- =========================================================
+             SELECCIÓN DE MÉDICO
+             ========================================================= -->
 
         <div class="card-box">
-            <form method="get" class="row g-2 align-items-end">
+
+            <form method="get"
+                  class="row g-2 align-items-end">
+
                 <div class="col-md-7">
-                    <label class="form-label mb-1">Médico ejecutor</label>
-                    <select name="medico" class="form-select" required>
-                        <option value="">Seleccione un médico</option>
+
+                    <label class="form-label mb-1">
+                        Médico ejecutor
+                    </label>
+
+                    <select name="medico"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            Seleccione un médico
+                        </option>
+
                         {% for m in medicos %}
+
                             <option value="{{ m.id }}"
-                                {% if medico_id|stringformat:"s" == m.id|stringformat:"s" %}selected{% endif %}>
-                                {{ m.apellido|title }}, {{ m.nombre|title }}
-                                {% if m.matricula %} - Mat. {{ m.matricula }}{% endif %}
+                                    {% if medico_id|stringformat:"s" == m.id|stringformat:"s" %}
+                                        selected
+                                    {% endif %}>
+
+                                {{ m.apellido|title }},
+                                {{ m.nombre|title }}
+
+                                {% if m.matricula %}
+
+                                    - Mat. {{ m.matricula }}
+
+                                {% endif %}
+
                             </option>
+
                         {% endfor %}
+
                     </select>
+
                 </div>
+
 
                 <div class="col-md-5 d-flex gap-2">
-                    <button type="submit" class="btn btn-dark">
-                        <i class="fas fa-search"></i> Buscar órdenes
+
+                    <button type="submit"
+                            class="btn btn-dark">
+
+                        <i class="fas fa-search"></i>
+                        Buscar órdenes
+
                     </button>
 
-                    <a href="{% url 'gestion_app:confeccionar_planilla_entrega' %}" class="btn btn-outline-secondary">
+
+                    <a href="{% url 'gestion_app:confeccionar_planilla_entrega' %}"
+                       class="btn btn-outline-secondary">
+
                         Limpiar
+
                     </a>
+
                 </div>
+
             </form>
+
         </div>
 
+
         {% if medico %}
-            <form method="post" id="formConfeccionarPlanilla">
+
+            <!-- =============================================================
+                 FORMULARIO PRINCIPAL DE CONFECCIÓN
+                 ============================================================= -->
+
+            <form method="post"
+                  id="formConfeccionarPlanilla">
+
                 {% csrf_token %}
 
-                <input type="hidden" name="medico" value="{{ medico.id }}">
-                <input type="hidden" name="accion" id="accionPlanilla" value="">
+                <input type="hidden"
+                       name="medico"
+                       value="{{ medico.id }}">
+
+                <input type="hidden"
+                       name="accion"
+                       id="accionPlanilla"
+                       value="">
+
+
+                <!-- =================================================
+                     OBSERVACIONES
+                     ================================================= -->
 
                 <div class="card-box">
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <label class="form-label mb-1">Fecha de entrega</label>
-                            <input type="date"
-                                   name="fecha_entrega"
-                                   value="{{ fecha_hoy }}"
-                                   class="form-control">
-                            <div class="text-muted-small mt-1">
-                                Se usará solo si confirma y entrega.
-                            </div>
-                        </div>
 
-                        <div class="col-md-8">
-                            <label class="form-label mb-1">Observaciones</label>
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <label class="form-label mb-1">
+                                Observaciones
+                            </label>
+
                             <input type="text"
                                    name="observaciones"
                                    class="form-control"
                                    maxlength="500"
-                                   placeholder="Observaciones de la confección">
+                                   placeholder="Observaciones de la planilla">
+
                         </div>
+
                     </div>
+
                 </div>
+
+
+                <!-- =================================================
+                     TABLA
+                     ================================================= -->
 
                 <div class="table-card">
+
                     <div class="table-card-header">
+
                         <div>
+
                             <h6 class="table-card-title">
+
                                 <i class="fas fa-file-medical"></i>
-                                Órdenes no entregadas de {{ medico.apellido|title }}, {{ medico.nombre|title }}
+
+                                Órdenes disponibles de
+                                {{ medico.apellido|title }},
+                                {{ medico.nombre|title }}
+
                             </h6>
 
+
                             <div class="summary-box mt-2">
-                                <span class="summary-pill">
-                                    Total: <strong>{{ ordenes|length }}</strong>
-                                </span>
 
                                 <span class="summary-pill">
-                                    Seleccionadas: <strong id="contadorSeleccionadas">0</strong>
+
+                                    Total:
+
+                                    <strong>
+                                        {{ ordenes|length }}
+                                    </strong>
+
                                 </span>
+
+
+                                <span class="summary-pill">
+
+                                    Seleccionadas:
+
+                                    <strong id="contadorSeleccionadas">
+                                        0
+                                    </strong>
+
+                                </span>
+
                             </div>
+
                         </div>
 
+
                         <button type="button"
-                                class="btn btn-success btn-sm"
+                                class="btn btn-primary btn-sm"
                                 id="btnAbrirConfirmacion"
                                 {% if not ordenes %}disabled{% endif %}>
-                            <i class="fas fa-check-circle"></i> Confeccionar
+
+                            <i class="fas fa-file-signature"></i>
+                            Confeccionar
+
                         </button>
+
                     </div>
+
 
                     <div class="table-responsive">
+
                         <table class="table table-ordenes align-middle">
+
                             <thead>
+
                                 <tr>
+
                                     <th>
-                                        <input type="checkbox" id="checkTodos">
+
+                                        <div class="selection-actions">
+
+                                            <input type="checkbox"
+                                                   id="checkTodos">
+
+                                            <span>
+                                                Sel.
+                                            </span>
+
+                                        </div>
+
                                     </th>
+
                                     <th>N° Orden</th>
-                                    <th>N° Ingreso</th>
+
+                                    <th>Episodio</th>
+
                                     <th>Paciente</th>
-                                    <th>Obra Social</th>
-                                    <th>Fecha orden</th>
+
+                                    <th>Obra social</th>
+
+                                    <th>Fecha ejecución</th>
+
+                                    <th>Cupón</th>
+
+                                    <th>Códigos</th>
+
                                     <th>Estado</th>
+
                                 </tr>
+
                             </thead>
 
+
                             <tbody>
+
                                 {% for o in ordenes %}
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox"
-                                                   class="check-orden"
-                                                   name="ordenes"
-                                                   value="{{ o.id }}"
-                                                   {% if not o.autorizada or o.estado != "autorizada" %}disabled{% endif %}>
-                                        </td>
+
+                                    <tr id="filaOrden{{ o.id }}">
+
+                                        <!-- =================================
+                                             CHECK + LÁPIZ
+                                             ================================= -->
 
                                         <td>
-                                            <strong>#{{ o.id }}</strong>
+
+                                            <div class="selection-actions">
+
+                                                <input type="checkbox"
+                                                       class="check-orden"
+                                                       name="ordenes"
+                                                       value="{{ o.id }}">
+
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-primary btn-edit-order btnEditarOrden"
+
+                                                        data-id="{{ o.id }}"
+
+                                                        data-numero="{{ o.id|stringformat:'06d' }}"
+
+                                                        data-cupon="{{ o.numero_cupon|default:'' }}"
+
+                                                        data-fecha-ejecucion="{% if o.fecha_ejecucion_mostrar %}{{ o.fecha_ejecucion_mostrar|date:'Y-m-d' }}{% endif %}"
+
+                                                        data-url="{% url 'gestion_app:editar_datos_orden_planilla_ajax' o.id %}"
+
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEditarOrden"
+
+                                                        title="Editar cupón y fecha de ejecución">
+
+                                                    <i class="fas fa-pen"></i>
+
+                                                </button>
+
+                                            </div>
+
                                         </td>
 
+
+                                        <!-- =================================
+                                             ORDEN
+                                             ================================= -->
+
                                         <td>
-                                            {% if o.preingreso.numero %}
-                                                {{ o.preingreso.numero }}
-                                            {% elif o.preingreso.episodio %}
+
+                                            <strong>
+                                                #{{ o.id|stringformat:"06d" }}
+                                            </strong>
+
+                                        </td>
+
+
+                                        <!-- =================================
+                                             EPISODIO
+                                             ================================= -->
+
+                                        <td>
+
+                                            {% if o.preingreso.episodio %}
+
                                                 {{ o.preingreso.episodio }}
+
+                                            {% elif o.preingreso.numero %}
+
+                                                {{ o.preingreso.numero }}
+
                                             {% else %}
+
                                                 #{{ o.preingreso.id }}
+
                                             {% endif %}
+
                                         </td>
 
+
+                                        <!-- =================================
+                                             PACIENTE
+                                             ================================= -->
+
                                         <td>
+
                                             <div class="patient-name">
+
                                                 {{ o.preingreso.paciente.apellido|title }},
                                                 {{ o.preingreso.paciente.nombre|title }}
+
                                             </div>
+
                                         </td>
 
+
+                                        <!-- =================================
+                                             OBRA SOCIAL
+                                             ================================= -->
+
                                         <td>
+
                                             {% if o.preingreso.obra_social %}
-                                                {{ o.preingreso.obra_social|title }}
+
+                                                {{ o.preingreso.obra_social }}
+
                                             {% else %}
-                                                <span class="text-muted">Sin obra social</span>
+
+                                                <span class="text-muted">
+                                                    Sin obra social
+                                                </span>
+
                                             {% endif %}
+
                                         </td>
 
-                                        <td>
-                                            {% if o.fecha %}
-                                                {{ o.fecha|date:"d/m/Y" }}
-                                            {% else %}
-                                                <span class="text-muted">Sin fecha</span>
-                                            {% endif %}
-                                        </td>
+
+                                        <!-- =================================
+                                             FECHA EJECUCIÓN
+                                             ================================= -->
 
                                         <td>
-                                            {% if o.autorizada and o.estado == "autorizada" %}
-                                                <span class="badge-estado badge-autorizada">
-                                                    Autorizada
-                                                </span>
-                                            {% else %}
-                                                <span class="badge-estado badge-no-autorizada">
-                                                    No autorizada
-                                                </span>
-                                            {% endif %}
+
+                                            <span class="fecha-value"
+                                                  id="fechaOrden{{ o.id }}">
+
+                                                {% if o.fecha_ejecucion_mostrar %}
+
+                                                    {{ o.fecha_ejecucion_mostrar|date:"d/m/Y" }}
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </span>
+
                                         </td>
+
+
+                                        <!-- =================================
+                                             CUPÓN
+                                             ================================= -->
+
+                                        <td>
+
+                                            <span class="cupon-value"
+                                                  id="cuponOrden{{ o.id }}">
+
+                                                {{ o.numero_cupon|default:"—" }}
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- =================================
+                                             CÓDIGOS
+                                             ================================= -->
+
+                                        <td class="codes-cell">
+
+                                            {% if o.codigos_prestaciones %}
+
+                                                <span class="codes-list">
+
+                                                    {{ o.codigos_prestaciones|join:", " }}
+
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="codes-empty">
+                                                    Sin códigos
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+
+                                        <!-- =================================
+                                             ESTADO
+                                             ================================= -->
+
+                                        <td>
+
+                                            <span class="badge-estado badge-autorizada">
+                                                Autorizada
+                                            </span>
+
+                                        </td>
+
                                     </tr>
+
+
                                 {% empty %}
+
                                     <tr>
-                                        <td colspan="7">
+
+                                        <td colspan="9">
+
                                             <div class="empty-state">
+
                                                 <i class="fas fa-folder-open fa-2x mb-2"></i>
-                                                <div class="fw-bold">No hay órdenes pendientes para este médico.</div>
-                                                <div class="small">
-                                                    Puede que ya estén entregadas o incluidas en una planilla pendiente.
+
+                                                <div class="fw-bold">
+
+                                                    No hay órdenes disponibles para este médico.
+
                                                 </div>
+
+                                                <div class="small">
+
+                                                    Puede que ya estén incluidas en otra planilla
+                                                    o hayan sido entregadas.
+
+                                                </div>
+
                                             </div>
+
                                         </td>
+
                                     </tr>
+
                                 {% endfor %}
+
                             </tbody>
+
                         </table>
+
                     </div>
+
                 </div>
 
-                <div class="modal fade" id="modalConfirmarPlanilla" tabindex="-1" aria-hidden="true">
+
+                <!-- =================================================
+                     MODAL CONFECCIONAR
+                     ================================================= -->
+
+                <div class="modal fade"
+                     id="modalConfirmarPlanilla"
+                     tabindex="-1"
+                     aria-hidden="true">
+
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+
+                        <div class="modal-content"
+                             style="border-radius:16px; overflow:hidden;">
 
                             <div class="modal-header">
-                                <h5 class="modal-title">
-                                    Confirmar confección
+
+                                <h5 class="modal-title fw-bold">
+
+                                    <i class="fas fa-file-signature text-primary"></i>
+
+                                    Confeccionar planilla
+
                                 </h5>
 
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Cerrar">
+                                </button>
+
                             </div>
+
 
                             <div class="modal-body">
+
                                 <p class="mb-2">
+
                                     Se confeccionará una planilla para:
+
                                 </p>
 
-                                <div class="fw-bold mb-2">
-                                    {{ medico.apellido|title }}, {{ medico.nombre|title }}
+
+                                <div class="fw-bold mb-3">
+
+                                    {{ medico.apellido|title }},
+                                    {{ medico.nombre|title }}
+
                                 </div>
 
-                                <div class="alert alert-info mb-0">
+
+                                <div class="alert alert-info">
+
                                     Órdenes seleccionadas:
-                                    <strong id="modalCantidadSeleccionadas">0</strong>
+
+                                    <strong id="modalCantidadSeleccionadas">
+                                        0
+                                    </strong>
+
                                 </div>
+
+
+                                <div class="small text-muted">
+
+                                    Puede guardarla como borrador para continuar editándola,
+                                    o confirmarla para dejarla lista para entrega física.
+
+                                </div>
+
                             </div>
 
+
                             <div class="modal-footer">
+
                                 <button type="button"
                                         class="btn btn-outline-secondary"
                                         data-bs-dismiss="modal">
+
                                     Cancelar
+
                                 </button>
+
 
                                 <button type="button"
                                         class="btn btn-warning"
-                                        id="btnConfirmarPendiente">
-                                    Confirmar y dejar pendiente
+                                        id="btnGuardarBorrador">
+
+                                    <i class="fas fa-save me-1"></i>
+                                    Guardar borrador
+
                                 </button>
 
+
                                 <button type="button"
-                                        class="btn btn-success"
-                                        id="btnConfirmarEntregar">
-                                    Confirmar, entregar e imprimir
+                                        class="btn btn-primary"
+                                        id="btnConfirmarPlanilla">
+
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Confirmar planilla
+
                                 </button>
+
                             </div>
 
                         </div>
+
                     </div>
+
                 </div>
 
             </form>
+
+
+            <!-- =============================================================
+                 MODAL EDITAR ORDEN
+                 
+                 IMPORTANTE:
+                 Está FUERA del form principal para no anidar formularios.
+                 ============================================================= -->
+
+            <div class="modal fade"
+                 id="modalEditarOrden"
+                 tabindex="-1"
+                 aria-hidden="true">
+
+                <div class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content"
+                         style="border-radius:16px; overflow:hidden;">
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title fw-bold">
+
+                                <i class="fas fa-pen text-primary me-1"></i>
+
+                                Editar datos de la orden
+
+                            </h5>
+
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Cerrar">
+                            </button>
+
+                        </div>
+
+
+                        <div class="modal-body">
+
+                            <!-- =============================================
+                                 ORDEN
+                                 ============================================= -->
+
+                            <div class="modal-order-info">
+
+                                Orden
+
+                                <span class="modal-order-number"
+                                      id="numeroOrdenEditar">
+
+                                    —
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- =============================================
+                                 ERROR
+                                 ============================================= -->
+
+                            <div id="errorEditarOrden"
+                                 class="alert alert-danger d-none">
+                            </div>
+
+
+                            <!-- =============================================
+                                 CUPÓN
+                                 ============================================= -->
+
+                            <div class="mb-3">
+
+                                <label for="numeroCuponEditar"
+                                       class="form-label fw-bold">
+
+                                    Número de cupón
+
+                                </label>
+
+
+                                <input type="text"
+                                       id="numeroCuponEditar"
+                                       class="form-control"
+                                       maxlength="120"
+                                       autocomplete="off"
+                                       placeholder="Ingrese número de cupón"
+                                       required>
+
+                            </div>
+
+
+                            <!-- =============================================
+                                 FECHA EJECUCIÓN
+                                 ============================================= -->
+
+                            <div class="mb-2">
+
+                                <label for="fechaEjecucionEditar"
+                                       class="form-label fw-bold">
+
+                                    Fecha de ejecución
+
+                                </label>
+
+
+                                <input type="date"
+                                       id="fechaEjecucionEditar"
+                                       class="form-control"
+                                       required>
+
+                            </div>
+
+
+                            <div class="form-text">
+
+                                Estos datos pertenecen a la orden.
+                                La modificación se guarda inmediatamente.
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">
+
+                                Cancelar
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    id="btnGuardarDatosOrden">
+
+                                <i class="fas fa-save me-1"></i>
+                                Guardar
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         {% endif %}
 
     </div>
+
 </div>
 
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const checks = document.querySelectorAll(".check-orden");
-        const checkTodos = document.getElementById("checkTodos");
-        const contadorSeleccionadas = document.getElementById("contadorSeleccionadas");
-        const modalCantidadSeleccionadas = document.getElementById("modalCantidadSeleccionadas");
 
-        const btnAbrirConfirmacion = document.getElementById("btnAbrirConfirmacion");
-        const btnConfirmarPendiente = document.getElementById("btnConfirmarPendiente");
-        const btnConfirmarEntregar = document.getElementById("btnConfirmarEntregar");
+document.addEventListener("DOMContentLoaded", function () {
 
-        const form = document.getElementById("formConfeccionarPlanilla");
-        const accionPlanilla = document.getElementById("accionPlanilla");
+    // =========================================================================
+    // CONFECCIÓN
+    // =========================================================================
 
-        function contarSeleccionadas() {
-            const total = document.querySelectorAll(".check-orden:checked").length;
+    const checks = document.querySelectorAll(
+        ".check-orden"
+    );
 
-            if (contadorSeleccionadas) {
-                contadorSeleccionadas.textContent = total;
-            }
+    const checkTodos = document.getElementById(
+        "checkTodos"
+    );
 
-            if (modalCantidadSeleccionadas) {
-                modalCantidadSeleccionadas.textContent = total;
-            }
+    const contadorSeleccionadas = document.getElementById(
+        "contadorSeleccionadas"
+    );
 
-            return total;
+    const modalCantidadSeleccionadas = document.getElementById(
+        "modalCantidadSeleccionadas"
+    );
+
+    const btnAbrirConfirmacion = document.getElementById(
+        "btnAbrirConfirmacion"
+    );
+
+    const btnGuardarBorrador = document.getElementById(
+        "btnGuardarBorrador"
+    );
+
+    const btnConfirmarPlanilla = document.getElementById(
+        "btnConfirmarPlanilla"
+    );
+
+    const form = document.getElementById(
+        "formConfeccionarPlanilla"
+    );
+
+    const accionPlanilla = document.getElementById(
+        "accionPlanilla"
+    );
+
+
+    function contarSeleccionadas() {
+
+        const total = document.querySelectorAll(
+            ".check-orden:checked"
+        ).length;
+
+        if (contadorSeleccionadas) {
+
+            contadorSeleccionadas.textContent =
+                total;
+
         }
 
-        checks.forEach(check => {
-            check.addEventListener("change", contarSeleccionadas);
-        });
+        if (modalCantidadSeleccionadas) {
 
-        if (checkTodos) {
-            checkTodos.addEventListener("change", function () {
-                checks.forEach(check => {
-                    if (!check.disabled) {
-                        check.checked = this.checked;
-                    }
+            modalCantidadSeleccionadas.textContent =
+                total;
+
+        }
+
+        return total;
+    }
+
+
+    checks.forEach(function (check) {
+
+        check.addEventListener(
+            "change",
+            contarSeleccionadas
+        );
+
+    });
+
+
+    if (checkTodos) {
+
+        checkTodos.addEventListener(
+            "change",
+            function () {
+
+                checks.forEach(function (check) {
+
+                    check.checked =
+                        checkTodos.checked;
+
                 });
 
                 contarSeleccionadas();
-            });
-        }
 
-        if (btnAbrirConfirmacion) {
-            btnAbrirConfirmacion.addEventListener("click", function () {
-                const total = contarSeleccionadas();
+            }
+        );
+
+    }
+
+
+    if (btnAbrirConfirmacion) {
+
+        btnAbrirConfirmacion.addEventListener(
+            "click",
+            function () {
+
+                const total =
+                    contarSeleccionadas();
 
                 if (total === 0) {
-                    alert("Debe seleccionar al menos una orden autorizada.");
+
+                    alert(
+                        "Debe seleccionar al menos una orden autorizada."
+                    );
+
                     return;
                 }
 
-                const modal = new bootstrap.Modal(document.getElementById("modalConfirmarPlanilla"));
+                const modal =
+                    new bootstrap.Modal(
+                        document.getElementById(
+                            "modalConfirmarPlanilla"
+                        )
+                    );
+
                 modal.show();
-            });
-        }
 
-        if (btnConfirmarPendiente) {
-            btnConfirmarPendiente.addEventListener("click", function () {
-                accionPlanilla.value = "pendiente";
+            }
+        );
+
+    }
+
+
+    if (btnGuardarBorrador) {
+
+        btnGuardarBorrador.addEventListener(
+            "click",
+            function () {
+
+                accionPlanilla.value =
+                    "borrador";
+
+                this.disabled = true;
+
                 form.submit();
-            });
-        }
 
-        if (btnConfirmarEntregar) {
-            btnConfirmarEntregar.addEventListener("click", function () {
-                accionPlanilla.value = "entregar";
+            }
+        );
+
+    }
+
+
+    if (btnConfirmarPlanilla) {
+
+        btnConfirmarPlanilla.addEventListener(
+            "click",
+            function () {
+
+                accionPlanilla.value =
+                    "confirmar";
+
+                this.disabled = true;
+
                 form.submit();
-            });
-        }
 
-        contarSeleccionadas();
+            }
+        );
+
+    }
+
+
+    // =========================================================================
+    // EDICIÓN RÁPIDA DE ORDEN
+    // =========================================================================
+
+    let ordenEditarId = null;
+    let urlEditarOrden = null;
+    let botonEditarActual = null;
+
+    const modalEditarElemento =
+        document.getElementById(
+            "modalEditarOrden"
+        );
+
+    const numeroOrdenEditar =
+        document.getElementById(
+            "numeroOrdenEditar"
+        );
+
+    const numeroCuponEditar =
+        document.getElementById(
+            "numeroCuponEditar"
+        );
+
+    const fechaEjecucionEditar =
+        document.getElementById(
+            "fechaEjecucionEditar"
+        );
+
+    const errorEditarOrden =
+        document.getElementById(
+            "errorEditarOrden"
+        );
+
+    const btnGuardarDatosOrden =
+        document.getElementById(
+            "btnGuardarDatosOrden"
+        );
+
+
+    // -------------------------------------------------------------------------
+    // ABRIR MODAL
+    // -------------------------------------------------------------------------
+
+    document.querySelectorAll(
+        ".btnEditarOrden"
+    ).forEach(function (boton) {
+
+        boton.addEventListener(
+            "click",
+            function () {
+
+                ordenEditarId =
+                    this.dataset.id;
+
+                urlEditarOrden =
+                    this.dataset.url;
+
+                botonEditarActual =
+                    this;
+
+                numeroOrdenEditar.textContent =
+                    "#" + this.dataset.numero;
+
+                numeroCuponEditar.value =
+                    this.dataset.cupon || "";
+
+                fechaEjecucionEditar.value =
+                    this.dataset.fechaEjecucion || "";
+
+                errorEditarOrden.textContent =
+                    "";
+
+                errorEditarOrden.classList.add(
+                    "d-none"
+                );
+
+            }
+        );
+
     });
+
+
+    // -------------------------------------------------------------------------
+    // CSRF
+    // -------------------------------------------------------------------------
+
+    function getCookie(name) {
+
+        let cookieValue = null;
+
+        if (
+            document.cookie
+            && document.cookie !== ""
+        ) {
+
+            const cookies =
+                document.cookie.split(";");
+
+            for (
+                let i = 0;
+                i < cookies.length;
+                i++
+            ) {
+
+                const cookie =
+                    cookies[i].trim();
+
+                if (
+                    cookie.substring(
+                        0,
+                        name.length + 1
+                    ) === (
+                        name + "="
+                    )
+                ) {
+
+                    cookieValue =
+                        decodeURIComponent(
+                            cookie.substring(
+                                name.length + 1
+                            )
+                        );
+
+                    break;
+                }
+
+            }
+
+        }
+
+        return cookieValue;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // GUARDAR
+    // -------------------------------------------------------------------------
+
+    if (btnGuardarDatosOrden) {
+
+        btnGuardarDatosOrden.addEventListener(
+            "click",
+            async function () {
+
+                if (
+                    !ordenEditarId
+                    || !urlEditarOrden
+                ) {
+
+                    return;
+
+                }
+
+                const numeroCupon =
+                    numeroCuponEditar.value.trim();
+
+                const fechaEjecucion =
+                    fechaEjecucionEditar.value.trim();
+
+
+                // -------------------------------------------------------------
+                // VALIDACIÓN FRONT
+                // -------------------------------------------------------------
+
+                if (!numeroCupon) {
+
+                    errorEditarOrden.textContent =
+                        "Debe ingresar el número de cupón.";
+
+                    errorEditarOrden.classList.remove(
+                        "d-none"
+                    );
+
+                    numeroCuponEditar.focus();
+
+                    return;
+                }
+
+
+                if (!fechaEjecucion) {
+
+                    errorEditarOrden.textContent =
+                        "Debe ingresar la fecha de ejecución.";
+
+                    errorEditarOrden.classList.remove(
+                        "d-none"
+                    );
+
+                    fechaEjecucionEditar.focus();
+
+                    return;
+                }
+
+
+                // -------------------------------------------------------------
+                // DESHABILITAR BOTÓN
+                // -------------------------------------------------------------
+
+                this.disabled = true;
+
+                const contenidoOriginal =
+                    this.innerHTML;
+
+                this.innerHTML = `
+                    <span
+                        class="spinner-border spinner-border-sm me-1"
+                        role="status">
+                    </span>
+                    Guardando...
+                `;
+
+
+                try {
+
+                    // ---------------------------------------------------------
+                    // FORM DATA
+                    // ---------------------------------------------------------
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        "numero_cupon",
+                        numeroCupon
+                    );
+
+                    formData.append(
+                        "fecha_ejecucion",
+                        fechaEjecucion
+                    );
+
+
+                    // ---------------------------------------------------------
+                    // POST
+                    // ---------------------------------------------------------
+
+                    const response =
+                        await fetch(
+                            urlEditarOrden,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "X-CSRFToken": getCookie(
+                                        "csrftoken"
+                                    ),
+                                    "X-Requested-With":
+                                        "XMLHttpRequest"
+                                },
+
+                                body: formData
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok
+                        || !data.ok
+                    ) {
+
+                        throw new Error(
+                            data.mensaje
+                            || "No se pudo actualizar la orden."
+                        );
+
+                    }
+
+
+                    // =========================================================
+                    // ACTUALIZAR FILA SIN RECARGAR
+                    // =========================================================
+
+                    const cuponCelda =
+                        document.getElementById(
+                            "cuponOrden"
+                            + ordenEditarId
+                        );
+
+                    const fechaCelda =
+                        document.getElementById(
+                            "fechaOrden"
+                            + ordenEditarId
+                        );
+
+
+                    if (cuponCelda) {
+
+                        cuponCelda.textContent =
+                            data.orden.numero_cupon;
+
+                    }
+
+
+                    if (fechaCelda) {
+
+                        fechaCelda.textContent =
+                            data.orden.fecha_ejecucion_display;
+
+                    }
+
+
+                    // ---------------------------------------------------------
+                    // ACTUALIZAR DATASET DEL LÁPIZ
+                    // ---------------------------------------------------------
+
+                    if (botonEditarActual) {
+
+                        botonEditarActual.dataset.cupon =
+                            data.orden.numero_cupon;
+
+                        botonEditarActual.dataset.fechaEjecucion =
+                            data.orden.fecha_ejecucion;
+
+                    }
+
+
+                    // ---------------------------------------------------------
+                    // MARCAR VISUALMENTE LA FILA
+                    // ---------------------------------------------------------
+
+                    const fila =
+                        document.getElementById(
+                            "filaOrden"
+                            + ordenEditarId
+                        );
+
+                    if (fila) {
+
+                        fila.classList.remove(
+                            "row-updated"
+                        );
+
+                        void fila.offsetWidth;
+
+                        fila.classList.add(
+                            "row-updated"
+                        );
+
+                    }
+
+
+                    // ---------------------------------------------------------
+                    // CERRAR MODAL
+                    // ---------------------------------------------------------
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            modalEditarElemento
+                        );
+
+                    if (modal) {
+
+                        modal.hide();
+
+                    }
+
+                } catch (error) {
+
+                    errorEditarOrden.textContent =
+                        error.message;
+
+                    errorEditarOrden.classList.remove(
+                        "d-none"
+                    );
+
+                } finally {
+
+                    this.disabled = false;
+
+                    this.innerHTML =
+                        contenidoOriginal;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // =========================================================================
+    // INICIALIZAR
+    // =========================================================================
+
+    contarSeleccionadas();
+
+});
+
 </script>
 
 {% endblock %}

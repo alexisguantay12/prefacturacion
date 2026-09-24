@@ -4,6 +4,7 @@
 {% block content %}
 
 <style>
+
     * {
         box-sizing: border-box;
     }
@@ -19,6 +20,10 @@
     body {
         background: #f4f6f8;
     }
+
+    /* =========================================================
+       CONTENEDOR
+       ========================================================= */
 
     .print-container {
         width: 210mm;
@@ -291,7 +296,7 @@
     }
 
     .col-fecha {
-    width: 8%;
+        width: 9%;
     }
 
     .col-orden {
@@ -303,19 +308,23 @@
     }
 
     .col-codigo {
-        width: 10%;
+        width: 9%;
     }
 
     .col-cantidad {
         width: 8%;
     }
 
+    .col-cupon {
+        width: 9%;
+    }
+
     .col-paciente {
-        width: 25%;
+        width: 22%;
     }
 
     .col-obra-social {
-        width: 33%;
+        width: 27%;
     }
 
     .text-center {
@@ -412,9 +421,10 @@
 
     /* =========================================================
        IMPRESIÓN A4
-       Margen real de 0,5 cm en cada lado
        ========================================================= */
+
     @media print {
+
         html,
         body {
             width: auto !important;
@@ -470,11 +480,8 @@
         .print-sheet {
             position: relative;
             width: 100% !important;
-
-            /* Dejamos 2 mm de seguridad para evitar una segunda hoja */
             min-height: 285mm !important;
             height: auto !important;
-
             margin: 0 !important;
             padding: 0 0 10mm !important;
             box-shadow: none !important;
@@ -642,33 +649,46 @@
             size: A4 portrait;
             margin: 5mm;
         }
+
     }
+
 </style>
+
 
 <div class="print-container">
 
+    <!-- =========================================================
+         ACCIONES
+         ========================================================= -->
+
     <div class="print-actions no-print">
 
-        <button
-            type="button"
-            onclick="window.print()"
-            class="btn-print-sc"
-        >
+        <button type="button"
+                onclick="window.print()"
+                class="btn-print-sc">
+
             <i class="fas fa-print"></i>
             Imprimir
+
         </button>
 
-        <a
-            href="{% url 'gestion_app:lista_planillas_entrega' %}"
-            class="btn btn-outline-secondary btn-sm"
-        >
+
+        <a href="{% url 'gestion_app:lista_planillas_entrega' %}"
+           class="btn btn-outline-secondary btn-sm">
+
             <i class="fas fa-arrow-left"></i>
             Volver
+
         </a>
 
     </div>
 
+
     <main class="print-sheet">
+
+        <!-- =========================================================
+             ENCABEZADO
+             ========================================================= -->
 
         <div class="hospital-header">
 
@@ -676,23 +696,20 @@
 
                 <div class="hospital-logo">
 
-                    <img
-                        src="{% static 'img/logo-santa-clara.png' %}"
-                        alt="Santa Clara Hospital"
-                        onerror="
+                    <img src="{% static 'img/logo-santa-clara.png' %}"
+                         alt="Santa Clara Hospital"
+                         onerror="
                             this.style.display='none';
                             this.nextElementSibling.style.display='block';
-                        "
-                    >
+                         ">
 
-                    <span
-                        class="hospital-logo-text"
-                        style="display:none;"
-                    >
+                    <span class="hospital-logo-text"
+                          style="display:none;">
                         SC+
                     </span>
 
                 </div>
+
 
                 <div class="hospital-name">
                     Santa Clara<br>
@@ -700,6 +717,7 @@
                 </div>
 
             </div>
+
 
             <div class="hospital-module">
 
@@ -715,6 +733,11 @@
 
         </div>
 
+
+        <!-- =========================================================
+             TÍTULO
+             ========================================================= -->
+
         <div class="document-header">
 
             <div>
@@ -728,6 +751,7 @@
                 </div>
 
             </div>
+
 
             <div class="planilla-box">
 
@@ -743,7 +767,14 @@
 
         </div>
 
+
+        <!-- =========================================================
+             INFORMACIÓN GENERAL
+             ========================================================= -->
+
         <div class="info-grid">
+
+            <!-- MÉDICO -->
 
             <div class="info-item">
 
@@ -752,11 +783,16 @@
                 </div>
 
                 <div class="info-value">
+
                     {{ planilla.medico.apellido|upper }},
                     {{ planilla.medico.nombre|title }}
+
                 </div>
 
             </div>
+
+
+            <!-- MATRÍCULA -->
 
             <div class="info-item">
 
@@ -770,6 +806,9 @@
 
             </div>
 
+
+            <!-- FECHA DE ENTREGA -->
+
             <div class="info-item">
 
                 <div class="info-label">
@@ -779,14 +818,21 @@
                 <div class="info-value">
 
                     {% if planilla.fecha_entrega %}
+
                         {{ planilla.fecha_entrega|date:"d/m/Y" }}
+
                     {% else %}
-                        Pendiente
+
+                        —
+
                     {% endif %}
 
                 </div>
 
             </div>
+
+
+            <!-- ESTADO -->
 
             <div class="info-item">
 
@@ -796,12 +842,26 @@
 
                 <div class="info-value">
 
-                    {% if planilla.anulada %}
-                        Anulada
-                    {% elif planilla.entregada %}
+                    {% if planilla.estado == "borrador" %}
+
+                        Borrador
+
+                    {% elif planilla.estado == "confirmada" %}
+
+                        Confirmada
+
+                    {% elif planilla.estado == "entregada" %}
+
                         Entregada
+
+                    {% elif planilla.estado == "anulada" %}
+
+                        Anulada
+
                     {% else %}
-                        Pendiente
+
+                        —
+
                     {% endif %}
 
                 </div>
@@ -809,6 +869,11 @@
             </div>
 
         </div>
+
+
+        <!-- =========================================================
+             OBSERVACIONES
+             ========================================================= -->
 
         {% if planilla.observaciones %}
 
@@ -824,14 +889,21 @@
 
         {% endif %}
 
+
+        <!-- =========================================================
+             TABLA
+             ========================================================= -->
+
         <div class="table-wrapper">
 
             <table class="table-print">
 
                 <thead>
+
                     <tr>
+
                         <th class="col-fecha">
-                            Fecha
+                            Fecha ejec.
                         </th>
 
                         <th class="col-orden">
@@ -850,6 +922,10 @@
                             Cantidad
                         </th>
 
+                        <th class="col-cupon">
+                            Cupón
+                        </th>
+
                         <th class="col-paciente">
                             Paciente
                         </th>
@@ -857,8 +933,11 @@
                         <th class="col-obra-social">
                             Obra social
                         </th>
+
                     </tr>
+
                 </thead>
+
 
                 <tbody>
 
@@ -866,98 +945,210 @@
 
                         {% for det in d.orden.detalles.all %}
 
-                            <tr>
-                                <td class="text-center text-nowrap">
-                                    {% if d.orden.fecha %}
-                                        {{ d.orden.fecha|date:"d/m/Y" }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
+                            {% if not det.deleted_at %}
 
-                                <td class="text-center">
-                                    {{ d.orden.id }}
-                                </td>
+                                <tr>
 
-                                <td class="text-center">
-                                    {% if d.orden.preingreso.episodio %}
-                                        {{ d.orden.preingreso.episodio }}
-                                    {% elif d.orden.preingreso.numero %}
-                                        {{ d.orden.preingreso.numero }}
-                                    {% else %}
-                                        {{ d.orden.preingreso.id }}
-                                    {% endif %}
-                                </td>
+                                    <!-- FECHA EJECUCIÓN -->
 
-                                <td class="text-center">
-                                    {{ det.prestacion.codigo|default:"—" }}
-                                </td>
+                                    <td class="text-center text-nowrap">
 
-                                <td class="text-center">
-                                    {{ det.cantidad|default:"1" }}
-                                </td>
+                                        {% if d.orden.fecha_ejecucion %}
 
-                                <td>
-                                    {{ d.orden.preingreso.paciente.apellido|upper }},
-                                    {{ d.orden.preingreso.paciente.nombre|title }}
-                                </td>
+                                            {{ d.orden.fecha_ejecucion|date:"d/m/Y" }}
 
-                                <td>
-                                    {{ d.orden.preingreso.obra_social|default:"—" }}
-                                </td>
-                            </tr>
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- ORDEN -->
+
+                                    <td class="text-center">
+                                        {{ d.orden.id }}
+                                    </td>
+
+
+                                    <!-- EPISODIO -->
+
+                                    <td class="text-center">
+
+                                        {% if d.orden.preingreso.episodio %}
+
+                                            {{ d.orden.preingreso.episodio }}
+
+                                        {% elif d.orden.preingreso.numero %}
+
+                                            {{ d.orden.preingreso.numero }}
+
+                                        {% else %}
+
+                                            {{ d.orden.preingreso.id }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- CÓDIGO -->
+
+                                    <td class="text-center">
+
+                                        {{ det.prestacion.codigo|default:"—" }}
+
+                                    </td>
+
+
+                                    <!-- CANTIDAD -->
+
+                                    <td class="text-center">
+
+                                        {{ det.cantidad|default:"1" }}
+
+                                    </td>
+
+
+                                    <!-- CUPÓN -->
+
+                                    <td class="text-center">
+
+                                        {{ d.orden.numero_cupon|default:"—" }}
+
+                                    </td>
+
+
+                                    <!-- PACIENTE -->
+
+                                    <td>
+
+                                        {{ d.orden.preingreso.paciente.apellido|upper }},
+                                        {{ d.orden.preingreso.paciente.nombre|title }}
+
+                                    </td>
+
+
+                                    <!-- OBRA SOCIAL -->
+
+                                    <td>
+
+                                        {{ d.orden.preingreso.obra_social|default:"—" }}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endif %}
+
 
                         {% empty %}
 
                             <tr>
+
+                                <!-- FECHA -->
+
                                 <td class="text-center text-nowrap">
-                                    {% if d.orden.fecha %}
-                                        {{ d.orden.fecha|date:"d/m/Y" }}
+
+                                    {% if d.orden.fecha_ejecucion %}
+
+                                        {{ d.orden.fecha_ejecucion|date:"d/m/Y" }}
+
                                     {% else %}
+
                                         —
+
                                     {% endif %}
+
                                 </td>
+
+
+                                <!-- ORDEN -->
 
                                 <td class="text-center">
                                     {{ d.orden.id }}
                                 </td>
 
+
+                                <!-- EPISODIO -->
+
                                 <td class="text-center">
+
                                     {% if d.orden.preingreso.episodio %}
+
                                         {{ d.orden.preingreso.episodio }}
+
                                     {% elif d.orden.preingreso.numero %}
+
                                         {{ d.orden.preingreso.numero }}
+
                                     {% else %}
+
                                         {{ d.orden.preingreso.id }}
+
                                     {% endif %}
+
                                 </td>
+
+
+                                <!-- CÓDIGO -->
 
                                 <td class="text-center">
                                     —
                                 </td>
 
+
+                                <!-- CANTIDAD -->
+
                                 <td class="text-center">
                                     —
                                 </td>
+
+
+                                <!-- CUPÓN -->
+
+                                <td class="text-center">
+
+                                    {{ d.orden.numero_cupon|default:"—" }}
+
+                                </td>
+
+
+                                <!-- PACIENTE -->
 
                                 <td>
+
                                     {{ d.orden.preingreso.paciente.apellido|upper }},
                                     {{ d.orden.preingreso.paciente.nombre|title }}
+
                                 </td>
 
+
+                                <!-- OBRA SOCIAL -->
+
                                 <td>
+
                                     {{ d.orden.preingreso.obra_social|default:"—" }}
+
                                 </td>
+
                             </tr>
 
                         {% endfor %}
 
+
                     {% empty %}
 
                         <tr class="empty-row">
-                            <td colspan="7">
+
+                            <td colspan="8">
+
                                 Sin órdenes asociadas a la planilla.
+
                             </td>
+
                         </tr>
 
                     {% endfor %}
@@ -967,6 +1158,11 @@
             </table>
 
         </div>
+
+
+        <!-- =========================================================
+             RESUMEN
+             ========================================================= -->
 
         <div class="document-summary">
 
@@ -988,7 +1184,14 @@
 
         </div>
 
+
+        <!-- =========================================================
+             FIRMAS
+             ========================================================= -->
+
         <div class="signature-section">
+
+            <!-- ENTREGADO POR -->
 
             <div class="signature-box">
 
@@ -1018,6 +1221,9 @@
 
             </div>
 
+
+            <!-- PROFESIONAL -->
+
             <div class="signature-box">
 
                 <div class="signature-line"></div>
@@ -1027,23 +1233,37 @@
                 </div>
 
                 <div class="signature-description">
+
                     Matrícula
                     {{ planilla.medico.matricula|default:"—" }}
+
                 </div>
 
             </div>
 
         </div>
 
+
+        <!-- =========================================================
+             FOOTER
+             ========================================================= -->
+
         <div class="system-footer">
 
             <div>
-                Impreso el {{ fecha_impresion|date:"d/m/Y" }}
-                a las {{ fecha_impresion|date:"H:i" }}
+
+                Impreso el
+                {{ fecha_impresion|date:"d/m/Y" }}
+                a las
+                {{ fecha_impresion|date:"H:i" }}
+
             </div>
 
+
             <div class="system-footer-right">
+
                 Sistema de Gestión de Órdenes · Área de Sistemas
+
             </div>
 
         </div>
@@ -1052,15 +1272,29 @@
 
 </div>
 
-<script>
-    window.addEventListener("load", function () {
-        window.print();
-    });
 
-    window.addEventListener("afterprint", function () {
-        window.location.href =
-            "{% url 'gestion_app:lista_planillas_entrega' %}";
-    });
+<script>
+
+    window.addEventListener(
+        "load",
+        function () {
+
+            window.print();
+
+        }
+    );
+
+
+    window.addEventListener(
+        "afterprint",
+        function () {
+
+            window.location.href =
+                "{% url 'gestion_app:lista_planillas_entrega' %}";
+
+        }
+    );
+
 </script>
 
 {% endblock %}
