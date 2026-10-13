@@ -138,6 +138,60 @@
         font-weight: 800;
     }
 
+    .preingreso-card {
+        border: 1px solid #d6dce5;
+        border-radius: 14px;
+        padding: 1rem;
+        background: #ffffff;
+        transition: all 0.18s ease;
+        height: 100%;
+    }
+
+    .preingreso-card:hover {
+        border-color: #86b7fe;
+        box-shadow: 0 6px 18px rgba(13,110,253,0.08);
+    }
+
+    .preingreso-card.seleccionado {
+        border: 2px solid #198754;
+        background: #f2fff8;
+    }
+
+    .preingreso-title {
+        font-size: 1rem;
+        font-weight: 900;
+        color: #0f4c81;
+    }
+
+    .preingreso-meta {
+        font-size: 0.84rem;
+        color: #475569;
+        line-height: 1.55;
+    }
+
+    .preingreso-meta strong {
+        color: #1f2937;
+    }
+
+    .badge-ordenes {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.65rem;
+        background: #ede9fe;
+        color: #6d28d9;
+        font-size: 0.76rem;
+        font-weight: 900;
+    }
+
+    .preingreso-seleccionado-box {
+        border: 1px solid #86d3aa;
+        background: #f0fdf4;
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+    }
+
     .actions-bar {
         position: sticky;
         bottom: 0;
@@ -369,6 +423,11 @@
                name="episodio"
                id="episodio">
 
+        <input type="hidden"
+               name="preingreso_id"
+               id="preingresoId"
+               value="">
+
 
         <!-- ================================================= -->
         <!-- DATOS INNOVA -->
@@ -525,6 +584,84 @@
 
 
         <!-- ================================================= -->
+        <!-- POSIBLE PREINGRESO RELACIONADO -->
+        <!-- ================================================= -->
+
+        <div class="form-card d-none"
+             id="bloquePreingresosRelacionados">
+
+            <div class="section-title">
+
+                <span class="section-number">
+                    4
+                </span>
+
+                Posible cirugía programada / preingreso relacionado
+
+            </div>
+
+            <div class="section-body">
+
+                <div class="alert alert-warning border mb-3"
+                     id="avisoPreingresos">
+
+                    <i class="fas fa-triangle-exclamation me-1"></i>
+                    Este paciente posee uno o más preingresos abiertos.
+                    Revise si el episodio de INNOVA corresponde a una cirugía
+                    programada que ya tiene órdenes cargadas.
+
+                </div>
+
+                <div id="contenedorPreingresos"
+                     class="row g-3">
+                </div>
+
+                <div class="preingreso-seleccionado-box d-none mt-3"
+                     id="resumenPreingresoSeleccionado">
+
+                    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+                        <div>
+                            <div class="fw-bold text-success">
+                                <i class="fas fa-link me-1"></i>
+                                Preingreso seleccionado
+                            </div>
+
+                            <div class="small mt-1"
+                                 id="textoPreingresoSeleccionado">
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                id="btnQuitarPreingreso">
+                            <i class="fas fa-xmark"></i>
+                            Quitar selección
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            id="btnContinuarSinPreingreso">
+
+                        <i class="fas fa-arrow-right"></i>
+                        Continuar sin asociar preingreso
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
         <!-- COBERTURA -->
         <!-- ================================================= -->
 
@@ -533,7 +670,7 @@
             <div class="section-title">
 
                 <span class="section-number">
-                    4
+                    5
                 </span>
 
                 Cobertura y servicio
@@ -670,7 +807,7 @@
             <div class="section-title">
 
                 <span class="section-number">
-                    5
+                    6
                 </span>
 
                 Contacto responsable
@@ -749,7 +886,7 @@
             <div class="section-title">
 
                 <span class="section-number">
-                    6
+                    7
                 </span>
 
                 Observaciones
@@ -941,6 +1078,69 @@
 
 
 <!-- ========================================================= -->
+<!-- MODAL CONFIRMACIÓN PREINGRESO -->
+<!-- ========================================================= -->
+
+<div class="modal fade"
+     id="modalConfirmarPreingreso"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content modal-confirmacion">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    <i class="fas fa-link text-success"></i>
+                    Confirmar preingreso
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="alert alert-warning border">
+                    El episodio de INNOVA se vinculará al preingreso seleccionado.
+                    Ese mismo registro pasará a ingreso y conservará sus órdenes
+                    asociadas.
+                </div>
+
+                <div id="confirmacionPreingresoDetalle"></div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn btn-success"
+                        id="btnConfirmarPreingreso">
+                    <i class="fas fa-check"></i>
+                    Sí, vincular este preingreso
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
 <!-- MODAL MENSAJES -->
 <!-- ========================================================= -->
 
@@ -1073,6 +1273,52 @@
         );
 
 
+    const bloquePreingresosRelacionados =
+        document.getElementById(
+            "bloquePreingresosRelacionados"
+        );
+
+    const contenedorPreingresos =
+        document.getElementById(
+            "contenedorPreingresos"
+        );
+
+    const preingresoIdInput =
+        document.getElementById(
+            "preingresoId"
+        );
+
+    const resumenPreingresoSeleccionado =
+        document.getElementById(
+            "resumenPreingresoSeleccionado"
+        );
+
+    const textoPreingresoSeleccionado =
+        document.getElementById(
+            "textoPreingresoSeleccionado"
+        );
+
+    const btnQuitarPreingreso =
+        document.getElementById(
+            "btnQuitarPreingreso"
+        );
+
+    const btnContinuarSinPreingreso =
+        document.getElementById(
+            "btnContinuarSinPreingreso"
+        );
+
+    const modalConfirmarPreingresoElement =
+        document.getElementById(
+            "modalConfirmarPreingreso"
+        );
+
+    const btnConfirmarPreingreso =
+        document.getElementById(
+            "btnConfirmarPreingreso"
+        );
+
+
     // ---------------------------------------------------------
     // ESTADO
     // ---------------------------------------------------------
@@ -1084,6 +1330,12 @@
     let buscandoDetalle = false;
 
     let ingresoEnviado = false;
+
+    let preingresosDisponibles = [];
+
+    let preingresoPendiente = null;
+
+    let decisionPreingresoTomada = true;
 
 
     // ---------------------------------------------------------
@@ -1361,6 +1613,9 @@
         buscandoEpisodios = true;
 
         episodioPendiente = null;
+        preingresosDisponibles = [];
+        preingresoPendiente = null;
+        decisionPreingresoTomada = true;
 
         tablaEpisodiosBody.innerHTML =
             "";
@@ -1596,6 +1851,11 @@
             episodioPendiente =
                 data.datos;
 
+            preingresosDisponibles =
+                Array.isArray(data.preingresos)
+                    ? data.preingresos
+                    : [];
+
             mostrarConfirmacionEpisodio(
                 episodioPendiente
             );
@@ -1739,6 +1999,9 @@
             const datosConfirmados =
                 episodioPendiente;
 
+            const preingresosConfirmados =
+                [...preingresosDisponibles];
+
             /*
              * Limpiamos ANTES de cerrar el modal,
              * porque el evento hidden también modifica
@@ -1757,7 +2020,8 @@
             }
 
             cargarFormulario(
-                datosConfirmados
+                datosConfirmados,
+                preingresosConfirmados
             );
         }
     );
@@ -1782,12 +2046,27 @@
     // ---------------------------------------------------------
 
     function cargarFormulario(
-        datos
+        datos,
+        preingresos = []
     ) {
         ingresoEnviado =
             false;
 
         formIngresoErp.reset();
+
+        preingresoIdInput.value = "";
+
+        preingresosDisponibles =
+            Array.isArray(preingresos)
+                ? preingresos
+                : [];
+
+        preingresoPendiente = null;
+
+        decisionPreingresoTomada =
+            preingresosDisponibles.length === 0;
+
+        renderizarPreingresosRelacionados();
 
 
         // -----------------------------------------------------
@@ -1968,10 +2247,7 @@
         btnGuardarIngreso.disabled =
             false;
 
-        btnGuardarIngreso.innerHTML = `
-            <i class="fas fa-save"></i>
-            Crear ingreso
-        `;
+        actualizarBotonGuardar();
 
 
         // -----------------------------------------------------
@@ -2012,6 +2288,306 @@
 
 
     // ---------------------------------------------------------
+    // PREINGRESOS RELACIONADOS
+    // ---------------------------------------------------------
+
+    function actualizarBotonGuardar() {
+        if (preingresoIdInput.value) {
+            btnGuardarIngreso.innerHTML = `
+                <i class="fas fa-link"></i>
+                Vincular episodio y registrar ingreso
+            `;
+        } else {
+            btnGuardarIngreso.innerHTML = `
+                <i class="fas fa-save"></i>
+                Crear ingreso
+            `;
+        }
+    }
+
+
+    function limpiarSeleccionPreingreso(
+        decisionTomada = false
+    ) {
+        preingresoIdInput.value = "";
+        preingresoPendiente = null;
+        decisionPreingresoTomada = decisionTomada;
+
+        resumenPreingresoSeleccionado.classList.add(
+            "d-none"
+        );
+
+        textoPreingresoSeleccionado.innerText = "";
+
+        contenedorPreingresos
+            .querySelectorAll(".preingreso-card")
+            .forEach(function (card) {
+                card.classList.remove(
+                    "seleccionado"
+                );
+            });
+
+        actualizarBotonGuardar();
+    }
+
+
+    function renderizarPreingresosRelacionados() {
+        contenedorPreingresos.innerHTML = "";
+
+        limpiarSeleccionPreingreso(
+            preingresosDisponibles.length === 0
+        );
+
+        if (preingresosDisponibles.length === 0) {
+            bloquePreingresosRelacionados.classList.add(
+                "d-none"
+            );
+            return;
+        }
+
+        bloquePreingresosRelacionados.classList.remove(
+            "d-none"
+        );
+
+        preingresosDisponibles.forEach(
+            function (preingreso) {
+                const col =
+                    document.createElement("div");
+
+                col.className = "col-lg-6";
+
+                const id = escaparHtml(
+                    preingreso.id
+                );
+
+                const numero = escaparHtml(
+                    preingreso.numero ||
+                    preingreso.id
+                );
+
+                const fecha = escaparHtml(
+                    formatearFecha(
+                        preingreso.fecha_probable_ingreso
+                    )
+                );
+
+                const servicio = escaparHtml(
+                    preingreso.servicio || "-"
+                );
+
+                const medico = escaparHtml(
+                    preingreso.medico || "-"
+                );
+
+                const cobertura = escaparHtml(
+                    preingreso.obra_social || "-"
+                );
+
+                const plan = escaparHtml(
+                    preingreso.plan || "-"
+                );
+
+                const estado = escaparHtml(
+                    preingreso.estado_display ||
+                    preingreso.estado ||
+                    "-"
+                );
+
+                const ordenes = Number(
+                    preingreso.total_ordenes || 0
+                );
+
+                const diagnostico = escaparHtml(
+                    preingreso.diagnostico || "-"
+                );
+
+                col.innerHTML = `
+                    <div class="preingreso-card"
+                         data-preingreso-id="${id}">
+
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <div class="preingreso-title">
+                                    Preingreso N° ${numero}
+                                </div>
+                                <div class="small text-muted">
+                                    Estado: ${estado}
+                                </div>
+                            </div>
+
+                            <span class="badge-ordenes">
+                                <i class="fas fa-file-medical"></i>
+                                ${ordenes} orden${ordenes === 1 ? "" : "es"}
+                            </span>
+                        </div>
+
+                        <div class="preingreso-meta mb-3">
+                            <div><strong>Ingreso probable:</strong> ${fecha}</div>
+                            <div><strong>Servicio:</strong> ${servicio}</div>
+                            <div><strong>Médico:</strong> ${medico}</div>
+                            <div><strong>Cobertura:</strong> ${cobertura} - ${plan}</div>
+                            <div><strong>Diagnóstico:</strong> ${diagnostico}</div>
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-outline-success w-100 btn-seleccionar-preingreso"
+                                data-preingreso-id="${id}">
+                            <i class="fas fa-link"></i>
+                            Usar este preingreso
+                        </button>
+                    </div>
+                `;
+
+                contenedorPreingresos.appendChild(
+                    col
+                );
+            }
+        );
+    }
+
+
+    contenedorPreingresos.addEventListener(
+        "click",
+        function (event) {
+            const boton = event.target.closest(
+                ".btn-seleccionar-preingreso"
+            );
+
+            if (!boton) {
+                return;
+            }
+
+            const id = valorOTexto(
+                boton.dataset.preingresoId
+            );
+
+            const preingreso =
+                preingresosDisponibles.find(
+                    function (item) {
+                        return String(item.id) === id;
+                    }
+                );
+
+            if (!preingreso) {
+                mostrarModalMensaje(
+                    "No se pudo recuperar el preingreso seleccionado.",
+                    "No se puede continuar"
+                );
+                return;
+            }
+
+            preingresoPendiente = preingreso;
+
+            document.getElementById(
+                "confirmacionPreingresoDetalle"
+            ).innerHTML = `
+                <div class="fw-bold mb-2">
+                    Preingreso N° ${escaparHtml(preingreso.numero || preingreso.id)}
+                </div>
+                <div class="small">
+                    <strong>Ingreso probable:</strong>
+                    ${escaparHtml(formatearFecha(preingreso.fecha_probable_ingreso))}<br>
+                    <strong>Servicio:</strong>
+                    ${escaparHtml(preingreso.servicio || "-")}<br>
+                    <strong>Médico:</strong>
+                    ${escaparHtml(preingreso.medico || "-")}<br>
+                    <strong>Órdenes asociadas:</strong>
+                    ${escaparHtml(preingreso.total_ordenes || 0)}
+                </div>
+            `;
+
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    modalConfirmarPreingresoElement
+                )
+                .show();
+        }
+    );
+
+
+    btnConfirmarPreingreso.addEventListener(
+        "click",
+        function () {
+            if (!preingresoPendiente) {
+                return;
+            }
+
+            const preingreso =
+                preingresoPendiente;
+
+            preingresoIdInput.value =
+                valorOTexto(preingreso.id);
+
+            decisionPreingresoTomada = true;
+
+            contenedorPreingresos
+                .querySelectorAll(".preingreso-card")
+                .forEach(function (card) {
+                    card.classList.toggle(
+                        "seleccionado",
+                        card.dataset.preingresoId ===
+                            String(preingreso.id)
+                    );
+                });
+
+            resumenPreingresoSeleccionado.classList.remove(
+                "d-none"
+            );
+
+            textoPreingresoSeleccionado.innerText =
+                `Preingreso N° ${preingreso.numero || preingreso.id} · ` +
+                `${preingreso.total_ordenes || 0} órdenes asociadas. ` +
+                "Al guardar se convertirá este mismo registro en ingreso.";
+
+            actualizarBotonGuardar();
+
+            const modal =
+                bootstrap.Modal.getInstance(
+                    modalConfirmarPreingresoElement
+                );
+
+            if (modal) {
+                modal.hide();
+            }
+
+            preingresoPendiente = null;
+        }
+    );
+
+
+    modalConfirmarPreingresoElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
+            preingresoPendiente = null;
+        }
+    );
+
+
+    btnQuitarPreingreso.addEventListener(
+        "click",
+        function () {
+            limpiarSeleccionPreingreso(false);
+        }
+    );
+
+
+    btnContinuarSinPreingreso.addEventListener(
+        "click",
+        function () {
+            limpiarSeleccionPreingreso(true);
+
+            mostrarModalMensaje(
+                (
+                    "Se continuará sin asociar un preingreso. " +
+                    "Al guardar se creará un ingreso nuevo desde INNOVA."
+                ),
+                "Ingreso sin preingreso"
+            );
+        }
+    );
+
+
+    // ---------------------------------------------------------
     // VOLVER DESDE LISTADO DE EPISODIOS
     // ---------------------------------------------------------
 
@@ -2021,6 +2597,13 @@
 
             episodioPendiente =
                 null;
+
+            preingresosDisponibles = [];
+            preingresoPendiente = null;
+            decisionPreingresoTomada = true;
+            preingresoIdInput.value = "";
+            bloquePreingresosRelacionados.classList.add("d-none");
+            contenedorPreingresos.innerHTML = "";
 
             tablaEpisodiosBody.innerHTML =
                 "";
@@ -2058,10 +2641,17 @@
             episodioPendiente =
                 null;
 
+            preingresosDisponibles = [];
+            preingresoPendiente = null;
+            decisionPreingresoTomada = true;
+
             ingresoEnviado =
                 false;
 
             formIngresoErp.reset();
+            preingresoIdInput.value = "";
+            bloquePreingresosRelacionados.classList.add("d-none");
+            contenedorPreingresos.innerHTML = "";
 
             formIngresoErp.classList.add(
                 "d-none"
@@ -2271,6 +2861,29 @@
             }
 
             if (
+                preingresosDisponibles.length > 0 &&
+                !decisionPreingresoTomada
+            ) {
+                event.preventDefault();
+
+                mostrarModalMensaje(
+                    (
+                        "Se encontraron preingresos abiertos para este paciente. " +
+                        "Seleccione el preingreso correspondiente o presione " +
+                        "'Continuar sin asociar preingreso'."
+                    ),
+                    "Debe decidir sobre el preingreso"
+                );
+
+                bloquePreingresosRelacionados.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                return;
+            }
+
+            if (
                 !formIngresoErp
                     .checkValidity()
             ) {
@@ -2311,6 +2924,12 @@
 
             ingresoEnviado =
                 false;
+
+            preingresosDisponibles = [];
+            preingresoPendiente = null;
+            decisionPreingresoTomada = true;
+            preingresoIdInput.value = "";
+            bloquePreingresosRelacionados.classList.add("d-none");
 
             formIngresoErp.classList.add(
                 "d-none"
@@ -2367,7 +2986,14 @@
                 buscandoDetalle =
                     false;
 
+                preingresosDisponibles = [];
+                preingresoPendiente = null;
+                decisionPreingresoTomada = true;
+
                 formIngresoErp.reset();
+                preingresoIdInput.value = "";
+                bloquePreingresosRelacionados.classList.add("d-none");
+                contenedorPreingresos.innerHTML = "";
 
                 formIngresoErp.classList.add(
                     "d-none"

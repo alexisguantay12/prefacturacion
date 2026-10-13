@@ -577,7 +577,17 @@
                                 </td>
 
                                 <td>
-                                    {{ orden.medico|title|default:"No cargado" }}
+                                    <div>
+                                        {{ orden.medico|title|default:"No cargado" }}
+                                    </div>
+
+                                    {% with primer_detalle=orden.detalles.all|first %}
+                                        {% if primer_detalle %}
+                                            <div class="small text-primary fw-semibold mt-1">
+                                                {{ primer_detalle.get_honorarios_gastos_display|default:"-" }}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
                                 </td>
 
                                 <td class="text-center">

@@ -276,6 +276,24 @@
         font-weight: 900;
         font-size: 0.78rem;
     }
+
+    /* La linea de busqueda no desplaza el select: ambos controles quedan alineados. */
+    .medico-combo { position:relative; width:100%; }
+    .medico-select-real { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+    .medico-combo-boton { width:100%; min-height:43px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:.62rem .8rem; background:#fff; border:1px solid #cfd8e3; border-radius:12px; color:#1f2937; text-align:left; font-size:.9rem; font-weight:400; }
+    .medico-combo-boton:focus { outline:none; border-color:#1d7fbf; box-shadow:0 0 0 .18rem rgba(29,127,191,.18); }
+    .medico-combo-boton #medicoComboTexto { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .medico-flecha { color:#526179; flex-shrink:0; font-size:1.1rem; }
+    .medico-combo-menu { position:absolute; z-index:1050; left:0; right:0; top:calc(100% + 3px); background:#fff; border:1px solid #cfd8e3; border-radius:10px; box-shadow:0 10px 25px rgba(15,23,42,.18); overflow:hidden; }
+    .medico-combo-menu[hidden] { display:none; }
+    .medico-combo-busqueda { display:flex; align-items:center; border-bottom:1px solid #e5e7eb; padding:6px; }
+    .medico-combo-busqueda input { width:100%; min-width:0; padding:7px 8px; border:1px solid #cfd8e3; border-radius:6px; outline:none; font-size:.84rem; }
+    .medico-combo-busqueda input:focus { border-color:#1d7fbf; }
+    .medico-combo-busqueda button { border:0; background:transparent; color:#526179; font-size:1.3rem; padding:0 8px; }
+    .medico-combo-opciones { max-height:235px; overflow-y:auto; }
+    .medico-combo-opcion { display:block; width:100%; border:0; border-radius:0; background:#fff; text-align:left; padding:7px 11px; font-size:.82rem; color:#1f2937; }
+    .medico-combo-opcion.activo, .medico-combo-opcion:hover { background:#e8f2ff; color:#0f4c81; }
+    .medico-combo-vacio { padding:12px; color:#6b7280; font-size:.82rem; }
 </style>
 
 <div class="page-wrap">
@@ -361,15 +379,26 @@
                             Médico <span class="required-mark">*</span>
                         </label>
 
-                        <select name="medico" class="form-select" required>
-                            <option value="">Seleccione médico...</option>
-                            {% for medico in medicos %}
-                                <option value="{{ medico.id }}"
-                                    {% if medico_default and medico.id == medico_default.id %}selected{% endif %}>
-                                    {{ medico.apellido }}, {{ medico.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                        <div class="medico-combo" id="medicoCombo">
+                            <select name="medico" id="medicoSelect" required class="medico-select-real" tabindex="-1" aria-label="Médico seleccionado">
+                                <option value="">Seleccione médico...</option>
+                                {% for medico in medicos %}
+                                    <option value="{{ medico.id }}" {% if medico_default and medico.id == medico_default.id %}selected{% endif %}>
+                                        {{ medico.apellido }}, {{ medico.nombre }}{% if medico.matricula %} — Matrícula {{ medico.matricula }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" id="medicoComboBoton" class="medico-combo-boton" aria-haspopup="listbox" aria-expanded="false">
+                                <span id="medicoComboTexto">Seleccione médico...</span><span class="medico-flecha">⌄</span>
+                            </button>
+                            <div class="medico-combo-menu" id="medicoComboMenu" hidden>
+                                <div class="medico-combo-busqueda">
+                                    <input type="text" id="medicoComboBuscar" autocomplete="off" placeholder="Buscar nombre, apellido o matrícula..." aria-label="Buscar médico">
+                                    <button type="button" id="medicoComboLimpiar" title="Borrar búsqueda">×</button>
+                                </div>
+                                <div id="medicoComboOpciones" class="medico-combo-opciones" role="listbox"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-12">
@@ -1001,6 +1030,12 @@
 
         limpiarErrorDetalle();
 
+        if (!document.getElementById("medicoSelect").value) {
+            document.getElementById("medicoComboBoton").focus();
+            alert("Debe seleccionar el médico de la orden.");
+            return;
+        }
+
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
@@ -1107,6 +1142,130 @@
 
         actualizarNumeracionFilas();
 
+    // Selector de medicos: busqueda DENTRO del desplegable, sin dependencias externas.
+    (function configurarComboMedicos() {
+        const root = document.getElementById('medicoCombo');
+        const select = document.getElementById('medicoSelect');
+        const boton = document.getElementById('medicoComboBoton');
+        const texto = document.getElementById('medicoComboTexto');
+        const menu = document.getElementById('medicoComboMenu');
+        const input = document.getElementById('medicoComboBuscar');
+        const limpiar = document.getElementById('medicoComboLimpiar');
+        const lista = document.getElementById('medicoComboOpciones');
+        if (!root || !select) return;
+        const opciones = Array.from(select.options).filter(o => o.value);
+        let indiceActivo = 0;
+        let visibles = [];
+        const normalizar = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        function actualizarTexto() {
+            texto.textContent = select.selectedOptions[0]?.textContent.trim() || 'Seleccione médico...';
+        }
+        function renderizar() {
+            const q = normalizar(input.value);
+            visibles = opciones.filter(o => normalizar(o.textContent).includes(q));
+            indiceActivo = Math.min(indiceActivo, Math.max(0, visibles.length - 1));
+            lista.replaceChildren();
+            if (!visibles.length) {
+                const vacio = document.createElement('div');
+                vacio.className = 'medico-combo-vacio';
+                vacio.textContent = 'No se encontraron médicos';
+                lista.appendChild(vacio);
+            }
+            visibles.forEach((o, i) => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'medico-combo-opcion' + (i === indiceActivo ? ' activo' : '');
+                item.setAttribute('role', 'option');
+                item.setAttribute('aria-selected', String(o.value === select.value));
+                item.textContent = o.textContent.trim();
+                item.addEventListener('mouseenter', () => { indiceActivo = i; pintarActivo(); });
+                item.addEventListener('click', () => elegir(o.value));
+                lista.appendChild(item);
+            });
+        }
+        function pintarActivo() {
+            Array.from(lista.children).forEach((el, i) => el.classList.toggle('activo', i === indiceActivo));
+            lista.children[indiceActivo]?.scrollIntoView({block:'nearest'});
+        }
+        function abrir() {
+            menu.hidden = false;
+            boton.setAttribute('aria-expanded', 'true');
+            input.value = '';
+            indiceActivo = 0;
+            renderizar();
+            input.focus();
+        }
+        function cerrar() {
+            menu.hidden = true;
+            boton.setAttribute('aria-expanded', 'false');
+            input.value = '';
+        }
+        function elegir(id) {
+            select.value = id;
+            select.dispatchEvent(new Event('change', {bubbles:true}));
+            actualizarTexto();
+            cerrar();
+            boton.focus();
+        }
+        boton.addEventListener('click', () => menu.hidden ? abrir() : cerrar());
+        input.addEventListener('input', () => { indiceActivo = 0; renderizar(); });
+        limpiar.addEventListener('click', () => { input.value = ''; indiceActivo = 0; renderizar(); input.focus(); });
+        input.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (visibles.length) indiceActivo = (indiceActivo + (e.key === 'ArrowDown' ? 1 : -1) + visibles.length) % visibles.length;
+                pintarActivo();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (visibles[indiceActivo]) elegir(visibles[indiceActivo].value);
+            } else if (e.key === 'Escape') {
+                e.preventDefault(); cerrar(); boton.focus();
+            }
+        });
+        document.addEventListener('pointerdown', e => { if (!root.contains(e.target)) cerrar(); });
+        select.addEventListener('change', actualizarTexto);
+        actualizarTexto();
+    })();
+
+    // Atajo en fechas de los items: 4 digitos (DDMM) + Enter/Tab = ano actual.
+    // Conserva el input date original y su calendario nativo.
+    (function configurarFechasItems() {
+        const tabla = document.getElementById('tablaDetallesOrden');
+        if (!tabla) return;
+        const teclas = new WeakMap();
+        const selector = '.detalle_fecha_desde, .detalle_fecha_hasta';
+        tabla.addEventListener('keydown', e => {
+            if (!e.target.matches(selector)) return;
+            const campo = e.target;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            if (/^\d$/.test(e.key)) {
+                // Solo observar lo tipeado; no bloquear la edicion/calendario nativo.
+                const actual = teclas.get(campo) || '';
+                teclas.set(campo, (actual + e.key).slice(-8));
+                return;
+            }
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                const digits = teclas.get(campo) || '';
+                if (!campo.value && digits.length === 4) {
+                    const dia = Number(digits.slice(0,2));
+                    const mes = Number(digits.slice(2,4));
+                    const year = new Date().getFullYear();
+                    const prueba = new Date(year, mes - 1, dia);
+                    if (prueba.getFullYear() === year && prueba.getMonth() === mes-1 && prueba.getDate() === dia) {
+                        campo.value = `${year}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+                        campo.dispatchEvent(new Event('change', {bubbles:true}));
+                    }
+                }
+                teclas.delete(campo);
+                if (e.key === 'Enter') e.preventDefault();
+            } else if (e.key === 'Escape') {
+                teclas.delete(campo);
+            }
+        });
+        tabla.addEventListener('change', e => {
+            if (e.target.matches(selector)) teclas.delete(e.target);
+        });
+    })();
 
         window.addEventListener("pageshow", function (event) {
             const navEntries = performance.getEntriesByType("navigation");

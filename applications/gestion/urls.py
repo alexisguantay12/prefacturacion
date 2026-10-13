@@ -261,5 +261,20 @@ urlpatterns = [
         views.buscar_paciente_innova_preingreso,
         name="buscar_paciente_innova_preingreso",
     ),
+    path(
+        "ingreso/<int:ingreso_id>/procedimientos/",
+        views.procedimientos_ingreso_ajax,
+        name="procedimientos_ingreso_ajax",
+    ),
 
+    path(
+        "ingreso/<int:ingreso_id>/generar-procedimiento/",
+        views.generar_ordenes_procedimiento_ingreso_ajax,
+        name="generar_ordenes_procedimiento_ingreso_ajax",
+    ),
+    path(
+        "orden/<int:orden_id>/detalle-ajax/",
+        views.detalle_orden_ajax,
+        name="detalle_orden_ajax",
+    ),
 ]

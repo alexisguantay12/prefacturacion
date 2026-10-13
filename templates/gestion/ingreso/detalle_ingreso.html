@@ -105,7 +105,12 @@
         line-height: 1.2;
         margin-bottom: .18rem;
     }
-
+    .concepto-orden {
+        font-size: .76rem;
+        font-weight: 700;
+        color: #1c11bd;
+        line-height: 1.2;
+    }
     .patient-meta {
         font-size: .78rem;
         color: #526179;
@@ -275,6 +280,13 @@
     .order-number {
         font-weight: 900;
         color: #111827;
+    }
+
+    .concepto-orden-resumen {
+        margin-top: .15rem;
+        font-size: .72rem;
+        color: #0748ca;
+        line-height: 1.25;
     }
 
     .badge-ok {
@@ -574,6 +586,9 @@
                         <i class="fas fa-plus-circle"></i>
                         Nueva orden
                     </a>
+                    <button type="button" id="btnAgregarProcedimiento" class="btn btn-outline-success btn-sm-custom ms-1">
+                        <i class="fas fa-clipboard-list"></i> Agregar procedimiento
+                    </button>
                 {% else %}
                     <span class="btn btn-outline-secondary btn-sm-custom disabled">
                         <i class="fas fa-lock"></i>
@@ -614,7 +629,14 @@
                                 </td>
 
                                 <td>
-                                    {{ orden.medico|title|default:"No cargado" }}
+                                    <div>{{ orden.medico|title|default:"No cargado" }}</div>
+                                    {% with primer_detalle=orden.detalles.all|first %}
+                                        {% if primer_detalle %}
+                                            <div class="concepto-orden-resumen concepto-orden">
+                                                {{ primer_detalle.get_honorarios_gastos_display|default:"-" }}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
                                 </td>
 
                                 <td class="text-center">
@@ -640,11 +662,12 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a href="{% url 'gestion_app:detalle_orden' orden.id %}"
-                                       class="btn btn-outline-primary btn-sm action-circle"
-                                       title="Ver orden">
+                                    <button type="button" class="btn btn-outline-primary btn-sm action-circle btnVistaRapidaOrden"
+                                            title="Vista rápida de la orden" aria-label="Ver orden {{ orden.id }}"
+                                            data-url="{% url 'gestion_app:detalle_orden_ajax' orden.id %}"
+                                            data-bs-toggle="modal" data-bs-target="#modalVistaOrden">
                                         <i class="fas fa-eye"></i>
-                                    </a>
+                                    </button>
 
                                     {% if orden.estado != "anulada" %}
                                         {% if orden.puede_gestionar %}
@@ -741,6 +764,9 @@
                             <i class="fas fa-plus-circle"></i>
                             Cargar primera orden
                         </a>
+                        <button type="button" id="btnAgregarProcedimientoVacio" class="btn btn-outline-success btn-sm-custom ms-1">
+                            <i class="fas fa-clipboard-list"></i> Agregar procedimiento
+                        </button>
                     {% else %}
                         <span class="btn btn-outline-secondary btn-sm-custom disabled">
                             <i class="fas fa-lock"></i>
@@ -753,6 +779,873 @@
     </div>
 
 </div>
+<div class="modal fade"
+     id="modalAgregarProcedimiento"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content"
+             style="border-radius:18px; overflow:hidden; border:0;">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5 class="modal-title fw-bold mb-0">
+
+                        <i class="fas fa-wand-magic-sparkles text-primary"></i>
+                        Agregar procedimiento
+
+                    </h5>
+
+                    <div class="text-muted small mt-1">
+                        Generar las órdenes configuradas para un procedimiento.
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div id="procedimientoLoading"
+                     class="text-center py-5">
+
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+
+                    <div class="mt-2 text-muted">
+                        Cargando procedimientos...
+                    </div>
+
+                </div>
+
+                <div id="procedimientoError"
+                     class="alert alert-danger d-none">
+                </div>
+
+                <div id="procedimientoContenido"
+                     class="d-none">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-bold">
+                            Procedimiento
+                        </label>
+
+                        <select id="selectProcedimiento"
+                                class="form-select">
+
+                            <option value="">
+                                Seleccione un procedimiento...
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div id="resumenProcedimiento"
+                         class="d-none mb-3">
+
+                        <div class="card border-0 bg-light">
+
+                            <div class="card-body">
+
+                                <h6 class="fw-bold mb-1"
+                                    id="resumenProcedimientoNombre">
+                                </h6>
+
+                                <div class="small text-muted mb-3"
+                                     id="resumenProcedimientoDescripcion">
+                                </div>
+
+                                <div class="row g-2">
+
+                                    <div class="col-md-6">
+
+                                        <div class="border bg-white rounded-3 p-2">
+
+                                            <div class="small text-muted">
+                                                Órdenes
+                                            </div>
+
+                                            <strong id="resumenCantidadOrdenes">
+                                                0
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-6">
+
+                                        <div class="border bg-white rounded-3 p-2">
+
+                                            <div class="small text-muted">
+                                                Prestaciones
+                                            </div>
+
+                                            <strong id="resumenCantidadDetalles">
+                                                0
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="mt-3">
+
+                                    <div class="small fw-bold mb-2">
+                                        Órdenes que se crearán
+                                    </div>
+
+                                    <div id="listaPlantillasProcedimiento">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-bold">
+                                Fecha desde
+                            </label>
+
+                            <input type="date"
+                                   id="procedimientoFechaDesde"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-bold">
+                                Fecha hasta
+                            </label>
+
+                            <input type="date"
+                                   id="procedimientoFechaHasta"
+                                   class="form-control">
+
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0 small">
+
+                        <i class="fas fa-circle-info"></i>
+
+                        Las órdenes se crearán con fecha actual,
+                        estado <strong>Pendiente</strong> y médico
+                        Santa Clara matrícula <strong>9063</strong>.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        id="btnConfirmarProcedimiento"
+                        disabled>
+
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    Generar órdenes
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade"
+     id="modalResultadoProcedimiento"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content"
+             style="border-radius:18px; overflow:hidden; border:0;">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold"
+                    id="resultadoProcedimientoTitulo">
+                    Resultado
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div id="resultadoProcedimientoTexto">
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal">
+
+                    Aceptar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btnAgregarProcedimiento =
+        document.getElementById("btnAgregarProcedimiento");
+
+    const btnAgregarProcedimientoVacio =
+        document.getElementById("btnAgregarProcedimientoVacio");
+
+    const modalElement =
+        document.getElementById("modalAgregarProcedimiento");
+
+    const modalResultadoElement =
+        document.getElementById("modalResultadoProcedimiento");
+
+    if (!modalElement || !modalResultadoElement) {
+        return;
+    }
+
+    const modalProcedimiento =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+    const modalResultado =
+        bootstrap.Modal.getOrCreateInstance(
+            modalResultadoElement
+        );
+
+    const urlProcedimientos =
+        "{% url 'gestion_app:procedimientos_ingreso_ajax' preingreso.id %}";
+
+    const urlGenerar =
+        "{% url 'gestion_app:generar_ordenes_procedimiento_ingreso_ajax' preingreso.id %}";
+
+    const loading =
+        document.getElementById("procedimientoLoading");
+
+    const errorBox =
+        document.getElementById("procedimientoError");
+
+    const contenido =
+        document.getElementById("procedimientoContenido");
+
+    const selectProcedimiento =
+        document.getElementById("selectProcedimiento");
+
+    const fechaDesde =
+        document.getElementById("procedimientoFechaDesde");
+
+    const fechaHasta =
+        document.getElementById("procedimientoFechaHasta");
+
+    const btnConfirmar =
+        document.getElementById("btnConfirmarProcedimiento");
+
+    const resumen =
+        document.getElementById("resumenProcedimiento");
+
+    const resumenNombre =
+        document.getElementById("resumenProcedimientoNombre");
+
+    const resumenDescripcion =
+        document.getElementById("resumenProcedimientoDescripcion");
+
+    const resumenCantidadOrdenes =
+        document.getElementById("resumenCantidadOrdenes");
+
+    const resumenCantidadDetalles =
+        document.getElementById("resumenCantidadDetalles");
+
+    const listaPlantillas =
+        document.getElementById("listaPlantillasProcedimiento");
+
+    const resultadoTitulo =
+        document.getElementById("resultadoProcedimientoTitulo");
+
+    const resultadoTexto =
+        document.getElementById("resultadoProcedimientoTexto");
+
+    let procedimientos = [];
+    let generando = false;
+    let recargarAlCerrar = false;
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function getCookie(name) {
+
+        let cookieValue = null;
+
+        if (
+            document.cookie &&
+            document.cookie !== ""
+        ) {
+
+            const cookies =
+                document.cookie.split(";");
+
+            for (let i = 0; i < cookies.length; i++) {
+
+                const cookie =
+                    cookies[i].trim();
+
+                if (
+                    cookie.substring(
+                        0,
+                        name.length + 1
+                    ) === (
+                        name + "="
+                    )
+                ) {
+
+                    cookieValue =
+                        decodeURIComponent(
+                            cookie.substring(
+                                name.length + 1
+                            )
+                        );
+
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
+
+    function fechaHoy() {
+
+        const hoy = new Date();
+
+        const year =
+            hoy.getFullYear();
+
+        const month =
+            String(
+                hoy.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                hoy.getDate()
+            ).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function limpiarModal() {
+
+        procedimientos = [];
+
+        loading.classList.remove("d-none");
+
+        errorBox.classList.add("d-none");
+        errorBox.textContent = "";
+
+        contenido.classList.add("d-none");
+
+        resumen.classList.add("d-none");
+
+        selectProcedimiento.innerHTML = `
+            <option value="">
+                Seleccione un procedimiento...
+            </option>
+        `;
+
+        const hoy = fechaHoy();
+
+        fechaDesde.value = hoy;
+        fechaHasta.value = hoy;
+
+        generando = false;
+
+        btnConfirmar.disabled = true;
+
+        btnConfirmar.innerHTML = `
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Generar órdenes
+        `;
+    }
+
+    function mostrarResultado(
+        titulo,
+        mensaje,
+        recargar = false
+    ) {
+
+        resultadoTitulo.textContent =
+            titulo;
+
+        resultadoTexto.textContent =
+            mensaje;
+
+        recargarAlCerrar =
+            recargar;
+
+        modalResultado.show();
+    }
+
+    modalResultadoElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
+
+            if (recargarAlCerrar) {
+                window.location.reload();
+            }
+
+        }
+    );
+
+    async function cargarProcedimientos() {
+
+        limpiarModal();
+
+        try {
+
+            const response =
+                await fetch(
+                    urlProcedimientos,
+                    {
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        }
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            loading.classList.add("d-none");
+
+            if (!response.ok || !data.ok) {
+
+                errorBox.textContent =
+                    data.error ||
+                    "No se pudieron cargar los procedimientos.";
+
+                errorBox.classList.remove("d-none");
+
+                return;
+            }
+
+            procedimientos =
+                data.procedimientos || [];
+
+            if (procedimientos.length === 0) {
+
+                errorBox.textContent =
+                    "No hay procedimientos activos configurados.";
+
+                errorBox.classList.remove("d-none");
+
+                return;
+            }
+
+            procedimientos.forEach(
+                function (procedimiento) {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value =
+                        procedimiento.id;
+
+                    option.textContent =
+                        `${procedimiento.nombre} (${procedimiento.cantidad_ordenes} órdenes)`;
+
+                    selectProcedimiento.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+            contenido.classList.remove("d-none");
+
+        } catch (error) {
+
+            loading.classList.add("d-none");
+
+            errorBox.textContent =
+                "No se pudo consultar la configuración de procedimientos.";
+
+            errorBox.classList.remove("d-none");
+
+        }
+
+    }
+
+    function validar() {
+
+        const valido =
+            selectProcedimiento.value &&
+            fechaDesde.value &&
+            fechaHasta.value &&
+            fechaDesde.value <= fechaHasta.value;
+
+        btnConfirmar.disabled =
+            !valido || generando;
+    }
+
+    function actualizarResumen() {
+
+        const procedimiento =
+            procedimientos.find(
+                item =>
+                    String(item.id) ===
+                    String(selectProcedimiento.value)
+            );
+
+        if (!procedimiento) {
+
+            resumen.classList.add("d-none");
+
+            validar();
+
+            return;
+        }
+
+        resumenNombre.textContent =
+            procedimiento.nombre;
+
+        resumenDescripcion.textContent =
+            procedimiento.descripcion || "";
+
+        resumenCantidadOrdenes.textContent =
+            procedimiento.cantidad_ordenes;
+
+        resumenCantidadDetalles.textContent =
+            procedimiento.cantidad_detalles;
+
+        listaPlantillas.innerHTML =
+            (procedimiento.plantillas || [])
+            .map(function (plantilla) {
+
+                const cantidad =
+                    plantilla.cantidad_detalles;
+
+                return `
+                    <div class="
+                        d-flex
+                        justify-content-between
+                        align-items-center
+                        border
+                        rounded-3
+                        bg-white
+                        px-3
+                        py-2
+                        mb-2">
+
+                        <div>
+
+                            <div class="fw-bold">
+                                ${escapeHtml(plantilla.nombre)}
+                            </div>
+
+                            ${
+                                plantilla.observaciones
+                                ?
+                                `
+                                    <div class="small text-muted">
+                                        ${escapeHtml(
+                                            plantilla.observaciones
+                                        )}
+                                    </div>
+                                `
+                                :
+                                ""
+                            }
+
+                        </div>
+
+                        <span class="badge bg-primary">
+
+                            ${cantidad}
+                            ${
+                                cantidad === 1
+                                ? "prestación"
+                                : "prestaciones"
+                            }
+
+                        </span>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+        resumen.classList.remove("d-none");
+
+        validar();
+    }
+
+    function abrirModal() {
+
+        modalProcedimiento.show();
+
+        cargarProcedimientos();
+    }
+
+    if (btnAgregarProcedimiento) {
+
+        btnAgregarProcedimiento.addEventListener(
+            "click",
+            abrirModal
+        );
+
+    }
+
+    if (btnAgregarProcedimientoVacio) {
+
+        btnAgregarProcedimientoVacio.addEventListener(
+            "click",
+            abrirModal
+        );
+
+    }
+
+    selectProcedimiento.addEventListener(
+        "change",
+        actualizarResumen
+    );
+
+    fechaDesde.addEventListener(
+        "change",
+        validar
+    );
+
+    fechaHasta.addEventListener(
+        "change",
+        validar
+    );
+
+    btnConfirmar.addEventListener(
+        "click",
+        async function () {
+
+            if (generando) {
+                return;
+            }
+
+            if (!selectProcedimiento.value) {
+
+                mostrarResultado(
+                    "Falta información",
+                    "Debe seleccionar un procedimiento."
+                );
+
+                return;
+            }
+
+            if (
+                !fechaDesde.value ||
+                !fechaHasta.value
+            ) {
+
+                mostrarResultado(
+                    "Falta información",
+                    "Debe completar ambas fechas."
+                );
+
+                return;
+            }
+
+            if (
+                fechaDesde.value >
+                fechaHasta.value
+            ) {
+
+                mostrarResultado(
+                    "Fechas incorrectas",
+                    (
+                        "La fecha desde no puede ser "
+                        + "posterior a la fecha hasta."
+                    )
+                );
+
+                return;
+            }
+
+            generando = true;
+
+            validar();
+
+            btnConfirmar.innerHTML = `
+                <i class="fas fa-spinner fa-spin"></i>
+                Generando...
+            `;
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "procedimiento_id",
+                selectProcedimiento.value
+            );
+
+            formData.append(
+                "fecha_desde",
+                fechaDesde.value
+            );
+
+            formData.append(
+                "fecha_hasta",
+                fechaHasta.value
+            );
+
+            try {
+
+                const response =
+                    await fetch(
+                        urlGenerar,
+                        {
+                            method: "POST",
+
+                            headers: {
+
+                                "X-CSRFToken":
+                                    getCookie("csrftoken"),
+
+                                "X-Requested-With":
+                                    "XMLHttpRequest"
+                            },
+
+                            body: formData,
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok || !data.ok) {
+
+                    generando = false;
+
+                    btnConfirmar.innerHTML = `
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        Generar órdenes
+                    `;
+
+                    validar();
+
+                    mostrarResultado(
+                        "No se pudieron generar las órdenes",
+                        (
+                            data.error ||
+                            "Ocurrió un error al generar las órdenes."
+                        )
+                    );
+
+                    return;
+                }
+
+                modalProcedimiento.hide();
+
+                mostrarResultado(
+                    "Órdenes generadas",
+                    (
+                        `${data.mensaje} `
+                        +
+                        `Se crearon ${data.detalles_creados} `
+                        +
+                        `detalles de prestaciones.`
+                    ),
+                    true
+                );
+
+            } catch (error) {
+
+                generando = false;
+
+                btnConfirmar.innerHTML = `
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    Generar órdenes
+                `;
+
+                validar();
+
+                mostrarResultado(
+                    "Error",
+                    (
+                        "No se pudo completar la operación. "
+                        + "Intente nuevamente."
+                    )
+                );
+
+            }
+
+        }
+    );
+
+});
+</script>
 <div class="modal fade"
      id="modalCerrarEpisodio"
      tabindex="-1"
@@ -1528,6 +2421,115 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
     });
+</script>
+
+
+<!-- Consulta rápida de órdenes: solo lectura -->
+<div class="modal fade" id="modalVistaOrden" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-eye text-primary me-2"></i><span id="vistaOrdenTitulo">Vista rápida de orden</span></h5>
+                    <div class="small text-muted" id="vistaOrdenPaciente"></div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="vistaOrdenCargando" class="text-center py-5"><span class="spinner-border text-primary"></span><div class="mt-2">Cargando orden...</div></div>
+                <div id="vistaOrdenError" class="alert alert-danger d-none" role="alert"></div>
+                <div id="vistaOrdenContenido" class="d-none">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <span id="vistaOrdenEstado" class="badge bg-secondary"></span>
+                        <span id="vistaOrdenCantidad" class="badge bg-light text-dark border"></span>
+                    </div>
+                    <div id="vistaOrdenResumen" class="row row-cols-2 row-cols-lg-4 g-2 mb-3"></div>
+                    <div id="vistaOrdenObservaciones" class="alert alert-warning d-none"></div>
+                    <div class="table-responsive border rounded-3">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light"><tr><th>#</th><th>Prestación / Código</th><th>Médico</th><th class="text-center">Cant.</th><th>Concepto</th><th>Nivel</th><th>Desde</th><th>Hasta</th></tr></thead>
+                            <tbody id="vistaOrdenDetalles"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="vistaOrdenAnterior"><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="vistaOrdenSiguiente">Siguiente <i class="fas fa-chevron-right"></i></button>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modalVistaOrden");
+    const botones = Array.from(document.querySelectorAll(".btnVistaRapidaOrden"));
+    const el = id => document.getElementById(id);
+    let indice = -1;
+    let peticion = null;
+    const escapar = valor => String(valor ?? "-").replace(/[&<>"']/g, caracter => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[caracter]));
+    function actualizarNavegacion() {
+        el("vistaOrdenAnterior").disabled = indice <= 0;
+        el("vistaOrdenSiguiente").disabled = indice < 0 || indice >= botones.length - 1;
+    }
+    function celdaResumen(titulo, valor) {
+        return `<div class="col"><div class="bg-light border rounded-3 p-2 h-100"><div class="text-muted small">${escapar(titulo)}</div><strong>${escapar(valor)}</strong></div></div>`;
+    }
+    async function cargar(posicion) {
+        if (posicion < 0 || posicion >= botones.length) return;
+        indice = posicion;
+        actualizarNavegacion();
+        if (peticion) peticion.abort();
+        peticion = new AbortController();
+        el("vistaOrdenCargando").classList.remove("d-none");
+        el("vistaOrdenError").classList.add("d-none");
+        el("vistaOrdenContenido").classList.add("d-none");
+        el("vistaOrdenTitulo").textContent = "Vista rápida de orden";
+        el("vistaOrdenPaciente").textContent = "";
+        try {
+            const respuesta = await fetch(botones[indice].dataset.url, {signal: peticion.signal, headers: {"X-Requested-With":"XMLHttpRequest"}});
+            const datos = await respuesta.json();
+            if (!respuesta.ok || !datos.ok) throw new Error(datos.error || "No se pudo consultar la orden.");
+            const orden = datos.orden;
+            el("vistaOrdenTitulo").textContent = `Orden N.º ${String(orden.id).padStart(6, "0")}`;
+            el("vistaOrdenPaciente").textContent = `${orden.paciente} · DNI ${orden.dni} · Episodio ${orden.episodio}`;
+            el("vistaOrdenEstado").textContent = orden.estado;
+            el("vistaOrdenEstado").className = "badge " + (orden.anulada ? "bg-danger" : orden.entregada ? "bg-info text-dark" : orden.autorizada ? "bg-success" : "bg-warning text-dark");
+            el("vistaOrdenCantidad").textContent = `${datos.detalles.length} prestaciones`;
+            el("vistaOrdenResumen").innerHTML = [
+                ["Fecha", orden.fecha], ["Médico de la orden", orden.medico],
+                ["Cupón", orden.cupon], ["Episodio", orden.episodio],
+                ["N.º ingreso", orden.numero_ingreso], ["Cobertura", orden.cobertura],
+                ["Plan", orden.plan], ["Fecha de ejecución", orden.fecha_ejecucion]
+            ].map(([k,v]) => celdaResumen(k,v)).join("");
+            const obs = el("vistaOrdenObservaciones");
+            obs.classList.toggle("d-none", !orden.observaciones);
+            obs.textContent = orden.observaciones ? `Observaciones: ${orden.observaciones}` : "";
+            el("vistaOrdenDetalles").innerHTML = datos.detalles.length ? datos.detalles.map((d,i) => `<tr>
+                <td>${i+1}</td><td><div>${escapar(d.prestacion)}</div><small class="text-muted">Código: ${escapar(d.codigo)}</small></td>
+                <td>${escapar(d.medico)}</td><td class="text-center">${escapar(d.cantidad)}</td>
+                <td>${escapar(d.concepto)}</td><td>${escapar(d.nivel)}</td><td>${escapar(d.desde)}</td><td>${escapar(d.hasta)}</td>
+            </tr>`).join("") : '<tr><td colspan="8" class="text-center text-muted py-4">Sin prestaciones cargadas.</td></tr>';
+            el("vistaOrdenContenido").classList.remove("d-none");
+        } catch (error) {
+            if (error.name === "AbortError") return;
+            el("vistaOrdenError").textContent = error.message;
+            el("vistaOrdenError").classList.remove("d-none");
+        } finally {
+            if (indice === posicion) el("vistaOrdenCargando").classList.add("d-none");
+        }
+    }
+    modal.addEventListener("show.bs.modal", event => {
+        const posicion = botones.indexOf(event.relatedTarget);
+        if (posicion !== -1) cargar(posicion);
+    });
+    modal.addEventListener("hidden.bs.modal", () => { if (peticion) peticion.abort(); });
+    el("vistaOrdenAnterior").addEventListener("click", () => cargar(indice - 1));
+    el("vistaOrdenSiguiente").addEventListener("click", () => cargar(indice + 1));
+});
 </script>
 
 {% endblock %}

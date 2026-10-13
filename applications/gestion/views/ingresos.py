@@ -11,7 +11,8 @@ from ..models import *
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 # =============================================================================
 # INGRESOS
 # =============================================================================
@@ -37,8 +38,11 @@ def lista_ingresos(request):
         )
         .filter(
             estado__in=["ingresado", "cerrado"]
+        ) 
+        .annotate(
+            numero_orden=Cast("numero", IntegerField())
         )
-        .order_by("-fecha_ingreso", "-id")
+        .order_by("-numero_orden", "-fecha_ingreso", "-id")
     )
 
     if paciente:

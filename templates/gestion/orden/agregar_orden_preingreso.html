@@ -1,1118 +1,2468 @@
 {% extends "base.html" %}
 
+
+
 {% block content %}
 
+
+
 <style>
+
     .page-wrap {
+
         max-width: 1320px;
+
         margin: 0 auto;
+
     }
+
+
 
     .form-hero {
+
         background: #ffffff;
+
         border-radius: 20px;
+
         padding: 1.4rem 1.6rem;
+
         margin-bottom: 1.2rem;
+
         box-shadow: 0 10px 28px rgba(15, 76, 129, 0.14);
+
         border: 1px solid #d6dce5;
+
     }
+
+
 
     .form-hero h2 {
+
         margin: 0;
+
         font-weight: 900;
+
         font-size: 1.65rem;
+
         color: #111827;
+
     }
+
+
 
     .form-hero h2 i {
+
         color: #0f4c81;
+
         margin-right: 0.45rem;
+
     }
+
+
 
     .form-hero p {
+
         margin: 0.35rem 0 0;
+
         color: #526179;
+
         font-size: 0.92rem;
+
     }
+
+
 
     .summary-card,
+
     .form-card {
+
         background: #ffffff;
+
         border: 1px solid #d6dce5;
+
         border-radius: 18px;
+
         box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+
         overflow: hidden;
+
         margin-bottom: 1rem;
+
     }
+
+
 
     .summary-card {
+
         padding: 1.1rem;
+
         background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+
     }
+
+
 
     .patient-main {
+
         display: flex;
+
         align-items: center;
+
         gap: 0.9rem;
+
     }
+
+
 
     .patient-avatar {
+
         width: 54px;
+
         height: 54px;
+
         border-radius: 50%;
+
         background: #e8f2ff;
+
         color: #0d6efd;
+
         display: flex;
+
         align-items: center;
+
         justify-content: center;
+
         font-size: 1.45rem;
+
         border: 1px solid #b9d7ff;
+
         flex-shrink: 0;
+
     }
+
+
 
     .patient-name {
+
         font-size: 1.2rem;
+
         font-weight: 900;
+
         color: #111827;
+
     }
+
+
 
     .patient-subtitle {
+
         color: #526179;
+
         font-size: 0.88rem;
+
     }
+
+
 
     .section-title {
+
         background: #fbfdff;
+
         border-bottom: 1px solid #dbe3ef;
+
         padding: 0.85rem 1.15rem;
+
         font-weight: 900;
+
         color: #1f2937;
+
         display: flex;
+
         align-items: center;
+
         justify-content: space-between;
+
         gap: 0.75rem;
+
     }
+
+
 
     .section-title-left {
+
         display: flex;
+
         align-items: center;
+
         gap: 0.65rem;
+
     }
+
+
 
     .section-number {
+
         width: 28px;
+
         height: 28px;
+
         border-radius: 50%;
+
         background: #0d6efd;
+
         color: #ffffff;
+
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         font-size: 0.82rem;
+
         font-weight: 900;
+
     }
+
+
 
     .section-body {
+
         padding: 1.15rem;
+
     }
+
+
 
     .form-label {
+
         font-size: 0.8rem;
+
         font-weight: 800;
+
         color: #1f2937;
+
         margin-bottom: 0.35rem;
+
     }
+
+
 
     .form-control,
+
     .form-select {
+
         border-radius: 12px;
+
         border: 1px solid #cfd8e3;
+
         font-size: 0.9rem;
+
         padding: 0.62rem 0.8rem;
+
         background: #ffffff;
+
     }
+
+
 
     .form-control:focus,
+
     .form-select:focus {
+
         border-color: #1d7fbf;
+
         box-shadow: 0 0 0 0.18rem rgba(29, 127, 191, 0.18);
+
     }
+
+
 
     .btn {
+
         border-radius: 12px;
+
         font-weight: 800;
+
     }
+
+
 
     .btn-sm-custom {
+
         padding: 0.52rem 0.9rem;
+
         font-size: 0.85rem;
+
     }
+
+
 
     .actions-bar {
+
         position: sticky;
+
         bottom: 0;
+
         background: rgba(255,255,255,0.96);
+
         backdrop-filter: blur(8px);
+
         border: 1px solid #d6dce5;
+
         border-radius: 16px;
+
         padding: 0.85rem;
+
         display: flex;
+
         justify-content: space-between;
+
         gap: 0.75rem;
+
         box-shadow: 0 -5px 20px rgba(0,0,0,0.06);
+
         margin-top: 1rem;
+
         z-index: 10;
+
     }
+
+
 
     .required-mark {
+
         color: #dc2626;
+
     }
+
+
 
     .mini-help {
+
         font-size: 0.78rem;
+
         color: #6b7280;
+
     }
+
+
 
     .detalle-table {
+
         min-width: 900px;
+
     }
+
+
 
     .detalle-table thead th {
+
         font-size: 0.76rem;
+
         color: #374151;
+
         font-weight: 900;
+
         white-space: nowrap;
+
         background: #f8f9fa;
+
         vertical-align: middle;
+
     }
+
+
 
     .detalle-table tbody td {
+
         font-size: 0.82rem;
+
         vertical-align: middle;
+
         padding: 0.35rem;
+
     }
+
+
 
     .detalle-table .form-control,
+
     .detalle-table .form-select {
+
         min-height: 34px;
+
         border-radius: 9px;
+
         font-size: 0.78rem;
+
         padding: 0.35rem 0.45rem;
+
     }
+
+
 
     .detalle-table .input-group .btn {
+
         border-radius: 9px;
+
         padding: 0.25rem 0.5rem;
+
     }
+
+
 
     .modal-confirmacion {
+
         border: 0;
+
         border-radius: 18px;
+
         overflow: hidden;
+
         box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+
     }
+
+
 
     .modal-confirmacion .modal-header {
+
         background: #ffffff;
+
         border-bottom: 1px solid #e5e7eb;
+
     }
+
+
 
     .modal-confirmacion .modal-title {
+
         font-weight: 900;
+
         color: #1f2937;
+
     }
+
+
 
     .modal-xl {
+
         max-width: 1080px;
+
     }
-    
+
+
+
     .episode-badge{
+
         display:inline-block;
+
         margin-left:.6rem;
+
         padding:.18rem .65rem;
+
         background:#587bb0;
+
         color:#fff;
+
         border-radius:999px;
+
         font-size:.74rem;
+
         font-weight:700;
+
         letter-spacing:.3px;
+
     }
+
     .prestacion-table thead th {
+
         font-size: 0.8rem;
+
         color: #374151;
+
         font-weight: 900;
+
         white-space: nowrap;
+
     }
+
+
 
     .prestacion-table tbody td {
+
         font-size: 0.86rem;
+
         vertical-align: middle;
+
     }
+
+
 
     .prestacion-table tbody tr {
+
         cursor: default;
+
     }
+
+
 
     .prestacion-table.table-hover tbody tr:hover {
+
         --bs-table-accent-bg: transparent;
+
         background-color: transparent;
+
     }
+
+
 
     .empty-row {
+
         padding: 2rem !important;
+
         color: #6b7280;
+
         text-align: center;
+
     }
 
+
+
     .row-number {
+
         width: 28px;
+
         height: 28px;
+
         border-radius: 50%;
+
         background: #eef2ff;
+
         color: #1d4ed8;
+
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         font-weight: 900;
+
         font-size: 0.78rem;
+
     }
+
+    .medico-combo { position:relative; width:100%; }
+
+    .medico-select-real { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+
+    .medico-combo-boton { width:100%; min-height:43px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:.62rem .8rem; background:#fff; border:1px solid #cfd8e3; border-radius:12px; color:#1f2937; text-align:left; font-size:.9rem; font-weight:400; }
+
+    .medico-combo-boton:focus { outline:none; border-color:#1d7fbf; box-shadow:0 0 0 .18rem rgba(29,127,191,.18); }
+
+    .medico-combo-boton #medicoComboTexto { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    .medico-flecha { color:#526179; flex-shrink:0; font-size:1.1rem; }
+
+    .medico-combo-menu { position:absolute; z-index:1050; left:0; right:0; top:calc(100% + 3px); background:#fff; border:1px solid #cfd8e3; border-radius:10px; box-shadow:0 10px 25px rgba(15,23,42,.18); overflow:hidden; }
+
+    .medico-combo-menu[hidden] { display:none; }
+
+    .medico-combo-busqueda { display:flex; align-items:center; border-bottom:1px solid #e5e7eb; padding:6px; }
+
+    .medico-combo-busqueda input { width:100%; min-width:0; padding:7px 8px; border:1px solid #cfd8e3; border-radius:6px; outline:none; font-size:.84rem; }
+
+    .medico-combo-busqueda input:focus { border-color:#1d7fbf; }
+
+    .medico-combo-busqueda button { border:0; background:transparent; color:#526179; font-size:1.3rem; padding:0 8px; }
+
+    .medico-combo-opciones { max-height:235px; overflow-y:auto; }
+
+    .medico-combo-opcion { display:block; width:100%; border:0; border-radius:0; background:#fff; text-align:left; padding:7px 11px; font-size:.82rem; color:#1f2937; }
+
+    .medico-combo-opcion.activo, .medico-combo-opcion:hover { background:#e8f2ff; color:#0f4c81; }
+
+    .medico-combo-vacio { padding:12px; color:#6b7280; font-size:.82rem; }
+
 </style>
+
+
 
 <div class="page-wrap">
 
+
+
     <div class="form-hero">
+
         <div class="d-flex justify-content-between align-items-start gap-3">
+
             <div>
+
                 <h2>
+
                     <i class="fas fa-file-signature"></i>
+
                     Nueva Orden de Autorización
+
                 </h2>
+
                 <p>
+
                     Carga de orden vinculada al preingreso. El médico se carga una sola vez en el encabezado.
+
                 </p>
+
             </div>
+
+
 
             <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary btn-sm-custom">
+
                 <i class="fas fa-arrow-left"></i> Volver
+
             </a>
+
         </div>
+
     </div>
+
+
 
     <div class="summary-card">
+
         <div class="patient-main">
+
             <div class="patient-avatar">
+
                 <i class="fas fa-user-injured"></i>
+
             </div>
+
+
 
             <div>
+
                 <div class="patient-name">
+
                     {{ preingreso.paciente.apellido }}, {{ preingreso.paciente.nombre }}
+
                 </div>
+
+
 
                 <div class="patient-subtitle">
+
                     DNI {{ preingreso.paciente.dni|default:"-" }}
+
                     {% if preingreso.obra_social %}
+
                         · {{ preingreso.obra_social.nombre }}
+
                     {% endif %}
+
                     {% if preingreso.plan %}
+
                         · Plan {{ preingreso.plan.nombre }}
+
                     {% endif %}
+
                     {% if preingreso.fecha_probable_ingreso %}
+
                         · Ingreso probable {{ preingreso.fecha_probable_ingreso|date:"d/m/Y" }}
+
                     {% endif %}
+
                         <span class="episode-badge">
+
                             Numero Preingreso: {{ preingreso.id }}
+
                         </span>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <form method="post" id="formOrden">
+
         {% csrf_token %}
+
+
 
         <input type="hidden" name="detalles_json" id="detalles_json">
 
+
+
         <div class="form-card">
+
             <div class="section-title">
+
                 <div class="section-title-left">
+
                     <span class="section-number">1</span>
+
                     Datos de la orden
+
                 </div>
+
             </div>
 
+
+
             <div class="section-body">
+
                 <div class="row g-3">
 
-                    <div class="col-md-3">
-                        <label class="form-label">Fecha</label>
-                        <input type="date"
-                               name="fecha"
-                               class="form-control"
-                               value="{{ fecha_hoy }}">
-                    </div>
+
 
                     <div class="col-md-3">
+
+                        <label class="form-label">Fecha</label>
+
+                        <input type="date"
+
+                               name="fecha"
+
+                               class="form-control"
+
+                               value="{{ fecha_hoy }}">
+
+                    </div>
+
+
+
+                    <div class="col-md-3">
+
                         <label class="form-label">
+
                             Médico <span class="required-mark">*</span>
+
                         </label>
 
-                        <select name="medico" class="form-select" required>
-                            <option value="">Seleccione médico...</option>
-                            {% for medico in medicos %}
-                                <option value="{{ medico.id }}"
-                                    {% if medico_default and medico.id == medico_default.id %}selected{% endif %}>
-                                    {{ medico.apellido }}, {{ medico.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
+
+
+                        <div class="medico-combo" id="medicoCombo">
+
+                            <select name="medico" id="medicoSelect" required class="medico-select-real" tabindex="-1" aria-label="Médico seleccionado">
+
+                                <option value="">Seleccione médico...</option>
+
+                                {% for medico in medicos %}
+
+                                    <option value="{{ medico.id }}" {% if medico_default and medico.id == medico_default.id %}selected{% endif %}>
+
+                                        {{ medico.apellido }}, {{ medico.nombre }}{% if medico.matricula %} — Matrícula {{ medico.matricula }}{% endif %}
+
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            <button type="button" id="medicoComboBoton" class="medico-combo-boton" aria-haspopup="listbox" aria-expanded="false">
+
+                                <span id="medicoComboTexto">Seleccione médico...</span><span class="medico-flecha">⌄</span>
+
+                            </button>
+
+                            <div class="medico-combo-menu" id="medicoComboMenu" hidden>
+
+                                <div class="medico-combo-busqueda">
+
+                                    <input type="text" id="medicoComboBuscar" autocomplete="off" placeholder="Buscar nombre, apellido o matrícula..." aria-label="Buscar médico">
+
+                                    <button type="button" id="medicoComboLimpiar" title="Borrar búsqueda">×</button>
+
+                                </div>
+
+                                <div id="medicoComboOpciones" class="medico-combo-opciones" role="listbox"></div>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
+
 
                     <div class="col-md-12">
+
                         <label class="form-label">Observaciones de la orden</label>
+
                         <textarea name="observaciones"
+
                                   class="form-control"
+
                                   rows="2"
+
                                   placeholder="Observaciones generales de la orden..."></textarea>
+
                     </div>
 
+
+
                 </div>
+
             </div>
+
         </div>
+
+
 
         <div class="form-card">
+
             <div class="section-title">
+
                 <div class="section-title-left">
+
                     <span class="section-number">2</span>
+
                     Detalles de la orden
+
                 </div>
+
+
 
                 <button type="button"
+
                         class="btn btn-primary btn-sm-custom"
+
                         id="btnAgregarFilaDetalle">
+
                     <i class="fas fa-plus-circle"></i> Agregar fila
+
                 </button>
+
             </div>
+
+
 
             <div class="section-body">
+
                 <div id="detalleError" class="alert alert-danger d-none mb-3"></div>
 
+
+
                 <div class="table-responsive border rounded-3">
+
                     <table class="table table-sm table-hover align-middle mb-0 detalle-table" id="tablaDetallesOrden">
+
                         <thead>
+
                             <tr>
+
                                 <th class="text-center" style="width:42px;">#</th>
+
                                 <th style="width:170px;">Código</th>
+
                                 <th style="width:260px;">Prestación</th>
+
                                 <th class="text-center" style="width:75px;">Cant.</th>
+
                                 <th style="width:135px;">Concepto</th>
+
                                 <th style="width:145px;">Nivel</th>
+
                                 <th style="width:125px;">Desde</th>
+
                                 <th style="width:125px;">Hasta</th>
+
                                 <th class="text-end" style="width:55px;"></th>
+
                             </tr>
+
                         </thead>
 
+
+
                         <tbody id="detallesBody">
+
                             <tr class="fila-detalle">
+
                                 <td class="text-center">
+
                                     <span class="row-number">1</span>
+
                                     <input type="hidden" class="detalle_prestacion_id">
+
                                 </td>
 
+
+
                                 <td>
+
                                     <div class="input-group input-group-sm">
+
                                         <input type="text"
+
                                                class="form-control detalle_prestacion_codigo"
+
                                                placeholder="Código"
+
                                                autocomplete="off">
 
+
+
                                         <button type="button"
+
                                                 class="btn btn-outline-primary btnBuscarPrestacionFila"
+
                                                 title="Buscar prestación"
+
                                                 data-bs-toggle="modal"
+
                                                 data-bs-target="#modalBuscarPrestacion">
+
                                             <i class="fas fa-search"></i>
+
                                         </button>
+
                                     </div>
+
                                 </td>
 
+
+
                                 <td>
+
                                     <input type="text"
+
                                            class="form-control detalle_prestacion_nombre"
+
                                            placeholder="Prestación"
+
                                            autocomplete="off">
+
                                 </td>
 
+
+
                                 <td>
+
                                     <input type="number"
+
                                            class="form-control text-center detalle_cantidad"
+
                                            value="1"
+
                                            min="1">
+
                                 </td>
 
+
+
                                 <td>
+
                                     <select class="form-select detalle_honorarios_gastos">
+
                                         <option value="">Seleccione...</option>
+
                                         {% for value, label in honorarios_gastos %}
+
                                             <option value="{{ value }}"
+
                                                 {% if label|lower == "gastos" %}selected{% endif %}>
+
                                                 {{ label }}
+
                                             </option>
+
                                         {% endfor %}
+
                                     </select>
+
                                 </td>
 
+
+
                                 <td>
+
                                     <select class="form-select detalle_tipo_honorario">
+
                                         <option value="">Seleccione...</option>
+
                                         {% for value, label in tipos_honorario %}
+
                                             <option value="{{ value }}">{{ label }}</option>
+
                                         {% endfor %}
+
                                     </select>
+
                                 </td>
 
+
+
                                 <td>
+
                                     <input type="date" class="form-control detalle_fecha_desde">
+
                                 </td>
 
+
+
                                 <td>
+
                                     <input type="date" class="form-control detalle_fecha_hasta">
+
                                 </td>
+
+
 
                                 <td class="text-end">
+
                                     <button type="button"
+
                                             class="btn btn-outline-danger btn-sm eliminarFilaDetalle"
+
                                             title="Eliminar fila">
+
                                         <i class="fas fa-trash"></i>
+
                                     </button>
+
                                 </td>
+
                             </tr>
+
                         </tbody>
+
                     </table>
+
                 </div>
+
+
 
                 <div class="mini-help mt-2">
+
                     Cargue los detalles directamente en la tabla. El médico de todos los detalles será el seleccionado en el encabezado de la orden.
+
                 </div>
+
             </div>
+
         </div>
+
+
 
         <div class="actions-bar">
+
             <a href="{% url 'gestion_app:detalle_preingreso' preingreso.id %}" class="btn btn-outline-secondary">
+
                 <i class="fas fa-times"></i> Cancelar
+
             </a>
 
+
+
             <button type="button"
+
                     class="btn btn-primary px-4"
+
                     data-bs-toggle="modal"
+
                     data-bs-target="#modalConfirmarGuardado">
+
                 <i class="fas fa-save"></i> Guardar orden
+
             </button>
+
         </div>
+
+
 
     </form>
 
+
+
 </div>
+
+
 
 <div class="modal fade" id="modalBuscarPrestacion" tabindex="-1" aria-hidden="true">
+
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+
         <div class="modal-content modal-confirmacion">
 
+
+
             <div class="modal-header">
+
                 <h5 class="modal-title">
+
                     <i class="fas fa-search text-primary"></i>
+
                     Buscar prestación
+
                 </h5>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
             </div>
 
+
+
             <div class="modal-body">
+
+
 
                 <div class="row g-2 mb-3">
+
                     <div class="col-md-10">
+
                         <input type="text"
+
                                id="buscarPrestacionInput"
+
                                class="form-control"
+
                                placeholder="Buscar por código o nombre...">
 
+
+
                         <div class="mini-help mt-1">
+
                             Ingrese al menos 2 caracteres. Se mostrarán 15 resultados por vez.
+
                         </div>
+
                     </div>
+
+
 
                     <div class="col-md-2 d-grid align-self-start">
+
                         <button type="button" class="btn btn-primary" id="btnBuscarPrestacion">
+
                             <i class="fas fa-search"></i> Buscar
+
                         </button>
+
                     </div>
+
                 </div>
+
+
 
                 <div id="prestacionesResultadoInfo" class="text-muted small mb-2">
+
                     No se cargan prestaciones automáticamente. Realice una búsqueda para comenzar.
+
                 </div>
+
+
 
                 <div class="table-responsive border rounded-3">
+
                     <table class="table table-sm align-middle mb-0 prestacion-table">
+
                         <thead class="table-light">
+
                             <tr>
+
                                 <th style="width: 160px;">Código</th>
+
                                 <th>Prestación</th>
+
                                 <th class="text-end" style="width: 130px;">Acción</th>
+
                             </tr>
+
                         </thead>
 
+
+
                         <tbody id="prestacionesResultadoBody">
+
                             <tr>
+
                                 <td colspan="3" class="empty-row">
+
                                     <i class="fas fa-magnifying-glass"></i>
+
                                     Busque una prestación por código o nombre.
+
                                 </td>
+
                             </tr>
+
                         </tbody>
+
                     </table>
+
                 </div>
+
+
 
                 <div class="d-grid mt-3">
+
                     <button type="button"
+
                             id="btnCargarMasPrestaciones"
+
                             class="btn btn-outline-primary d-none">
+
                         <i class="fas fa-chevron-down"></i> Cargar 15 más
+
                     </button>
+
                 </div>
 
+
+
             </div>
 
+
+
         </div>
+
     </div>
+
 </div>
+
+
 
 <div class="modal fade" id="modalConfirmarGuardado" tabindex="-1" aria-hidden="true">
+
     <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content modal-confirmacion">
 
+
+
             <div class="modal-header">
+
                 <h5 class="modal-title">
+
                     <i class="fas fa-check-circle text-primary"></i>
+
                     Confirmar orden
+
                 </h5>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
             </div>
+
+
 
             <div class="modal-body">
+
                 ¿Desea guardar la orden con todos sus detalles?
+
             </div>
+
+
 
             <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        data-bs-dismiss="modal">
-                    Cancelar
-                </button>
 
                 <button type="button"
-                        class="btn btn-primary"
-                        onclick="guardarOrden();">
-                    <i class="fas fa-save"></i> Sí, guardar
+
+                        class="btn btn-outline-secondary"
+
+                        data-bs-dismiss="modal">
+
+                    Cancelar
+
                 </button>
+
+
+
+                <button type="button"
+
+                        class="btn btn-primary"
+
+                        onclick="guardarOrden();">
+
+                    <i class="fas fa-save"></i> Sí, guardar
+
+                </button>
+
             </div>
 
+
+
         </div>
+
     </div>
+
 </div>
 
+
+
 <script>
+
     let prestacionPage = 1;
+
     let prestacionQuery = "";
+
     let prestacionHasNext = false;
+
     let filaActualPrestacion = null;
 
+
+
     const buscarPrestacionesUrl = "{% url 'gestion_app:buscar_prestaciones_ajax' %}";
+
     const buscarPrestacionCodigoUrl = "{% url 'gestion_app:buscar_prestacion_por_codigo_ajax' %}";
 
+
+
     function escapeHtml(value) {
+
         if (value === null || value === undefined) {
+
             return "";
+
         }
+
+
 
         return String(value)
+
             .replaceAll("&", "&amp;")
+
             .replaceAll("<", "&lt;")
+
             .replaceAll(">", "&gt;")
+
             .replaceAll('"', "&quot;")
+
             .replaceAll("'", "&#039;");
+
     }
+
+
 
     function actualizarNumeracionFilas() {
+
         document.querySelectorAll("#detallesBody tr.fila-detalle").forEach((tr, index) => {
+
             const number = tr.querySelector(".row-number");
+
             if (number) {
+
                 number.textContent = index + 1;
+
             }
+
         });
+
     }
+
+
 
     function setearDefaultsFila(fila) {
+
         const hgSelect = fila.querySelector(".detalle_honorarios_gastos");
 
+
+
         if (hgSelect) {
+
             const optionGastos = Array.from(hgSelect.options).find(option =>
+
                 option.text.trim().toLowerCase() === "gastos"
+
             );
 
+
+
             if (optionGastos) {
+
                 hgSelect.value = optionGastos.value;
+
             }
+
         }
+
     }
+
+
 
     function limpiarFilaDetalle(fila) {
+
         fila.querySelector(".detalle_prestacion_id").value = "";
+
         fila.querySelector(".detalle_prestacion_codigo").value = "";
+
         fila.querySelector(".detalle_prestacion_nombre").value = "";
+
         fila.querySelector(".detalle_cantidad").value = 1;
+
         fila.querySelector(".detalle_tipo_honorario").value = "";
+
         fila.querySelector(".detalle_fecha_desde").value = "";
+
         fila.querySelector(".detalle_fecha_hasta").value = "";
 
+
+
         setearDefaultsFila(fila);
+
     }
 
+
+
     function agregarFilaDetalle() {
+
         const tbody = document.getElementById("detallesBody");
+
         const primeraFila = tbody.querySelector("tr.fila-detalle");
 
+
+
         // Obtener las fechas de la primera fila
+
         const fechaDesdePrimera = primeraFila
+
             .querySelector(".detalle_fecha_desde")
+
             .value;
 
+
+
         const fechaHastaPrimera = primeraFila
+
             .querySelector(".detalle_fecha_hasta")
+
             .value;
+
+
 
         const nuevaFila = primeraFila.cloneNode(true);
 
+
+
         // Limpia todos los datos clonados
+
         limpiarFilaDetalle(nuevaFila);
 
+
+
         // Solo copia las fechas si la primera fila tiene ambas cargadas
+
         if (fechaDesdePrimera && fechaHastaPrimera) {
+
             nuevaFila.querySelector(".detalle_fecha_desde").value = fechaDesdePrimera;
+
             nuevaFila.querySelector(".detalle_fecha_hasta").value = fechaHastaPrimera;
+
         }
 
+
+
         tbody.appendChild(nuevaFila);
+
         actualizarNumeracionFilas();
+
+
 
         const codigoInput = nuevaFila.querySelector(".detalle_prestacion_codigo");
 
+
+
         if (codigoInput) {
+
             codigoInput.focus();
+
         }
+
     }
+
+
 
     function eliminarFilaDetalle(fila) {
+
         const tbody = document.getElementById("detallesBody");
+
         const filas = tbody.querySelectorAll("tr.fila-detalle");
 
+
+
         if (filas.length > 1) {
+
             fila.remove();
+
         } else {
+
             limpiarFilaDetalle(fila);
+
         }
+
+
 
         actualizarNumeracionFilas();
+
     }
+
+
 
     function seleccionarPrestacion(prestacion) {
+
         if (!filaActualPrestacion) {
+
             return;
+
         }
+
+
 
         filaActualPrestacion.querySelector(".detalle_prestacion_id").value = prestacion.id || "";
+
         filaActualPrestacion.querySelector(".detalle_prestacion_codigo").value = prestacion.codigo || "";
+
         filaActualPrestacion.querySelector(".detalle_prestacion_nombre").value = prestacion.nombre || "";
 
+
+
         const cantidad = filaActualPrestacion.querySelector(".detalle_cantidad");
+
         if (!cantidad.value || parseInt(cantidad.value) <= 0) {
+
             cantidad.value = 1;
+
         }
+
+
 
         const modalBuscar = bootstrap.Modal.getInstance(document.getElementById("modalBuscarPrestacion"));
+
         if (modalBuscar) {
+
             modalBuscar.hide();
+
         }
+
+
 
         filaActualPrestacion.querySelector(".detalle_cantidad").focus();
+
     }
+
+
 
     function marcarCodigoNoEncontrado(input) {
+
         input.classList.add("is-invalid");
+
         input.title = "No se encontró una prestación exacta para este código.";
+
     }
+
+
 
     function limpiarMarcaCodigo(input) {
+
         input.classList.remove("is-invalid");
+
         input.title = "";
+
     }
+
+
 
     function completarPrestacionEnFila(fila, prestacion) {
+
         fila.querySelector(".detalle_prestacion_id").value = prestacion.id || "";
+
         fila.querySelector(".detalle_prestacion_codigo").value = prestacion.codigo || "";
+
         fila.querySelector(".detalle_prestacion_nombre").value = prestacion.nombre || "";
 
+
+
         const cantidad = fila.querySelector(".detalle_cantidad");
+
         if (!cantidad.value || parseInt(cantidad.value) <= 0) {
+
             cantidad.value = 1;
+
         }
+
+
 
         limpiarMarcaCodigo(fila.querySelector(".detalle_prestacion_codigo"));
+
     }
+
+
 
     function buscarPrestacionPorCodigoFila(fila) {
+
         const inputCodigo = fila.querySelector(".detalle_prestacion_codigo");
+
         const codigo = inputCodigo.value.trim();
 
+
+
         if (!codigo) {
+
             fila.querySelector(".detalle_prestacion_id").value = "";
+
             fila.querySelector(".detalle_prestacion_nombre").value = "";
+
             limpiarMarcaCodigo(inputCodigo);
+
             return;
+
         }
+
+
 
         fetch(`${buscarPrestacionCodigoUrl}?codigo=${encodeURIComponent(codigo)}`)
+
             .then(response => response.json())
+
             .then(data => {
+
                 if (data.found) {
+
                     completarPrestacionEnFila(fila, {
+
                         id: data.id,
+
                         codigo: data.codigo,
+
                         nombre: data.nombre
+
                     });
+
                 } else {
+
                     fila.querySelector(".detalle_prestacion_id").value = "";
+
                     fila.querySelector(".detalle_prestacion_nombre").value = "";
+
                     marcarCodigoNoEncontrado(inputCodigo);
+
                 }
+
             })
+
             .catch(() => {
+
                 fila.querySelector(".detalle_prestacion_id").value = "";
+
                 fila.querySelector(".detalle_prestacion_nombre").value = "";
+
                 marcarCodigoNoEncontrado(inputCodigo);
+
             });
+
     }
+
+
 
     function renderPrestaciones(prestaciones, append = false) {
+
         const tbody = document.getElementById("prestacionesResultadoBody");
+
+
 
         if (!append) {
+
             tbody.innerHTML = "";
+
         }
+
+
 
         if (prestaciones.length === 0 && !append) {
+
             tbody.innerHTML = `
+
                 <tr>
+
                     <td colspan="3" class="empty-row">
+
                         <i class="fas fa-circle-info"></i>
+
                         No se encontraron prestaciones.
+
                     </td>
+
                 </tr>
+
             `;
+
             return;
+
         }
+
+
 
         prestaciones.forEach(prestacion => {
+
             const tr = document.createElement("tr");
 
+
+
             tr.innerHTML = `
-                <td>
-                    <strong>${escapeHtml(prestacion.codigo || "-")}</strong>
-                </td>
 
                 <td>
-                    <strong>${escapeHtml(prestacion.nombre || "-")}</strong>
-                    <div class="mini-help">${escapeHtml(prestacion.descripcion || "")}</div>
+
+                    <strong>${escapeHtml(prestacion.codigo || "-")}</strong>
+
                 </td>
+
+
+
+                <td>
+
+                    <strong>${escapeHtml(prestacion.nombre || "-")}</strong>
+
+                    <div class="mini-help">${escapeHtml(prestacion.descripcion || "")}</div>
+
+                </td>
+
+
 
                 <td class="text-end">
+
                     <button type="button" class="btn btn-sm btn-primary">
+
                         <i class="fas fa-check"></i> Seleccionar
+
                     </button>
+
                 </td>
+
             `;
+
+
 
             tr.querySelector("button").addEventListener("click", function () {
+
                 seleccionarPrestacion(prestacion);
+
             });
 
+
+
             tbody.appendChild(tr);
+
         });
+
     }
 
+
+
     function buscarPrestaciones(reset = true) {
+
         const input = document.getElementById("buscarPrestacionInput");
+
         const info = document.getElementById("prestacionesResultadoInfo");
+
         const btnMas = document.getElementById("btnCargarMasPrestaciones");
+
         const tbody = document.getElementById("prestacionesResultadoBody");
 
+
+
         if (reset) {
+
             prestacionPage = 1;
+
             prestacionQuery = input.value.trim();
+
         }
 
+
+
         if (prestacionQuery.length < 2) {
+
             info.innerText = "Ingrese al menos 2 caracteres para buscar.";
+
             tbody.innerHTML = `
+
                 <tr>
+
                     <td colspan="3" class="empty-row">
+
                         <i class="fas fa-magnifying-glass"></i>
+
                         Busque una prestación por código o nombre.
+
                     </td>
+
                 </tr>
+
             `;
+
             btnMas.classList.add("d-none");
+
             return;
+
         }
+
+
 
         info.innerText = "Buscando prestaciones...";
 
+
+
         if (reset) {
+
             tbody.innerHTML = `
+
                 <tr>
+
                     <td colspan="3" class="empty-row">
+
                         <i class="fas fa-spinner fa-spin"></i>
+
                         Buscando...
+
                     </td>
+
                 </tr>
+
             `;
+
         }
 
+
+
         fetch(`${buscarPrestacionesUrl}?q=${encodeURIComponent(prestacionQuery)}&page=${prestacionPage}`)
+
             .then(response => response.json())
+
             .then(data => {
+
                 renderPrestaciones(data.results || [], !reset);
+
+
 
                 prestacionHasNext = data.has_next;
 
+
+
                 if (prestacionHasNext) {
+
                     btnMas.classList.remove("d-none");
+
                 } else {
+
                     btnMas.classList.add("d-none");
+
                 }
+
+
 
                 if ((data.results || []).length === 0 && reset) {
+
                     info.innerText = "No se encontraron prestaciones.";
+
                 } else {
+
                     info.innerText = "Resultados encontrados.";
+
                 }
+
             })
+
             .catch(() => {
+
                 info.innerText = "Ocurrió un error al buscar prestaciones.";
+
                 tbody.innerHTML = `
+
                     <tr>
+
                         <td colspan="3" class="empty-row text-danger">
+
                             No se pudo realizar la búsqueda.
+
                         </td>
+
                     </tr>
+
                 `;
+
             });
+
     }
+
+
 
     function filaTieneDatos(fila) {
+
         const prestacionId = fila.querySelector(".detalle_prestacion_id").value.trim();
+
         const codigo = fila.querySelector(".detalle_prestacion_codigo").value.trim();
+
         const nombre = fila.querySelector(".detalle_prestacion_nombre").value.trim();
 
+
+
         return Boolean(prestacionId || codigo || nombre);
+
     }
+
+
 
     function obtenerTextoSelect(select) {
+
         if (!select || !select.value) {
+
             return "";
+
         }
 
+
+
         return select.options[select.selectedIndex]?.text?.trim() || "";
+
     }
+
+
 
     function armarDetallesDesdeTabla() {
+
         const detalles = [];
+
         const errores = [];
 
+
+
         document.querySelectorAll("#detallesBody tr.fila-detalle").forEach((fila, index) => {
+
             if (!filaTieneDatos(fila)) {
+
                 return;
+
             }
+
+
 
             const prestacionId = fila.querySelector(".detalle_prestacion_id").value.trim();
+
             const prestacionCodigo = fila.querySelector(".detalle_prestacion_codigo").value.trim();
+
             const prestacionNombre = fila.querySelector(".detalle_prestacion_nombre").value.trim();
+
             const cantidad = fila.querySelector(".detalle_cantidad").value || 1;
+
             const conceptoSelect = fila.querySelector(".detalle_honorarios_gastos");
+
             const nivelSelect = fila.querySelector(".detalle_tipo_honorario");
+
             const fechaDesde = fila.querySelector(".detalle_fecha_desde").value;
+
             const fechaHasta = fila.querySelector(".detalle_fecha_hasta").value;
 
+
+
             if (!prestacionId) {
+
                 errores.push(`Fila ${index + 1}: debe seleccionar una prestación válida o ingresar un código existente.`);
+
             }
+
+
 
             if (!cantidad || parseInt(cantidad) <= 0) {
+
                 errores.push(`Fila ${index + 1}: la cantidad debe ser mayor a cero.`);
+
             }
 
+
+
             detalles.push({
+
                 prestacion_id: prestacionId,
+
                 prestacion_codigo: prestacionCodigo,
+
                 prestacion_nombre: prestacionNombre,
+
                 cantidad: cantidad,
+
                 honorarios_gastos: conceptoSelect.value,
+
                 honorarios_gastos_texto: conceptoSelect.value ? obtenerTextoSelect(conceptoSelect) : "",
+
                 tipo_honorario: nivelSelect.value,
+
                 tipo_honorario_texto: nivelSelect.value ? obtenerTextoSelect(nivelSelect) : "",
+
                 fecha_desde: fechaDesde,
+
                 fecha_hasta: fechaHasta,
+
                 observaciones: "",
+
             });
+
         });
 
+
+
         return { detalles, errores };
+
     }
+
+
 
     function mostrarErrorDetalle(mensaje) {
+
         const errorBox = document.getElementById("detalleError");
+
         errorBox.innerHTML = mensaje;
+
         errorBox.classList.remove("d-none");
+
         errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
     }
+
+
 
     function limpiarErrorDetalle() {
+
         const errorBox = document.getElementById("detalleError");
+
         errorBox.innerHTML = "";
+
         errorBox.classList.add("d-none");
+
     }
 
+
+
     function guardarOrden() {
+
         const form = document.getElementById("formOrden");
+
+
 
         limpiarErrorDetalle();
 
-        if (!form.checkValidity()) {
-            form.reportValidity();
+
+
+        if (!document.getElementById("medicoSelect").value) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById("modalConfirmarGuardado"));
+            if (modal) modal.hide();
+            document.getElementById("medicoComboBoton").focus();
+            alert("Debe seleccionar el médico de la orden.");
             return;
         }
+
+        if (!form.checkValidity()) {
+
+            form.reportValidity();
+
+            return;
+
+        }
+
+
 
         const resultado = armarDetallesDesdeTabla();
 
+
+
         if (resultado.detalles.length === 0) {
+
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalConfirmarGuardado"));
+
             if (modal) {
+
                 modal.hide();
+
             }
+
+
 
             mostrarErrorDetalle("Debe cargar al menos un detalle en la orden.");
+
             return;
+
         }
+
+
 
         if (resultado.errores.length > 0) {
+
             const modal = bootstrap.Modal.getInstance(document.getElementById("modalConfirmarGuardado"));
+
             if (modal) {
+
                 modal.hide();
+
             }
 
+
+
             mostrarErrorDetalle(resultado.errores.map(error => `<div>${escapeHtml(error)}</div>`).join(""));
+
             return;
+
         }
 
+
+
         document.getElementById("detalles_json").value = JSON.stringify(resultado.detalles);
+
         form.submit();
+
     }
 
+
+
     document.addEventListener("DOMContentLoaded", function () {
+
         const btnBuscarPrestacion = document.getElementById("btnBuscarPrestacion");
+
         const buscarPrestacionInput = document.getElementById("buscarPrestacionInput");
+
         const btnCargarMasPrestaciones = document.getElementById("btnCargarMasPrestaciones");
+
         const btnAgregarFilaDetalle = document.getElementById("btnAgregarFilaDetalle");
+
         const tablaDetalles = document.getElementById("tablaDetallesOrden");
 
+
+
         document.querySelectorAll("#detallesBody tr.fila-detalle").forEach(fila => {
+
             setearDefaultsFila(fila);
+
         });
+
+
 
         btnAgregarFilaDetalle.addEventListener("click", agregarFilaDetalle);
 
+
+
         tablaDetalles.addEventListener("click", function (e) {
+
             const btnBuscar = e.target.closest(".btnBuscarPrestacionFila");
+
             if (btnBuscar) {
+
                 filaActualPrestacion = btnBuscar.closest("tr.fila-detalle");
+
                 const codigo = filaActualPrestacion.querySelector(".detalle_prestacion_codigo").value.trim();
+
                 buscarPrestacionInput.value = codigo;
+
                 return;
+
             }
+
+
 
             const btnEliminar = e.target.closest(".eliminarFilaDetalle");
+
             if (btnEliminar) {
+
                 eliminarFilaDetalle(btnEliminar.closest("tr.fila-detalle"));
+
             }
+
         });
+
+
 
         tablaDetalles.addEventListener("keydown", function (e) {
+
             if (e.key === "Enter" && e.target.classList.contains("detalle_prestacion_codigo")) {
+
                 e.preventDefault();
+
                 filaActualPrestacion = e.target.closest("tr.fila-detalle");
+
                 buscarPrestacionInput.value = e.target.value.trim();
+
                 new bootstrap.Modal(document.getElementById("modalBuscarPrestacion")).show();
 
+
+
                 if (buscarPrestacionInput.value.length >= 2) {
+
                     buscarPrestaciones(true);
+
                 }
+
             }
+
         });
+
+
 
         tablaDetalles.addEventListener("blur", function (e) {
+
             if (e.target.classList.contains("detalle_prestacion_codigo")) {
+
                 buscarPrestacionPorCodigoFila(e.target.closest("tr.fila-detalle"));
+
             }
+
         }, true);
 
+
+
         btnBuscarPrestacion.addEventListener("click", function () {
+
             buscarPrestaciones(true);
+
         });
+
+
 
         buscarPrestacionInput.addEventListener("keydown", function (e) {
+
             if (e.key === "Enter") {
+
                 e.preventDefault();
+
                 buscarPrestaciones(true);
+
             }
+
         });
+
+
 
         btnCargarMasPrestaciones.addEventListener("click", function () {
+
             if (prestacionHasNext) {
+
                 prestacionPage += 1;
+
                 buscarPrestaciones(false);
+
             }
+
         });
+
+
 
         document.getElementById("modalBuscarPrestacion").addEventListener("shown.bs.modal", function () {
+
             buscarPrestacionInput.focus();
 
+
+
             if (buscarPrestacionInput.value.trim().length >= 2) {
+
                 buscarPrestaciones(true);
+
             }
+
         });
+
         window.addEventListener("pageshow", function (event) {
+
             const navEntries = performance.getEntriesByType("navigation");
+
             const navType = navEntries.length ? navEntries[0].type : "";
+
+
 
             const vinoPorBackForward = event.persisted || navType === "back_forward";
 
+
+
             if (vinoPorBackForward) {
+
                 window.location.replace("{% url 'gestion_app:detalle_ingreso' preingreso.id %}");
+
             }
+
         });
 
+
+
+    // Selector de medicos: busqueda DENTRO del desplegable, sin dependencias externas.
+
+    (function configurarComboMedicos() {
+
+        const root = document.getElementById('medicoCombo');
+
+        const select = document.getElementById('medicoSelect');
+
+        const boton = document.getElementById('medicoComboBoton');
+
+        const texto = document.getElementById('medicoComboTexto');
+
+        const menu = document.getElementById('medicoComboMenu');
+
+        const input = document.getElementById('medicoComboBuscar');
+
+        const limpiar = document.getElementById('medicoComboLimpiar');
+
+        const lista = document.getElementById('medicoComboOpciones');
+
+        if (!root || !select) return;
+
+        const opciones = Array.from(select.options).filter(o => o.value);
+
+        let indiceActivo = 0;
+
+        let visibles = [];
+
+        const normalizar = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+        function actualizarTexto() {
+
+            texto.textContent = select.selectedOptions[0]?.textContent.trim() || 'Seleccione médico...';
+
+        }
+
+        function renderizar() {
+
+            const q = normalizar(input.value);
+
+            visibles = opciones.filter(o => normalizar(o.textContent).includes(q));
+
+            indiceActivo = Math.min(indiceActivo, Math.max(0, visibles.length - 1));
+
+            lista.replaceChildren();
+
+            if (!visibles.length) {
+
+                const vacio = document.createElement('div');
+
+                vacio.className = 'medico-combo-vacio';
+
+                vacio.textContent = 'No se encontraron médicos';
+
+                lista.appendChild(vacio);
+
+            }
+
+            visibles.forEach((o, i) => {
+
+                const item = document.createElement('button');
+
+                item.type = 'button';
+
+                item.className = 'medico-combo-opcion' + (i === indiceActivo ? ' activo' : '');
+
+                item.setAttribute('role', 'option');
+
+                item.setAttribute('aria-selected', String(o.value === select.value));
+
+                item.textContent = o.textContent.trim();
+
+                item.addEventListener('mouseenter', () => { indiceActivo = i; pintarActivo(); });
+
+                item.addEventListener('click', () => elegir(o.value));
+
+                lista.appendChild(item);
+
+            });
+
+        }
+
+        function pintarActivo() {
+
+            Array.from(lista.children).forEach((el, i) => el.classList.toggle('activo', i === indiceActivo));
+
+            lista.children[indiceActivo]?.scrollIntoView({block:'nearest'});
+
+        }
+
+        function abrir() {
+
+            menu.hidden = false;
+
+            boton.setAttribute('aria-expanded', 'true');
+
+            input.value = '';
+
+            indiceActivo = 0;
+
+            renderizar();
+
+            input.focus();
+
+        }
+
+        function cerrar() {
+
+            menu.hidden = true;
+
+            boton.setAttribute('aria-expanded', 'false');
+
+            input.value = '';
+
+        }
+
+        function elegir(id) {
+
+            select.value = id;
+
+            select.dispatchEvent(new Event('change', {bubbles:true}));
+
+            actualizarTexto();
+
+            cerrar();
+
+            boton.focus();
+
+        }
+
+        boton.addEventListener('click', () => menu.hidden ? abrir() : cerrar());
+
+        input.addEventListener('input', () => { indiceActivo = 0; renderizar(); });
+
+        limpiar.addEventListener('click', () => { input.value = ''; indiceActivo = 0; renderizar(); input.focus(); });
+
+        input.addEventListener('keydown', e => {
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+
+                e.preventDefault();
+
+                if (visibles.length) indiceActivo = (indiceActivo + (e.key === 'ArrowDown' ? 1 : -1) + visibles.length) % visibles.length;
+
+                pintarActivo();
+
+            } else if (e.key === 'Enter') {
+
+                e.preventDefault();
+
+                if (visibles[indiceActivo]) elegir(visibles[indiceActivo].value);
+
+            } else if (e.key === 'Escape') {
+
+                e.preventDefault(); cerrar(); boton.focus();
+
+            }
+
+        });
+
+        document.addEventListener('pointerdown', e => { if (!root.contains(e.target)) cerrar(); });
+
+        select.addEventListener('change', actualizarTexto);
+
+        actualizarTexto();
+
+    })();
+
+
+
+
         actualizarNumeracionFilas();
+
     });
+
 </script>
+
+
 
 {% endblock %}
