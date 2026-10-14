@@ -634,6 +634,9 @@
                                         {% if primer_detalle %}
                                             <div class="concepto-orden-resumen concepto-orden">
                                                 {{ primer_detalle.get_honorarios_gastos_display|default:"-" }}
+                                                {% if primer_detalle.tipo_honorario %}
+                                                    · {{ primer_detalle.get_tipo_honorario_display }}
+                                                {% endif %}
                                             </div>
                                         {% endif %}
                                     {% endwith %}
