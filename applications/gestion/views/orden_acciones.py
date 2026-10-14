@@ -192,7 +192,7 @@ def _permisos_edicion_orden(orden):
     # Regla segura: si está autorizada, no se cambian códigos aunque tenga <= 14 días.
     puede_editar_codigos = (
         puede_editar
-        and dias_transcurridos <= 14
+        and dias_transcurridos <= 30
         and not orden.autorizada
     )
 
@@ -205,9 +205,9 @@ def _permisos_edicion_orden(orden):
             "La orden está autorizada. Solo pueden modificarse el médico "
             "y las observaciones."
         )
-    elif dias_transcurridos > 14:
+    elif dias_transcurridos > 30:
         motivo_bloqueo = (
-            "El plazo de 14 días para modificar prestaciones ya venció."
+            "El plazo de 30 días para modificar prestaciones ya venció."
         )
 
     return {
