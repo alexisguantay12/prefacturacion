@@ -738,7 +738,8 @@ def confeccionar_planilla_entrega(request):
                     ya_en_planilla=False,
                 )
                 .order_by(
-                    "fecha",
+                    "preingreso__paciente__apellido",
+                    "preingreso__paciente__nombre",
                     "id",
                 )
             )
@@ -1437,7 +1438,8 @@ def editar_planilla_entrega(request, planilla_id):
             id__in=ordenes_otras_planillas_ids,
         )
         .order_by(
-            "fecha",
+            "preingreso__paciente__apellido",
+            "preingreso__paciente__nombre",
             "id",
         )
     )
