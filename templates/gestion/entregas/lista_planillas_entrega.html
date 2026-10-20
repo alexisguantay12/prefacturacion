@@ -5,131 +5,216 @@
 <style>
 
     .page-wrap {
+
         max-width: 1320px;
+
         margin: 0 auto;
+
     }
 
     .page-header,
+
     .card-filter,
+
     .table-card {
+
         background: #ffffff;
+
         border: 1px solid #d8e0ea;
+
         box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+
     }
 
     .page-header {
+
         border-radius: 18px;
+
         padding: 1rem 1.15rem;
+
         margin-bottom: 1rem;
+
     }
 
     .page-title {
+
         font-size: 1.45rem;
+
         font-weight: 900;
+
         color: #1f2937;
+
         margin: 0;
+
     }
 
     .page-subtitle {
+
         color: #6b7280;
+
         font-size: 0.88rem;
+
         margin-top: .2rem;
+
     }
 
     .card-filter {
+
         border-radius: 16px;
+
         padding: 1rem;
+
         margin-bottom: 1rem;
+
     }
 
     .table-card {
+
         border-radius: 18px;
+
         overflow: hidden;
+
     }
 
     .table-card-header {
+
         padding: .9rem 1.1rem;
+
         border-bottom: 1px solid #e5eaf1;
+
         background: #fbfdff;
+
         display: flex;
+
         justify-content: space-between;
+
         align-items: center;
+
     }
 
     .table-entregas {
+
         width: 100%;
+
         margin: 0;
+
         font-size: .85rem;
+
     }
 
     .table-entregas th {
+
         background: #f1f5f9;
+
         padding: .8rem .75rem;
+
         font-size: .76rem;
+
         font-weight: 900;
+
         white-space: nowrap;
+
     }
 
     .table-entregas td {
+
         padding: .78rem .75rem;
+
         vertical-align: middle;
+
         border-bottom: 1px solid #eef2f7;
+
     }
 
     .medico-name {
+
         font-weight: 900;
+
     }
 
     .badge-estado {
+
         display: inline-flex;
+
         padding: .38rem .62rem;
+
         border-radius: 999px;
+
         font-size: .74rem;
+
         font-weight: 900;
+
     }
 
     .badge-borrador {
+
         background: #fffbeb;
+
         color: #92400e;
+
         border: 1px solid #fde68a;
+
     }
 
     .badge-confirmada {
+
         background: #eff6ff;
+
         color: #1d4ed8;
+
         border: 1px solid #bfdbfe;
+
     }
 
     .badge-entregada {
+
         background: #ecfdf5;
+
         color: #047857;
+
         border: 1px solid #a7f3d0;
+
     }
 
     .badge-anulada {
+
         background: #fef2f2;
+
         color: #b91c1c;
+
         border: 1px solid #fecaca;
+
     }
 
     .badge-orden {
+
         background: #eef2ff;
+
         color: #3730a3;
+
         border: 1px solid #c7d2fe;
+
         padding: .3rem .55rem;
+
         border-radius: 999px;
+
         font-size: .72rem;
+
         font-weight: 900;
+
     }
 
     .empty-state {
+
         text-align: center;
+
         padding: 2.5rem;
+
         color: #6b7280;
+
     }
 
 </style>
-
 
 <div class="container-fluid py-3">
 
@@ -142,21 +227,27 @@
                 <div>
 
                     <h2 class="page-title">
+
                         <i class="fas fa-file-invoice me-1"></i>
+
                         Planillas de entrega
+
                     </h2>
 
                     <div class="page-subtitle">
+
                         Gestión de planillas de entrega de órdenes por profesional.
+
                     </div>
 
                 </div>
 
-
                 <a href="{% url 'gestion_app:confeccionar_planilla_entrega' %}"
+
                    class="btn btn-primary">
 
                     <i class="fas fa-plus-circle me-1"></i>
+
                     Generar planilla
 
                 </a>
@@ -165,76 +256,100 @@
 
         </div>
 
-
         <div class="card-filter">
 
             <form method="get"
+
                   class="row g-2 align-items-end">
 
                 <div class="col-md-5">
 
                     <label class="form-label mb-1">
+
                         Buscar
+
                     </label>
 
                     <input type="text"
+
                            name="q"
+
                            value="{{ query }}"
+
                            class="form-control"
+
                            placeholder="Médico, matrícula, observación o N° planilla">
 
                 </div>
 
-
                 <div class="col-md-4">
 
                     <label class="form-label mb-1">
+
                         Estado
+
                     </label>
 
                     <select name="estado"
+
                             class="form-select">
 
                         <option value="">
+
                             Todos
+
                         </option>
 
                         <option value="borrador"
+
                                 {% if estado == "borrador" %}selected{% endif %}>
+
                             Borrador
+
                         </option>
 
                         <option value="confirmada"
+
                                 {% if estado == "confirmada" %}selected{% endif %}>
+
                             Confirmada
+
                         </option>
 
                         <option value="entregada"
+
                                 {% if estado == "entregada" %}selected{% endif %}>
+
                             Entregada
+
                         </option>
 
                         <option value="anulada"
+
                                 {% if estado == "anulada" %}selected{% endif %}>
+
                             Anulada
+
                         </option>
 
                     </select>
 
                 </div>
 
-
                 <div class="col-md-3 d-flex gap-2">
 
                     <button type="submit"
+
                             class="btn btn-dark">
 
                         <i class="fas fa-search"></i>
+
                         Filtrar
 
                     </button>
 
                     <a href="{% url 'gestion_app:lista_planillas_entrega' %}"
+
                        class="btn btn-outline-secondary">
 
                         Limpiar
@@ -247,23 +362,27 @@
 
         </div>
 
-
         <div class="table-card">
 
             <div class="table-card-header">
 
                 <strong>
+
                     <i class="fas fa-list-check me-1"></i>
+
                     Planillas
+
                 </strong>
 
                 <span class="badge-orden">
+
                     {{ page_obj.paginator.count }}
+
                     registro{% if page_obj.paginator.count != 1 %}s{% endif %}
+
                 </span>
 
             </div>
-
 
             <div class="table-responsive">
 
@@ -272,19 +391,28 @@
                     <thead>
 
                         <tr>
+
                             <th>N°</th>
+
                             <th>Médico</th>
+
                             <th>Matrícula</th>
+
                             <th>Confirmación</th>
+
                             <th>Entrega</th>
+
                             <th>Órdenes</th>
+
                             <th>Estado</th>
+
                             <th>Observaciones</th>
+
                             <th class="text-end">Acciones</th>
+
                         </tr>
 
                     </thead>
-
 
                     <tbody>
 
@@ -293,26 +421,28 @@
                             <tr>
 
                                 <td>
-                                    <strong>{{ p.id }}</strong>
-                                </td>
 
+                                    <strong>{{ p.id }}</strong>
+
+                                </td>
 
                                 <td>
 
                                     <div class="medico-name">
 
                                         {{ p.medico.apellido|title }},
+
                                         {{ p.medico.nombre|title }}
 
                                     </div>
 
                                 </td>
 
-
                                 <td>
-                                    {{ p.medico.matricula|default:"—" }}
-                                </td>
 
+                                    {{ p.medico.matricula|default:"—" }}
+
+                                </td>
 
                                 <td>
 
@@ -328,7 +458,6 @@
 
                                 </td>
 
-
                                 <td>
 
                                     {% if p.fecha_entrega %}
@@ -343,56 +472,61 @@
 
                                 </td>
 
-
                                 <td>
 
                                     <span class="badge-orden">
 
                                         {{ p.total_ordenes }}
+
                                         orden{% if p.total_ordenes != 1 %}es{% endif %}
 
                                     </span>
 
                                 </td>
 
-
                                 <td>
 
                                     {% if p.estado == "borrador" %}
 
                                         <span class="badge-estado badge-borrador">
+
                                             Borrador
+
                                         </span>
 
                                     {% elif p.estado == "confirmada" %}
 
                                         <span class="badge-estado badge-confirmada">
+
                                             Confirmada
+
                                         </span>
 
                                     {% elif p.estado == "entregada" %}
 
                                         <span class="badge-estado badge-entregada">
+
                                             Entregada
+
                                         </span>
 
                                     {% else %}
 
                                         <span class="badge-estado badge-anulada">
+
                                             Anulada
+
                                         </span>
 
                                     {% endif %}
 
                                 </td>
 
-
                                 <td>
 
                                     {{ p.observaciones|default:"—" }}
 
                                 </td>
-
 
                                 <td class="text-end">
 
@@ -401,20 +535,23 @@
                                         <!-- VER -->
 
                                         <a href="{% url 'gestion_app:detalle_planilla_entrega' p.id %}"
+
                                         class="btn btn-sm btn-outline-primary"
+
                                         title="Ver planilla">
 
                                             <i class="fas fa-eye"></i>
 
                                         </a>
 
-
                                         <!-- EDITAR SOLO BORRADOR -->
 
                                         {% if p.estado == "borrador" %}
 
                                             <a href="{% url 'gestion_app:editar_planilla_entrega' p.id %}"
+
                                             class="btn btn-sm btn-outline-warning"
+
                                             title="Editar planilla">
 
                                                 <i class="fas fa-pen"></i>
@@ -423,13 +560,14 @@
 
                                         {% endif %}
 
-
                                         <!-- IMPRIMIR CONFIRMADA O ENTREGADA -->
 
                                         {% if p.estado == "confirmada" or p.estado == "entregada" %}
 
                                             <a href="{% url 'gestion_app:imprimir_planilla_entrega' p.id %}"
+
                                             class="btn btn-sm btn-outline-dark"
+
                                             title="Imprimir planilla">
 
                                                 <i class="fas fa-print"></i>
@@ -438,15 +576,18 @@
 
                                         {% endif %}
 
-
                                         <!-- ENTREGAR SOLO CONFIRMADA -->
 
                                         {% if p.estado == "confirmada" %}
 
                                             <button type="button"
+
                                                     class="btn btn-sm btn-outline-success btn-entregar-planilla"
+
                                                     data-id="{{ p.id }}"
+
                                                     data-url="{% url 'gestion_app:entregar_planilla_entrega' p.id %}"
+
                                                     title="Entregar planilla">
 
                                                 <i class="fas fa-hand-holding"></i>
@@ -461,7 +602,6 @@
 
                             </tr>
 
-
                         {% empty %}
 
                             <tr>
@@ -473,7 +613,9 @@
                                         <i class="fas fa-folder-open fa-2x mb-2"></i>
 
                                         <div class="fw-bold">
+
                                             No se encontraron planillas.
+
                                         </div>
 
                                     </div>
@@ -492,7 +634,6 @@
 
         </div>
 
-
         {% if page_obj.paginator.num_pages > 1 %}
 
             <nav class="mt-3">
@@ -504,34 +645,39 @@
                         <li class="page-item">
 
                             <a class="page-link"
+
                                href="?page={{ page_obj.previous_page_number }}&q={{ query }}&estado={{ estado }}">
+
                                 Anterior
+
                             </a>
 
                         </li>
 
                     {% endif %}
 
-
                     <li class="page-item disabled">
 
                         <span class="page-link">
 
                             Página {{ page_obj.number }}
+
                             de {{ page_obj.paginator.num_pages }}
 
                         </span>
 
                     </li>
 
-
                     {% if page_obj.has_next %}
 
                         <li class="page-item">
 
                             <a class="page-link"
+
                                href="?page={{ page_obj.next_page_number }}&q={{ query }}&estado={{ estado }}">
+
                                 Siguiente
+
                             </a>
 
                         </li>
@@ -547,5 +693,106 @@
     </div>
 
 </div>
+
+
+<!-- Modal de entrega desde el listado -->
+<div class="modal fade" id="modalEntregarPlanillaLista" tabindex="-1" aria-labelledby="tituloModalEntregaLista" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="tituloModalEntregaLista">
+          <i class="fas fa-hand-holding text-success me-1"></i> Entregar planilla
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Confirma la entrega física de la planilla <strong id="numeroPlanillaEntregaLista"></strong>?</p>
+        <div class="mb-3">
+          <label for="observacionEntregaLista" class="form-label fw-bold">Observación de entrega</label>
+          <textarea id="observacionEntregaLista" class="form-control" rows="3" maxlength="500"
+                    placeholder="Ej.: Retira cadete del Dr. Pérez, firma planilla física..."></textarea>
+          <div class="form-text">Opcional. Información administrativa interna.</div>
+        </div>
+        <div class="alert alert-info mb-0">
+          <i class="fas fa-info-circle me-1"></i> Todas las órdenes serán marcadas como entregadas.
+        </div>
+        <div id="errorEntregaLista" class="alert alert-danger d-none mt-3" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="btnConfirmarEntregaLista">
+          <i class="fas fa-check me-1"></i> Sí, entregar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const modalElement = document.getElementById("modalEntregarPlanillaLista");
+  const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  const numero = document.getElementById("numeroPlanillaEntregaLista");
+  const observacion = document.getElementById("observacionEntregaLista");
+  const errorBox = document.getElementById("errorEntregaLista");
+  const confirmar = document.getElementById("btnConfirmarEntregaLista");
+  const botonOriginal = confirmar.innerHTML;
+  let urlEntrega = null;
+
+  function getCookie(name) {
+    const item = document.cookie.split(";").map(v => v.trim())
+      .find(v => v.startsWith(name + "="));
+    return item ? decodeURIComponent(item.substring(name.length + 1)) : "";
+  }
+
+  document.querySelectorAll(".btn-entregar-planilla").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      urlEntrega = boton.dataset.url;
+      numero.textContent = "N.º " + boton.dataset.id;
+      observacion.value = "";
+      errorBox.textContent = "";
+      errorBox.classList.add("d-none");
+      confirmar.disabled = false;
+      confirmar.innerHTML = botonOriginal;
+      modal.show();
+    });
+  });
+
+  confirmar.addEventListener("click", async function () {
+    if (!urlEntrega || confirmar.disabled) return;
+    confirmar.disabled = true;
+    confirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Entregando...';
+    errorBox.textContent = "";
+    errorBox.classList.add("d-none");
+
+    try {
+      const formData = new FormData();
+      formData.append("observacion_entrega", observacion.value.trim());
+      const response = await fetch(urlEntrega, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || "No se pudo registrar la entrega.");
+      }
+      if (data.print_url) {
+        window.location.href = data.print_url;
+      } else {
+        window.location.reload();
+      }
+    } catch (error) {
+      errorBox.textContent = error.message || "Ocurrió un error al entregar la planilla.";
+      errorBox.classList.remove("d-none");
+      confirmar.disabled = false;
+      confirmar.innerHTML = botonOriginal;
+    }
+  });
+});
+</script>
 
 {% endblock %}
